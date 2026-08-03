@@ -86,7 +86,7 @@ export function Navbar() {
   return (
     <>
       <header
-        className="absolute inset-x-0 top-0 z-50 flex items-center justify-between px-5 py-5 text-black transition-colors duration-500 data-[open=true]:text-white sm:px-8 lg:pl-[clamp(2rem,2.3vw,2.5rem)] lg:pr-[clamp(2.75rem,3.3vw,3.5rem)] lg:pt-[1.25rem]"
+        className="absolute inset-x-0 top-0 z-50 flex items-center justify-between px-5 py-5 pt-[max(1.25rem,env(safe-area-inset-top))] pl-[max(1.25rem,env(safe-area-inset-left))] pr-[max(1.25rem,env(safe-area-inset-right))] text-black transition-colors duration-500 data-[open=true]:text-white sm:px-8 lg:pl-[clamp(2rem,2.3vw,2.5rem)] lg:pr-[clamp(2.75rem,3.3vw,3.5rem)]"
         data-open={open}
       >
         <a

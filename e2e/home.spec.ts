@@ -149,3 +149,93 @@ test.describe("home", () => {
     }
   });
 });
+
+test.describe("home (responsive)", () => {
+  const fitInViewport = (box: { x: number; width: number }, width: number) => {
+    expect(box.x).toBeGreaterThanOrEqual(0);
+    expect(box.x + box.width).toBeLessThanOrEqual(width);
+  };
+
+  test("hero title and actions fit within 320px and 375px viewports", async ({
+    page,
+  }) => {
+    for (const width of [320, 375]) {
+      await page.setViewportSize({ width, height: 667 });
+      await page.goto("/");
+
+      const heading = page.locator("#hero-heading");
+      await expect(heading).toBeVisible();
+      const headingBox = await heading.boundingBox();
+      expect(headingBox).not.toBeNull();
+      fitInViewport(headingBox!, width);
+
+      const actions = page.locator("[data-hero-action]");
+      for (const action of await actions.all()) {
+        const box = await action.boundingBox();
+        expect(box).not.toBeNull();
+        fitInViewport(box!, width);
+      }
+
+      expect(
+        await page.evaluate(() => document.documentElement.scrollWidth)
+      ).toBeLessThanOrEqual(width);
+    }
+  });
+
+  test("preloader words fit within a 320px viewport", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.setViewportSize({ width: 320, height: 568 });
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+
+    const content = page.locator("[data-curtain-content]");
+    await expect(content).toBeVisible();
+    const box = await content.boundingBox();
+    expect(box).not.toBeNull();
+    fitInViewport(box!, 320);
+  });
+
+  test("menu fits without horizontal overflow on small and landscape screens", async ({
+    page,
+  }) => {
+    const cases = [
+      { width: 320, height: 568, label: "small portrait" },
+      { width: 667, height: 375, label: "landscape" },
+    ];
+
+    for (const { width, height, label } of cases) {
+      await page.setViewportSize({ width, height });
+      await page.goto("/");
+
+      const toggle = page.locator("[data-hero-menu-toggle]");
+      await toggle.click();
+
+      const panel = page.locator("#staggered-menu-panel");
+      await expect(panel).toBeVisible();
+      await expect
+        .poll(() => panel.evaluate((el) => el.scrollWidth - el.clientWidth), {
+          message: `panel must not scroll horizontally (${label})`,
+        })
+        .toBeLessThanOrEqual(1);
+
+      const panelBox = await panel.boundingBox();
+      expect(panelBox).not.toBeNull();
+
+      for (const item of navigation) {
+        const link = panel.getByRole("link", { name: item.label });
+        await expect(link).toBeVisible();
+        const box = await link.boundingBox();
+        expect(box, `${item.label} (${label})`).not.toBeNull();
+        fitInViewport(box!, width);
+      }
+
+      const email = panel.getByRole("link", { name: profile.email });
+      await expect(email).toBeVisible();
+      const emailBox = await email.boundingBox();
+      expect(emailBox).not.toBeNull();
+      expect(emailBox!.x).toBeGreaterThanOrEqual(panelBox!.x - 1);
+      expect(emailBox!.x + emailBox!.width).toBeLessThanOrEqual(
+        panelBox!.x + panelBox!.width + 1
+      );
+    }
+  });
+});

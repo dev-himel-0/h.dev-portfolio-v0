@@ -46,7 +46,7 @@ export function Preloader({ onFinished }: { onFinished?: () => void }) {
         words={WORDS}
         interval={WORD_INTERVAL_MS}
         repeat={false}
-        textClassName="text-5xl text-white md:text-7xl"
+        textClassName="text-white text-[clamp(2.5rem,11vw,4.5rem)]"
       />
     </CurtainReveal>
   );

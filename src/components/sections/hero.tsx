@@ -139,7 +139,7 @@ export function Hero({ isRevealed }: { isRevealed: boolean }) {
       <section
         id="home"
         aria-labelledby="hero-heading"
-        className="relative flex min-h-[100svh] items-center justify-center px-5 pb-28 pt-24 sm:px-8 sm:pb-32 lg:px-24"
+        className="hero-section relative flex min-h-[100svh] items-center justify-center"
       >
         <div
           aria-hidden="true"
@@ -171,7 +171,7 @@ export function Hero({ isRevealed }: { isRevealed: boolean }) {
         <div className="relative z-10 mx-auto flex w-full max-w-[75rem] -translate-y-[0.6vh] flex-col items-center">
           <h1
             id="hero-heading"
-            className="w-full text-center text-[clamp(3.25rem,15vw,7.25rem)] font-semibold leading-[0.82] tracking-[-0.03em] lg:text-[clamp(7.25rem,11.5vw,11.75rem)]"
+            className="hero-title w-full text-center text-[clamp(2.625rem,14.5vw,7.25rem)] font-semibold leading-[0.82] tracking-[-0.03em] lg:text-[clamp(7.25rem,11.5vw,11.75rem)]"
           >
             <span className="block overflow-hidden pb-[0.03em]">
               <span
@@ -212,7 +212,7 @@ export function Hero({ isRevealed }: { isRevealed: boolean }) {
         <div
           data-hero-scroll
           aria-hidden="true"
-          className="absolute bottom-[clamp(2.25rem,3.5vh,3rem)] left-1/2 flex -translate-x-1/2 flex-col items-center"
+          className="absolute left-1/2 flex -translate-x-1/2 flex-col items-center"
         >
           <span className="text-[0.625rem] font-medium uppercase tracking-[0.32em]">
             SCROLL
