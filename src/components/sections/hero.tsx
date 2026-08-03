@@ -14,6 +14,14 @@ const actionIcons = {
   "arrow-up-right": ArrowUpRight,
 };
 
+/**
+ * Gap between the preloader wiping up and the hero's first beat. The terminal
+ * wipe (fade 0.4 + 0.1 offset + 5 bands × 1.0s power4.inOut / 0.08 stagger)
+ * clears ~1.9s after wipe-start; this delay lands the opening beats (name
+ * ~0.5-1.5s into the timeline) right as the bands leave the screen.
+ */
+const ENTRANCE_DELAY_S = 1.2;
+
 export function Hero({ isRevealed }: { isRevealed: boolean }) {
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -21,106 +29,98 @@ export function Hero({ isRevealed }: { isRevealed: boolean }) {
     () => {
       if (!isRevealed) return;
 
-      const media = gsap.matchMedia();
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        return;
+      }
 
-      media.add(
-        { reduceMotion: "(prefers-reduced-motion: reduce)" },
-        (context) => {
-          const targets = [
-            "[data-hero-nav]",
-            "[data-hero-rail]",
-            "[data-hero-line]",
-            "[data-hero-action]",
-            "[data-hero-scroll]",
-          ];
-
-          if (context.conditions?.reduceMotion) {
-            gsap.set(targets, { clearProps: "all" });
-            return;
-          }
-
-          gsap.set("[data-hero-line]", {
-            willChange: "transform",
-            transformPerspective: 1000,
-          });
-          gsap.set("[data-hero-action]", { willChange: "transform,opacity" });
-
-          const timeline = gsap.timeline({
-            delay: 0.35,
-            defaults: { ease: "power4.out" },
-            onComplete: () => {
-              gsap.set(["[data-hero-line]", "[data-hero-action]"], {
-                clearProps: "willChange",
-              });
-            },
-          });
-
-          timeline
-            .from(
-              "[data-hero-nav]",
-              { y: -22, autoAlpha: 0, duration: 0.75 },
-              0
-            )
-            .from(
-              "[data-hero-rail]",
-              { x: -14, autoAlpha: 0, duration: 0.72 },
-              0.04
-            )
-            .from(
-              "[data-hero-rail-line]",
-              { scaleY: 0, transformOrigin: "top center", duration: 0.8 },
-              0.12
-            )
-            .from(
-              "[data-hero-line='filled']",
-              { yPercent: 112, rotateX: -7, duration: 1.15 },
-              0.25
-            )
-            .from(
-              "[data-hero-line='outlined']",
-              { yPercent: 112, rotateX: -7, duration: 1.15 },
-              0.39
-            )
-            .from(
-              "[data-hero-action]",
-              { y: 30, autoAlpha: 0, duration: 0.72, stagger: 0.1 },
-              0.83
-            )
-            .from(
-              "[data-hero-scroll]",
-              { y: 12, autoAlpha: 0, duration: 0.6 },
-              1.02
-            )
-            .from(
-              "[data-hero-scroll-line]",
-              { scaleY: 0, transformOrigin: "top center", duration: 0.62 },
-              1.08
-            );
-
-          const arrowTween = gsap.to("[data-scroll-arrow]", {
-            y: 5,
-            duration: 1.15,
-            delay: 2.1,
-            repeat: -1,
-            yoyo: true,
-            ease: "sine.inOut",
-          });
-
-          const handleVisibility = () => {
-            if (document.hidden) arrowTween.pause();
-            else arrowTween.resume();
-          };
-
-          document.addEventListener("visibilitychange", handleVisibility);
-          handleVisibility();
-
-          return () => {
-            document.removeEventListener("visibilitychange", handleVisibility);
-          };
-        }
+      gsap.set("[data-hero-line]", { willChange: "transform" });
+      gsap.set(
+        ["[data-hero-rail-content]", "[data-hero-rail-line]", "[data-hero-scroll-line]"],
+        { willChange: "transform" }
       );
+      gsap.set("[data-hero-action]", { willChange: "transform,opacity" });
 
-      return () => media.revert();
+      const timeline = gsap.timeline({
+        delay: ENTRANCE_DELAY_S,
+        defaults: { ease: "power4.out" },
+        onComplete: () => {
+          gsap.set(
+            [
+              "[data-hero-line]",
+              "[data-hero-rail-content]",
+              "[data-hero-rail-line]",
+              "[data-hero-scroll-line]",
+              "[data-hero-action]",
+            ],
+            { clearProps: "willChange" }
+          );
+        },
+      });
+
+      timeline
+        .from("[data-hero-mono]", { y: -12, autoAlpha: 0, duration: 0.55 }, 0.15)
+        .from(
+          "[data-hero-nav-item]",
+          { y: -10, autoAlpha: 0, duration: 0.5, stagger: 0.07 },
+          0.25
+        )
+        .from(
+          "[data-hero-rail-content]",
+          { yPercent: -110, autoAlpha: 0, duration: 0.9, ease: "expo.out" },
+          0.35
+        )
+        .from(
+          "[data-hero-rail-line]",
+          { scaleY: 0, transformOrigin: "top center", duration: 0.7, ease: "power3.out" },
+          0.5
+        )
+        .from(
+          "[data-hero-line='filled']",
+          { yPercent: 110, autoAlpha: 0, duration: 0.9, ease: "expo.out" },
+          0.5
+        )
+        .from(
+          "[data-hero-line='outlined']",
+          { yPercent: 110, autoAlpha: 0, duration: 0.95, ease: "expo.out" },
+          0.7
+        )
+        .from(
+          "[data-hero-action]",
+          { y: 18, autoAlpha: 0, duration: 0.7, stagger: 0.1 },
+          1.35
+        )
+        .from("[data-hero-scroll]", { y: 8, autoAlpha: 0, duration: 0.5 }, 1.68)
+        .from(
+          "[data-hero-scroll-line]",
+          { scaleY: 0, transformOrigin: "top center", duration: 0.55 },
+          1.72
+        )
+        .from(
+          "[data-scroll-arrow]",
+          { autoAlpha: 0, duration: 0.45, ease: "power2.out" },
+          1.8
+        );
+
+      const arrowTween = gsap.to("[data-scroll-arrow]", {
+        y: 4,
+        duration: 1.4,
+        delay: 2.55,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut",
+      });
+
+      const handleVisibility = () => {
+        if (document.hidden) arrowTween.pause();
+        else arrowTween.resume();
+      };
+
+      document.addEventListener("visibilitychange", handleVisibility);
+      handleVisibility();
+
+      return () => {
+        document.removeEventListener("visibilitychange", handleVisibility);
+      };
     },
     {
       scope: rootRef,
@@ -142,18 +142,30 @@ export function Hero({ isRevealed }: { isRevealed: boolean }) {
         className="relative flex min-h-[100svh] items-center justify-center px-5 pb-28 pt-24 sm:px-8 sm:pb-32 lg:px-24"
       >
         <div
-          data-hero-rail
           aria-hidden="true"
-          className="absolute left-[clamp(2.25rem,2.65vw,2.75rem)] top-[40.5%] hidden flex-col items-center gap-4 lg:flex"
+          className="absolute left-[clamp(2.25rem,2.65vw,2.75rem)] top-[40.5%] hidden justify-center lg:flex"
         >
-          <span className="size-1.5 rounded-full bg-black" />
-          <span
-            data-hero-rail-line
-            className="h-14 w-px origin-top bg-black/50"
-          />
-          <span className="text-[0.625rem] font-medium uppercase tracking-[0.22em] text-black/60 [writing-mode:vertical-rl]">
-            01
-          </span>
+          <div className="overflow-hidden">
+            <div
+              data-hero-rail-content
+              className="flex flex-col items-center gap-4 will-change-transform"
+            >
+              <span
+                data-hero-rail-dot
+                className="size-1.5 bg-black"
+              />
+              <span
+                data-hero-rail-line
+                className="h-14 w-px origin-top bg-black/50"
+              />
+              <span
+                data-hero-rail-label
+                className="text-[0.625rem] font-medium uppercase tracking-[0.22em] text-black/60 [writing-mode:vertical-rl]"
+              >
+                01
+              </span>
+            </div>
+          </div>
         </div>
 
         <div className="relative z-10 mx-auto flex w-full max-w-[75rem] -translate-y-[0.6vh] flex-col items-center">

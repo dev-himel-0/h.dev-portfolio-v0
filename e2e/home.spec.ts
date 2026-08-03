@@ -40,4 +40,22 @@ test.describe("home", () => {
       page.getByRole("link", { name: `${profile.name}, home` })
     ).toBeVisible();
   });
+
+  test("shows all hero content immediately with reduced motion", async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+
+    const heading = page.locator("#hero-heading");
+    await expect(heading).toBeVisible();
+    await expect(heading).toContainText(hero.filledTitle);
+    await expect(heading).toContainText(hero.outlinedTitle);
+
+    for (const action of hero.actions) {
+      await expect(
+        page.getByRole("link", { name: action.label })
+      ).toBeVisible();
+    }
+  });
 });

@@ -20,10 +20,10 @@ export function FlipLink({
     <a
       href={href}
       className={cn(
-        "group inline-flex h-12 w-full items-center justify-center gap-2.5 overflow-hidden rounded-[4px] border px-7 text-[0.9375rem] font-normal tracking-[-0.01em] transition-colors duration-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-4 sm:w-auto",
+        "group inline-flex h-12 w-full items-center justify-center gap-2.5 overflow-hidden border px-7 text-[0.9375rem] font-normal tracking-[-0.01em] transition-colors duration-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-4 sm:w-auto",
         variant === "solid"
           ? "border-black bg-black text-white hover:bg-white hover:text-black"
-          : "border-black bg-white text-black hover:bg-black hover:text-white",
+          : "border-black bg-white text-black/85 hover:bg-black/5 hover:text-black",
         className
       )}
     >
@@ -42,7 +42,7 @@ export function FlipLink({
         <Icon
           aria-hidden="true"
           weight="regular"
-          className="size-[1.05rem] transition-transform duration-500 ease-[cubic-bezier(0.76,0,0.24,1)] group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-focus-visible:-translate-y-0.5 group-focus-visible:translate-x-0.5"
+          className="size-[1.05rem] transition-transform duration-300 ease-out group-hover:-translate-y-1 group-hover:translate-x-1 group-focus-visible:-translate-y-1 group-focus-visible:translate-x-1"
         />
       ) : null}
     </a>
