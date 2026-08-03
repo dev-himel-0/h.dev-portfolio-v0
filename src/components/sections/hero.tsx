@@ -60,8 +60,8 @@ export function Hero({ isRevealed }: { isRevealed: boolean }) {
       timeline
         .from("[data-hero-mono]", { y: -12, autoAlpha: 0, duration: 0.55 }, 0.15)
         .from(
-          "[data-hero-nav-item]",
-          { y: -10, autoAlpha: 0, duration: 0.5, stagger: 0.07 },
+          "[data-hero-menu-toggle]",
+          { y: -10, autoAlpha: 0, duration: 0.5 },
           0.25
         )
         .from(

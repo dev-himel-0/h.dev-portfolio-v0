@@ -26,9 +26,12 @@ export interface StackItem {
   color: string;
 }
 
+export type SocialIcon = "github" | "linkedin" | "x" | "email";
+
 export interface SocialLink {
   label: string;
   href: string;
+  icon: SocialIcon;
 }
 
 export interface NavigationItem {
@@ -163,8 +166,8 @@ export const stack: StackItem[] = [
 ];
 
 export const socials: SocialLink[] = [
-  { label: "GitHub", href: "" },
-  { label: "LinkedIn", href: "" },
-  { label: "X / Twitter", href: "" },
-  { label: "Email", href: "" },
+  { label: "GitHub", href: "", icon: "github" },
+  { label: "LinkedIn", href: "", icon: "linkedin" },
+  { label: "X / Twitter", href: "", icon: "x" },
+  { label: "Email", href: "", icon: "email" },
 ];

@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { hero, navigation, profile } from "../src/lib/data";
+import { hero, navigation, profile, socials } from "../src/lib/data";
 
 test.describe("home", () => {
   test("loads with a 200 response", async ({ page }) => {
@@ -40,21 +40,95 @@ test.describe("home", () => {
     }
   });
 
-  test("renders the navbar with navigation links", async ({ page }) => {
+  test("renders the navbar with the menu toggle and monogram", async ({
+    page,
+  }) => {
     await page.goto("/");
-
-    const nav = page.getByRole("navigation", { name: "Primary navigation" });
-    await expect(nav).toBeVisible();
-
-    for (const item of navigation) {
-      await expect(
-        nav.getByRole("link", { name: item.label })
-      ).toHaveAttribute("href", item.href);
-    }
 
     await expect(
       page.getByRole("link", { name: `${profile.name}, home` })
     ).toBeVisible();
+
+    const toggle = page.locator("[data-hero-menu-toggle]");
+    await expect(toggle).toBeVisible();
+    await expect(toggle).toHaveAttribute("aria-expanded", "false");
+    await expect(toggle).toHaveAttribute("aria-controls", "staggered-menu-panel");
+
+    await expect(page.locator("#staggered-menu-panel")).toBeHidden();
+  });
+
+  test("opens the staggered menu with navigation, email and availability", async ({
+    page,
+  }) => {
+    await page.goto("/");
+
+    const toggle = page.locator("[data-hero-menu-toggle]");
+    await toggle.click();
+
+    await expect(page.getByRole("button", { name: "Close menu" })).toBeVisible();
+    await expect(toggle).toHaveAttribute("aria-expanded", "true");
+
+    const panel = page.locator("#staggered-menu-panel");
+    await expect(panel).toBeVisible();
+
+    for (const item of navigation) {
+      await expect(
+        panel.getByRole("link", { name: item.label })
+      ).toHaveAttribute("href", item.href);
+    }
+
+    await expect(
+      panel.getByRole("link", { name: profile.email })
+    ).toHaveAttribute("href", `mailto:${profile.email}`);
+    await expect(panel.getByText(profile.availability)).toBeVisible();
+
+    for (const social of socials) {
+      if (social.href) {
+        await expect(
+          panel.getByRole("link", { name: social.label })
+        ).toBeVisible();
+      } else {
+        await expect(panel.getByText(social.label)).toBeVisible();
+      }
+    }
+  });
+
+  test("closes the staggered menu on toggle, escape and click-away", async ({
+    page,
+  }) => {
+    await page.goto("/");
+
+    const toggle = page.locator("[data-hero-menu-toggle]");
+    const panel = page.locator("#staggered-menu-panel");
+
+    await toggle.click();
+    await expect(panel).toBeVisible();
+    await page.getByRole("button", { name: "Close menu" }).click();
+    await expect(panel).toBeHidden();
+    await expect(page.getByRole("button", { name: "Open menu" })).toBeVisible();
+
+    await toggle.click();
+    await expect(panel).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(panel).toBeHidden();
+
+    await toggle.click();
+    await expect(panel).toBeVisible();
+    await page.getByRole("link", { name: `${profile.name}, home` }).click();
+    await expect(panel).toBeHidden();
+  });
+
+  test("menu panel covers the full viewport", async ({ page }) => {
+    await page.goto("/");
+
+    await page.locator("[data-hero-menu-toggle]").click();
+    const panel = page.locator("#staggered-menu-panel");
+    await expect(panel).toBeVisible();
+
+    const box = await panel.boundingBox();
+    const viewport = page.viewportSize();
+    expect(box?.width ?? 0).toBeGreaterThanOrEqual(viewport.width - 1);
+    expect(box?.height ?? 0).toBeGreaterThanOrEqual(viewport.height - 1);
   });
 
   test("shows all hero content immediately with reduced motion", async ({
