@@ -36,9 +36,11 @@ interface CurtainRevealProps {
  * Full-screen curtain of black vertical bands that also hosts content on top
  * (the loader words). Two modes:
  * - `play`: children fade out, then the bands wipe upward with a stagger.
- * - `progress`: a hairline the width of the content fills over `progress` ms
- *   with a synced 0-100% counter beneath it — when it completes, children
- *   fade and the bands wipe (the line is the timer).
+ * - `progress`: a single hairline fills left-to-right across a bare black
+ *   field (no track) with a centered 0-100% counter on a black chip that
+ *   masks the line as it passes — an expo glide with an overshoot snap and
+ *   a light breath before children fade and the bands wipe (the line is the
+ *   timer).
  * Under `prefers-reduced-motion` it completes instantly without animating.
  */
 export function CurtainReveal({
@@ -90,35 +92,39 @@ export function CurtainReveal({
       }
 
       if (progress !== undefined) {
-        const fills = Array.from(root.querySelectorAll<HTMLElement>("[data-curtain-progress-fill]"));
+        const fill = root.querySelector<HTMLElement>("[data-curtain-progress-fill]");
         const count = countRef.current;
 
-        if (fills.length) {
-          const tween = gsap.fromTo(
-            fills,
-            { scaleX: 0 },
-            {
-              scaleX: 1,
-              duration: progress / 1000,
-              ease: "none",
-              onComplete: startWipe,
-            }
-          );
-          if (count) {
-            const counter = { value: 0 };
-            tween.progress(0);
-            gsap.to(counter, {
-              value: 100,
-              duration: progress / 1000,
-              ease: "none",
-              onUpdate: () => {
-                count.textContent = `${Math.round(counter.value)}%`;
-              },
-            });
-          }
-        } else {
-          startWipe();
+        if (fill) {
+          const state = { v: 0 };
+          const total = progress / 1000;
+          const settle = 0.42;
+          const main = total - settle;
+          const seg = main / 3;
+
+          const write = () => {
+            gsap.set(fill, { scaleX: state.v });
+            if (count) count.textContent = `${Math.round(state.v * 100)}%`;
+          };
+
+          const tl = gsap.timeline();
+          tl.fromTo(
+            count,
+            { autoAlpha: 0, y: 6 },
+            { autoAlpha: 1, y: 0, duration: 0.5, ease: "power2.out" },
+            0.15
+          )
+            .to(state, { v: 1 / 3, duration: seg, ease: "power2.inOut", onUpdate: write })
+            .to(state, { v: 2 / 3, duration: seg, ease: "power2.inOut", onUpdate: write })
+            .to(state, { v: 1, duration: seg, ease: "power2.inOut", onUpdate: write })
+            .to(fill, { scaleX: 1.015, duration: 0.12, ease: "power2.out" }, ">-0.05")
+            .to(fill, { scaleX: 1, duration: 0.3, ease: "power2.inOut" })
+            .to(fill, { opacity: 0.55, duration: 0.15, ease: "power2.in" }, ">-0.1")
+            .to(fill, { opacity: 1, duration: 0.15, ease: "power2.out" }, ">-0.05")
+            .add(startWipe, ">");
+          return;
         }
+        startWipe();
         return;
       }
 
@@ -148,25 +154,19 @@ export function CurtainReveal({
           <div className="flex w-fit flex-col items-center">
             {children}
             {progress !== undefined && (
-              <div className="mt-8 flex w-1/2 items-center gap-3">
-                <div className="h-px flex-1 overflow-hidden bg-white/15">
+              <div className="relative mt-8 w-3/5">
+                <div className="h-px overflow-hidden">
                   <div
                     data-curtain-progress-fill
-                    className="h-full w-full origin-right scale-x-0 bg-white will-change-transform"
+                    className="h-px w-full origin-left scale-x-0 bg-white will-change-transform"
                   />
                 </div>
                 <span
                   ref={countRef}
-                  className="font-mono text-xs tabular-nums text-white/70"
+                  className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-black px-2 font-mono text-sm font-light leading-none tracking-wider tabular-nums text-white/80"
                 >
                   0%
                 </span>
-                <div className="h-px flex-1 overflow-hidden bg-white/15">
-                  <div
-                    data-curtain-progress-fill
-                    className="h-full w-full origin-left scale-x-0 bg-white will-change-transform"
-                  />
-                </div>
               </div>
             )}
           </div>

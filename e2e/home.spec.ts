@@ -9,6 +9,22 @@ test.describe("home", () => {
     await expect(page).toHaveTitle(/Himel/);
   });
 
+  test("shows the preloader progress line before revealing the page", async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+
+    const progress = page.locator("[data-curtain-progress-fill]");
+    await expect(progress).toHaveCount(1);
+    await expect(progress).toBeVisible();
+    await expect(progress).toHaveClass(/scale-x-0/);
+
+    await expect(page.locator("[data-curtain-content]")).toBeHidden({
+      timeout: 10_000,
+    });
+  });
+
   test("renders the hero heading and actions", async ({ page }) => {
     await page.goto("/");
 

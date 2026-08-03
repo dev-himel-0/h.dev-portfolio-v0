@@ -5,8 +5,8 @@ import { useLenis } from "lenis/react";
 import { FlipFadeText } from "@/components/ui/flip-fade-text";
 import { CurtainReveal } from "@/components/ui/curtain-reveal";
 
-const WORDS = ["Frontend", "Engineer"];
-const WORD_INTERVAL_MS = 1800;
+const WORDS = ["Frontend", "Engineer", "Creative"];
+const WORD_INTERVAL_MS = 2200;
 /** Words flip in over letterDuration + staggerDelay * (len - 1). */
 const LAST_WORD_FLIP_MS = 0.6 * 1000 + 0.1 * 1000 * (WORDS[WORDS.length - 1].length);
 /** Hold the fully-formed last word before revealing. */
@@ -45,6 +45,7 @@ export function Preloader({ onFinished }: { onFinished?: () => void }) {
       <FlipFadeText
         words={WORDS}
         interval={WORD_INTERVAL_MS}
+        repeat={false}
         textClassName="text-5xl text-white md:text-7xl"
       />
     </CurtainReveal>

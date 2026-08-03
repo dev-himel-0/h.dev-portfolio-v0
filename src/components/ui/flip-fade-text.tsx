@@ -12,6 +12,8 @@ interface FlipFadeTextProps {
   letterDuration?: number;
   staggerDelay?: number;
   exitStaggerDelay?: number;
+  /** When false, cycling stops at the last word (it stays fully formed). */
+  repeat?: boolean;
 }
 
 const Letter = memo(function Letter({
@@ -119,17 +121,22 @@ export function FlipFadeText({
   letterDuration = 0.6,
   staggerDelay = 0.1,
   exitStaggerDelay = 0.05,
+  repeat = true,
 }: FlipFadeTextProps) {
   const [index, setIndex] = useState(0);
 
   const updateIndex = useCallback(() => {
-    setIndex((prev) => (prev + 1) % words.length);
-  }, [words.length]);
+    setIndex((prev) => {
+      const next = prev + 1;
+      return next >= words.length ? (repeat ? 0 : prev) : next;
+    });
+  }, [words.length, repeat]);
 
   useEffect(() => {
+    if (!repeat && index >= words.length - 1) return;
     const timer = setInterval(updateIndex, interval);
     return () => clearInterval(timer);
-  }, [updateIndex, interval]);
+  }, [updateIndex, interval, repeat, index, words.length]);
 
   const currentWord = useMemo(() => words[index], [words, index]);
 
