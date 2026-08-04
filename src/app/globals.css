@@ -125,7 +125,8 @@
   body {
     @apply overflow-x-hidden bg-background text-foreground;
   }
-  button:not(:disabled), [role="button"]:not(:disabled) {
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
     cursor: pointer;
   }
   html {
@@ -186,7 +187,10 @@
 }
 
 [data-hero-scroll] {
-  bottom: max(clamp(2.25rem, 3.5vh, 3rem), calc(env(safe-area-inset-bottom) + 1.5rem));
+  bottom: max(
+    clamp(2.25rem, 3.5vh, 3rem),
+    calc(env(safe-area-inset-bottom) + 1.5rem)
+  );
 }
 
 /* Short-and-wide viewports (landscape phones, small laptops): compact the
@@ -254,7 +258,10 @@
   gap: clamp(2.5rem, 7vh, 4rem);
   padding: clamp(4.25rem, 14vh, 9.5rem) clamp(1.5rem, 7vw, 6.5rem)
     clamp(1.75rem, 5vh, 3.5rem);
-  padding-top: max(clamp(4.25rem, 14vh, 9.5rem), calc(env(safe-area-inset-top) + 1rem));
+  padding-top: max(
+    clamp(4.25rem, 14vh, 9.5rem),
+    calc(env(safe-area-inset-top) + 1rem)
+  );
   padding-bottom: max(
     clamp(1.75rem, 5vh, 3.5rem),
     calc(env(safe-area-inset-bottom) + 1rem)
@@ -286,7 +293,7 @@
   display: inline-block;
   padding: 0.02em 3.4em 0.06em 0;
   font-family: var(--font-heading);
-  font-size: clamp(1.75rem, 5vw, 4.5rem);
+  font-size: min(clamp(1.75rem, 5vw, 4.5rem), clamp(2.25rem, 10vh, 4.5rem));
   font-weight: 600;
   line-height: 0.98;
   letter-spacing: -0.02em;
@@ -300,15 +307,23 @@
   counter-increment: smItem;
   content: counter(smItem, decimal-leading-zero);
   position: absolute;
-  top: 0.32em;
+  top: 50%;
   right: 0;
   font-family: var(--font-geist-mono);
-  font-size: clamp(0.625rem, 1vw, 0.8125rem);
+  font-size: min(clamp(2rem, 6vw, 5.5rem), clamp(2.75rem, 11vh, 5.5rem));
   font-weight: 400;
   letter-spacing: 0;
-  color: oklch(0.985 0 0 / 0.55);
+  color: transparent;
+  -webkit-text-stroke: 1px oklch(0.985 0 0 / 0.65);
+  -webkit-text-fill-color: transparent;
   opacity: var(--sm-num-opacity, 0);
-  transition: opacity 0.4s ease, color 0.4s ease;
+  transform-origin: center right;
+  transform: translateY(-50%) scale(var(--sm-num-scale, 1));
+  /* No opacity transition: GSAP drives the --sm-num-opacity fade on open. */
+  transition:
+    -webkit-text-stroke-color 0.4s ease,
+    color 0.4s ease,
+    transform 0.6s cubic-bezier(0.76, 0, 0.24, 1);
   pointer-events: none;
   user-select: none;
 }
@@ -319,11 +334,11 @@
   left: 0;
   bottom: 0.02em;
   width: calc(100% - 3.4em);
-  height: 2px;
+  height: 1.5px;
   background: oklch(0.985 0 0);
   transform: scaleX(0);
   transform-origin: right center;
-  transition: transform 0.55s cubic-bezier(0.76, 0, 0.24, 1);
+  transition: transform 0.5s cubic-bezier(0.76, 0, 0.24, 1);
 }
 
 .smg-item:hover::after,
@@ -332,21 +347,37 @@
   transform-origin: left center;
 }
 
-.smg-item-label {
+.smg-item-mask {
+  position: relative;
+  z-index: 1;
   display: inline-block;
-  transform-origin: 50% 100%;
-  transition: transform 0.55s cubic-bezier(0.76, 0, 0.24, 1);
   will-change: transform;
 }
 
-.smg-item:hover .smg-item-label,
-.smg-item:focus-visible .smg-item-label {
-  transform: translateX(-0.55rem);
+.smg-item-label {
+  display: inline-block;
+  transform-origin: 50% 100%;
+  transition: transform 0.5s cubic-bezier(0.76, 0, 0.24, 1);
+  will-change: transform;
 }
 
 .smg-item:hover::before,
 .smg-item:focus-visible::before {
-  color: oklch(0.985 0 0);
+  -webkit-text-stroke-color: oklch(0.985 0 0);
+}
+
+/* Big-number takeover: the outlined index scales up behind the label while
+   the label slides toward it. Disabled under prefers-reduced-motion. */
+@media (prefers-reduced-motion: no-preference) {
+  .smg-item:hover::before,
+  .smg-item:focus-visible::before {
+    --sm-num-scale: 1.65;
+  }
+
+  .smg-item:hover .smg-item-label,
+  .smg-item:focus-visible .smg-item-label {
+    transform: translateX(-0.5rem);
+  }
 }
 
 .smg-item-arrow {
@@ -359,15 +390,17 @@
   color: oklch(0.985 0 0);
   font-size: 0.34em;
   opacity: 0;
-  transform: translate(0.4em, -35%);
-  transition: opacity 0.4s ease, transform 0.55s cubic-bezier(0.76, 0, 0.24, 1);
+  transform: translate(0.9em, -50%);
+  transition:
+    opacity 0.35s ease,
+    transform 0.5s cubic-bezier(0.76, 0, 0.24, 1);
   pointer-events: none;
 }
 
 .smg-item:hover .smg-item-arrow,
 .smg-item:focus-visible .smg-item-arrow {
   opacity: 1;
-  transform: translate(0, -35%);
+  transform: translate(0, -50%);
 }
 
 .smg-item:focus-visible {
@@ -499,12 +532,19 @@
 
 /* ---- Responsive: compact menu on short viewports (landscape phones,
        small laptops) so the footer stays above the fold ---- */
-@media (max-height: 640px) {
+@media (max-height: 760px) {
   .smg-inner {
     gap: clamp(1.25rem, 5vh, 2.5rem);
+    padding-top: max(
+      clamp(2.5rem, 10vh, 5.5rem),
+      calc(env(safe-area-inset-top) + 1rem)
+    );
   }
   .smg-item {
-    font-size: clamp(1.375rem, 5vw, 2.5rem);
+    font-size: min(clamp(1.375rem, 5vw, 2.75rem), clamp(2.25rem, 9vh, 2.75rem));
+  }
+  .smg-item::before {
+    font-size: min(clamp(2rem, 5vw, 2.9rem), clamp(2.625rem, 7.5vh, 2.9rem));
   }
   .smg-item-wrap {
     padding-block: 0.2rem;
@@ -516,6 +556,18 @@
   .smg-social {
     font-size: clamp(0.9375rem, 1.75vw, 1.25rem);
   }
+}
+
+/* ---- Navbar full-bleed background ----
+   The frosted backdrop-filter lives on the inline style (see navbar.tsx)
+   so Tailwind's Lightning CSS pass can't strip the unprefixed property. */
+.navbar-bg {
+  background: rgba(255, 255, 255, 0.55);
+  will-change: transform, opacity;
+}
+
+header[data-open="true"] .navbar-bg {
+  background: #000;
 }
 
 /* ---- Navbar toggle ---- */
@@ -530,7 +582,7 @@
   color: inherit;
   font-family: var(--font-general);
   font-size: 0.8125rem;
-  font-weight: 500;
+  font-weight: 300;
   letter-spacing: 0.06em;
   line-height: 1;
   text-transform: uppercase;
@@ -580,12 +632,130 @@
   left: 50%;
   top: 50%;
   width: 100%;
-  height: 1.5px;
-  border-radius: 1px;
+  height: 1px;
+  border-radius: 0.5px;
   background: currentColor;
   transform: translate(-50%, -50%);
 }
 
 .smg-toggle-bar-v {
   transform: translate(-50%, -50%) rotate(90deg);
+}
+
+/* ---- Scroll-to-top button ---- */
+.stt-button {
+  position: fixed;
+  bottom: max(
+    clamp(1.5rem, 3vh, 2.5rem),
+    calc(env(safe-area-inset-bottom) + 1rem)
+  );
+  right: max(
+    clamp(1.5rem, 3vw, 2.5rem),
+    calc(env(safe-area-inset-right) + 1rem)
+  );
+  z-index: 30;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  padding: 0;
+  border: none;
+  border-radius: 9999px;
+  background: #fff;
+  color: #000;
+  cursor: pointer;
+  visibility: hidden;
+  opacity: 0;
+  scale: 0.8;
+  pointer-events: none;
+  box-shadow:
+    0 1px 3px rgb(0 0 0 / 0.08),
+    0 0 0 1px rgb(0 0 0 / 0.06);
+  transition:
+    visibility 0s 0.5s,
+    opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    scale 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.3s ease;
+  will-change: transform, opacity;
+}
+
+.stt-button[data-visible] {
+  visibility: visible;
+  opacity: 1;
+  scale: 1;
+  pointer-events: auto;
+  transition:
+    visibility 0s 0s,
+    opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    scale 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.3s ease;
+}
+
+.stt-button:hover {
+  box-shadow:
+    0 2px 8px rgb(0 0 0 / 0.12),
+    0 0 0 1px rgb(0 0 0 / 0.1);
+}
+
+.stt-button:focus-visible {
+  outline: 2px solid #000;
+  outline-offset: 3px;
+}
+
+.stt-button:active {
+  transform: scale(0.92);
+}
+
+.stt-ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.stt-progress {
+  transform: rotate(-90deg);
+  transform-origin: center;
+  transition: stroke-dashoffset 0.15s ease-out;
+  will-change: stroke-dashoffset;
+}
+
+.stt-arrow {
+  position: relative;
+  z-index: 1;
+  width: 1.125rem;
+  height: 1.125rem;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.stt-button:hover .stt-arrow {
+  transform: translateY(-2px) scale(1.1);
+}
+
+/* Curtain wipe panels (shared with scroll-to-top) */
+.stt-curtain {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  pointer-events: none;
+}
+
+.stt-curtain-panel {
+  flex: 1;
+  background: #000;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stt-button {
+    transition: none;
+  }
+  .stt-progress {
+    transition: none;
+  }
+  .stt-arrow {
+    transition: none;
+  }
 }

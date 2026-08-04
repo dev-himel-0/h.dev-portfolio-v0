@@ -1,6 +1,13 @@
 import { expect, test } from "@playwright/test";
 
-import { hero, navigation, profile, projects, socials, work } from "../src/lib/data";
+import {
+  hero,
+  navigation,
+  profile,
+  projects,
+  socials,
+  work,
+} from "../src/lib/data";
 
 test.describe("home", () => {
   test("loads with a 200 response", async ({ page }) => {
@@ -167,12 +174,145 @@ test.describe("home", () => {
       page.getByRole("link", { name: `${profile.name}, home` })
     ).toBeVisible();
 
+    await expect(
+      page.getByRole("link", { name: `${profile.name}, home` })
+    ).toHaveText(profile.brand);
+
     const toggle = page.locator("[data-hero-menu-toggle]");
     await expect(toggle).toBeVisible();
     await expect(toggle).toHaveAttribute("aria-expanded", "false");
     await expect(toggle).toHaveAttribute("aria-controls", "staggered-menu-panel");
 
+    const visibleToggleLabel = () =>
+      toggle
+        .locator(".smg-toggle-lines")
+        .evaluate((el) => {
+          const html = el as HTMLElement;
+          const lines = Array.from(html.querySelectorAll(".smg-toggle-line"));
+          const lineHeight = lines[0]?.getBoundingClientRect().height || 1;
+          const match = window.getComputedStyle(html).transform.match(/[-.\d]+/g);
+          const translateY = match && match.length >= 6 ? Number(match[5]) : 0;
+          const index = Math.min(
+            lines.length - 1,
+            Math.max(0, Math.round(-translateY / lineHeight))
+          );
+          return (lines[index] as HTMLElement)?.textContent ?? "";
+        });
+
+    await expect
+      .poll(visibleToggleLabel, "toggle reads Menu before any interaction")
+      .toBe("Menu");
+
     await expect(page.locator("#staggered-menu-panel")).toBeHidden();
+  });
+
+  test("navbar background is hidden while the hero is on screen", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await expect(page.locator("[data-curtain-content]")).toBeHidden({
+      timeout: 15_000,
+    });
+
+    const bar = page.locator("[data-navbar-bg]");
+    await expect(bar).toHaveCount(1);
+    const opacity = () =>
+      bar.evaluate((element) => Number(getComputedStyle(element).opacity));
+    await expect
+      .poll(opacity, "no background before the scroll threshold")
+      .toBe(0);
+    await expect(page.locator("[data-glass-surface]")).toHaveCount(0);
+
+    // The header itself stays transparent — a very small scroll must not fade the bar in.
+    await page.evaluate(() => window.scrollTo(0, 20));
+    await expect.poll(opacity, "a small scroll keeps the bar hidden").toBe(0);
+  });
+
+  test("navbar background fades in after the scroll threshold as a sharp full-bleed frosted bar", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await expect(page.locator("[data-curtain-content]")).toBeHidden({
+      timeout: 15_000,
+    });
+
+    await page.evaluate(() => window.scrollTo(0, 400));
+
+    const bar = page.locator("[data-navbar-bg]");
+    await expect(bar).toHaveCount(1);
+    await expect(bar).toBeVisible();
+
+    const opacity = () =>
+      bar.evaluate((element) => Number(getComputedStyle(element).opacity));
+    await expect.poll(opacity, "background fades to full opacity").toBeCloseTo(1, 1);
+
+    // Bold & sharp: edge-to-edge, square corners, no border, blur.
+    const viewport = page.viewportSize();
+    const box = await bar.boundingBox();
+    expect(box).not.toBeNull();
+    expect(box!.x).toBeCloseTo(0, 0);
+    expect(box!.x + box!.width).toBeCloseTo(viewport!.width, 0);
+    const radius = await bar.evaluate(
+      (element) => Number.parseFloat(getComputedStyle(element).borderRadius)
+    );
+    expect(radius).toBeLessThanOrEqual(1);
+    expect(
+      await bar.evaluate((element) => getComputedStyle(element).borderBottomWidth)
+    ).toBe("0px");
+
+    const backdropFilter = () =>
+      bar.evaluate((element) => getComputedStyle(element).backdropFilter);
+    await expect
+      .poll(backdropFilter, "bar uses a GPU backdrop blur (no SVG displacement)")
+      .toContain("blur(");
+    const filterValue = await bar.evaluate(
+      (element) => getComputedStyle(element).backdropFilter
+    );
+    expect(filterValue, "no SVG displacement filter").not.toContain("url(");
+
+    // Content stays on top and interactive.
+    await expect(
+      page.getByRole("link", { name: `${profile.name}, home` })
+    ).toBeVisible();
+    await expect(page.locator("[data-hero-menu-toggle]")).toBeVisible();
+  });
+
+  test("navbar background fades out when scrolling back to the top", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await expect(page.locator("[data-curtain-content]")).toBeHidden({
+      timeout: 15_000,
+    });
+
+    const bar = page.locator("[data-navbar-bg]");
+    const opacity = () =>
+      bar.evaluate((element) => Number(getComputedStyle(element).opacity));
+    await page.evaluate(() => window.scrollTo(0, 300));
+    await expect.poll(opacity, "bar fades in once the hero leaves view").toBeCloseTo(1, 1);
+
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await expect
+      .poll(opacity, "bar fades back out as the hero returns to view")
+      .toBe(0);
+  });
+
+  test("navbar background appears instantly with reduced motion", async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+    await expect(page.locator("[data-curtain-content]")).toBeHidden({
+      timeout: 15_000,
+    });
+
+    await page.evaluate(() => window.scrollTo(0, 400));
+
+    const bar = page.locator("[data-navbar-bg]");
+    await expect(bar).toBeVisible();
+    const opacity = () =>
+      bar.evaluate((element) => Number(getComputedStyle(element).opacity));
+    await expect.poll(opacity, "bar is fully opaque, no fade").toBe(1);
   });
 
   test("opens the staggered menu with navigation, email and availability", async ({
@@ -188,6 +328,11 @@ test.describe("home", () => {
 
     const panel = page.locator("#staggered-menu-panel");
     await expect(panel).toBeVisible();
+
+    await expect(
+      panel.getByRole("link", { name: navigation[0].label }),
+      "first nav link appears quickly after opening the menu"
+    ).toBeVisible({ timeout: 1_500 });
 
     for (const item of navigation) {
       await expect(
@@ -631,5 +776,199 @@ test.describe("home (responsive)", () => {
       await expect(row.locator("[data-work-index]")).toBeHidden();
       await expect(row.locator("[data-work-meta]")).toContainText(project.year);
     }
+  });
+});
+
+test.describe("scroll-to-top", () => {
+  test("is hidden at the top of the page", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator("[data-curtain-content]")).toBeHidden({
+      timeout: 15_000,
+    });
+    await page.evaluate(() => window.scrollTo(0, 0));
+
+    const button = page.locator("[data-scroll-to-top]");
+    await expect(button).toBeHidden();
+  });
+
+  test("appears after scrolling past 20% of the viewport", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await expect(page.locator("[data-curtain-content]")).toBeHidden({
+      timeout: 15_000,
+    });
+
+    const button = page.locator("[data-scroll-to-top]");
+
+    // Scroll to just below 20% threshold
+    const threshold = await page.evaluate(
+      () => window.innerHeight * 0.2 + 10
+    );
+    await page.evaluate((t) => window.scrollTo(0, t), threshold);
+    await expect(button).toBeVisible();
+  });
+
+  test("hides when scrolling back to the top", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator("[data-curtain-content]")).toBeHidden({
+      timeout: 15_000,
+    });
+
+    const button = page.locator("[data-scroll-to-top]");
+
+    // Scroll down to show button
+    const threshold = await page.evaluate(
+      () => window.innerHeight * 0.2 + 10
+    );
+    await page.evaluate((t) => window.scrollTo(0, t), threshold);
+    await expect(button).toBeVisible();
+
+    // Scroll back to top
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await expect(button).toBeHidden();
+  });
+
+  test("scroll progress ring reflects scroll position", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.goto("/");
+    await expect(page.locator("[data-curtain-content]")).toBeHidden({
+      timeout: 15_000,
+    });
+
+    const button = page.locator("[data-scroll-to-top]");
+    const threshold = await page.evaluate(
+      () => window.innerHeight * 0.2 + 10
+    );
+    await page.evaluate((t) => window.scrollTo(0, t), threshold);
+    await expect(button).toBeVisible();
+
+    const getOffset = () =>
+      page.evaluate(() => {
+        const circle = document.querySelector<SVGCircleElement>(
+          "[data-scroll-to-top] .stt-progress"
+        );
+        if (!circle) return "0";
+        return circle.getAttribute("stroke-dashoffset") ?? "0";
+      });
+
+    // At ~20% scroll, progress should be small
+    const offsetAt20 = await getOffset();
+
+    // Scroll to bottom and wait for Lenis to finish
+    await page.evaluate(() =>
+      window.scrollTo(0, document.documentElement.scrollHeight)
+    );
+    await page.waitForFunction(
+      () => {
+        const y = window.scrollY;
+        const max = document.documentElement.scrollHeight - window.innerHeight;
+        return max <= 0 || Math.abs(y - max) < 10;
+      },
+      { timeout: 5_000 }
+    );
+    const offsetAtBottom = await getOffset();
+
+    // Progress should increase (offset decreases) as we scroll down
+    expect(Number(offsetAtBottom)).toBeLessThan(Number(offsetAt20));
+  });
+
+  test("clicking scrolls to top with curtain wipe animation", async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.goto("/");
+    await expect(page.locator("[data-curtain-content]")).toBeHidden({
+      timeout: 15_000,
+    });
+
+    const button = page.locator("[data-scroll-to-top]");
+
+    // Scroll down to show button
+    await page.evaluate(() =>
+      window.scrollTo(0, document.documentElement.scrollHeight / 2)
+    );
+    await expect(button).toBeVisible();
+
+    // Click the button
+    await button.click();
+
+    // Curtain panels should appear briefly
+    const curtain = page.locator(".stt-curtain");
+    await expect(curtain).toBeVisible({ timeout: 2_000 });
+
+    // After animation completes, curtain should be hidden and scroll at top
+    await expect(curtain).toBeHidden({ timeout: 5_000 });
+    await expect
+      .poll(() => page.evaluate(() => window.scrollY))
+      .toBe(0);
+  });
+
+  test("is hidden while the staggered menu is open", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator("[data-curtain-content]")).toBeHidden({
+      timeout: 15_000,
+    });
+
+    const button = page.locator("[data-scroll-to-top]");
+
+    // Scroll down to show button
+    await page.evaluate(() =>
+      window.scrollTo(0, document.documentElement.scrollHeight / 2)
+    );
+    await expect(button).toBeVisible();
+
+    // Open menu
+    await page.locator("[data-hero-menu-toggle]").click();
+    await expect(
+      page.getByRole("button", { name: "Close menu" })
+    ).toBeVisible();
+
+    // Button should be hidden
+    await expect(button).toBeHidden();
+
+    // Close menu
+    await page.keyboard.press("Escape");
+    await expect(
+      page.getByRole("button", { name: "Open menu" })
+    ).toBeVisible();
+    // Button should reappear
+    await expect(button).toBeVisible();
+  });
+
+  test("hidden during preloader", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+
+    const button = page.locator("[data-scroll-to-top]");
+    await expect(button).toBeHidden();
+  });
+
+  test("works with reduced motion (instant scroll, no curtain)", async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+    await expect(page.locator("[data-curtain-content]")).toBeHidden({
+      timeout: 15_000,
+    });
+
+    const button = page.locator("[data-scroll-to-top]");
+
+    // Scroll down
+    await page.evaluate(() =>
+      window.scrollTo(0, document.documentElement.scrollHeight / 2)
+    );
+    await expect(button).toBeVisible();
+
+    // Click — should scroll instantly, no curtain
+    await button.click();
+    await expect
+      .poll(() => page.evaluate(() => window.scrollY))
+      .toBe(0);
+
+    // Curtain should not appear
+    const curtain = page.locator(".stt-curtain");
+    await expect(curtain).toBeHidden();
   });
 });

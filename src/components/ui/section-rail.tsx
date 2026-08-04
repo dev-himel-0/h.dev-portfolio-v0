@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, type RefObject } from "react";
 import gsap from "gsap";
-import { cn } from "@/lib/utils";
 
 const RAIL_CLAMP = "clamp(2.25rem,2.65vw,2.75rem)";
 
@@ -112,13 +111,11 @@ export function SectionRail({
   return (
     <div
       aria-hidden="true"
-      className={cn(
-        "pointer-events-none absolute top-0 hidden lg:flex",
-        side === "left"
-          ? `left-[${RAIL_CLAMP}]`
-          : `right-[${RAIL_CLAMP}]`
-      )}
-      style={{ height: "calc(100% - 50vh + 7rem)" }}
+      className="pointer-events-none absolute top-0 hidden lg:flex"
+      style={{
+        height: "calc(100% - 50vh + 7rem)",
+        ...(side === "left" ? { left: RAIL_CLAMP } : { right: RAIL_CLAMP }),
+      }}
     >
       <div
         ref={railRef}

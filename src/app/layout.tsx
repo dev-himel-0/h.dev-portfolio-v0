@@ -4,6 +4,7 @@ import { Geist, Geist_Mono, Outfit } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { SmoothScroll } from "@/components/ui/smooth-scroll";
+import { ScrollToTop } from "@/components/ui/scroll-to-top";
 
 const outfitHeading = Outfit({ subsets: ["latin"], variable: "--font-heading" });
 
@@ -47,7 +48,10 @@ export default function RootLayout({
       )}
     >
       <body className="min-h-full flex flex-col">
-        <SmoothScroll>{children}</SmoothScroll>
+        <SmoothScroll>
+          {children}
+          <ScrollToTop />
+        </SmoothScroll>
       </body>
     </html>
   );

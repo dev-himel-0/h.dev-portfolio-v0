@@ -46,6 +46,7 @@ export interface HeroAction extends NavigationItem {
 
 export const profile = {
   name: "Himel",
+  brand: "H.dev",
   role: "Frontend Engineer",
   tagline: "I build fast, precise, and memorable web interfaces.",
   availability: "Available for freelance & remote",

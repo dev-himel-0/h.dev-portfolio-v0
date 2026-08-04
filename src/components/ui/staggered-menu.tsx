@@ -17,15 +17,42 @@ import { prefersReducedMotion } from "@/lib/utils";
 
 /**
  * Fullscreen b/w menu, adapted from React Bits' StaggeredMenu. Three black
- * curtain bands sweep in from the right (0.07s apart, power4.out), then a
+ * curtain folds sweep in from the right (0.07s apart, power4.out), then a
  * fullscreen black panel slides over them with numbered Outfit items, a mono
  * email/availability footer and a socials row. All entrance/exit choreography
- * is a single GSAP timeline — timing mirrors the upstream component exactly.
+ * is a single GSAP timeline (timings in MENU_TIMING).
  *
  * The toggle button lives in the Navbar (this component only holds the overlay),
  * so state is controlled via `open` / `onOpenChange`.
  */
 const PRELAYER_COLORS = ["#000000", "#0a0a0a", "#161616"] as const;
+
+/**
+ * Entrance/exit choreography timings (s) — the classic theatrical opening:
+ * three curtain folds sweep in 0.07s apart, the panel pushes in on their
+ * tail, then the nav links rise one at a time (1.0s each, 0.1s stagger,
+ * yPercent 140 + rotate 10, power4.out) with an opacity fade, settling the
+ * last link around ~1.5s. The footer/socials are anchored just before the
+ * end of that cascade so they settle as the final link lands. GSAP animates
+ * only elements with no CSS transform/opacity transition
+ * (`[data-menu-item-label]` mask, social `<li>`) so nothing fights the tween.
+ */
+const MENU_TIMING = {
+  curtainDuration: 0.5,
+  curtainStagger: 0.07,
+  panelDelay: 0.08,
+  panelDuration: 0.65,
+  itemStartPct: 0.15,
+  itemDuration: 1.0,
+  itemStagger: 0.1,
+  numberDuration: 0.6,
+  numberDelay: 0.1,
+  footerLeadGap: 0.45,
+  footerDuration: 0.5,
+  socialStagger: 0.08,
+  socialDelay: 0.04,
+  closeDuration: 0.32,
+} as const;
 
 export function StaggeredMenu({
   open,
@@ -57,6 +84,7 @@ export function StaggeredMenu({
     gsap.set(panel.querySelectorAll("[data-menu-item-label]"), {
       yPercent: 140,
       rotate: 10,
+      opacity: 0,
     });
     gsap.set(panel.querySelectorAll("[data-menu-item]"), { "--sm-num-opacity": 0 });
     gsap.set(
@@ -77,8 +105,14 @@ export function StaggeredMenu({
     if (!root || !panel) return;
     gsap.set(root.querySelectorAll("[data-menu-prelayer]"), { xPercent: 0, autoAlpha: 1 });
     gsap.set(panel, { xPercent: 0, autoAlpha: 1 });
-    gsap.set(panel.querySelectorAll("[data-menu-item-label]"), { yPercent: 0, rotate: 0 });
-    gsap.set(panel.querySelectorAll("[data-menu-item-label]"), { clearProps: "transform" });
+    gsap.set(panel.querySelectorAll("[data-menu-item-label]"), {
+      yPercent: 0,
+      rotate: 0,
+      opacity: 1,
+    });
+    gsap.set(panel.querySelectorAll("[data-menu-item-label]"), {
+      clearProps: "transform,opacity",
+    });
     gsap.set(panel.querySelectorAll("[data-menu-item]"), { "--sm-num-opacity": 1 });
     gsap.set(
       [
@@ -147,15 +181,20 @@ export function StaggeredMenu({
 
     const tl = gsap.timeline({ paused: true });
 
-    // Curtain sweep — 0.5s, power4.out, 0.07s apart (exact React Bits timing).
+    // Curtain sweep — three folds cascade in, 0.07s apart (classic opening).
     prelayers.forEach((el, i) => {
-      tl.fromTo(el, { xPercent: 100 }, { xPercent: 0, duration: 0.5, ease: "power4.out" }, i * 0.07);
+      tl.fromTo(
+        el,
+        { xPercent: 100 },
+        { xPercent: 0, duration: MENU_TIMING.curtainDuration, ease: "power4.out" },
+        i * MENU_TIMING.curtainStagger
+      );
     });
-    const lastTime = (prelayers.length - 1) * 0.07;
+    const lastTime = (prelayers.length - 1) * MENU_TIMING.curtainStagger;
 
-    // Panel insertion — lastTime + 0.08, 0.65s, power4.out.
-    const panelInsertTime = lastTime + (prelayers.length ? 0.08 : 0);
-    const panelDuration = 0.65;
+    // Panel insertion — slides in on the folds' tail, 0.65s power4.out.
+    const panelInsertTime = lastTime + (prelayers.length ? MENU_TIMING.panelDelay : 0);
+    const panelDuration = MENU_TIMING.panelDuration;
     tl.fromTo(
       panel,
       { xPercent: 100 },
@@ -163,35 +202,53 @@ export function StaggeredMenu({
       panelInsertTime
     );
 
-    // Items — begin 15% into the panel slide, yPercent 140→0 + rotate 10→0.
+    // Items — begin 15% into the panel slide: each masked label rises 1.0s
+    // with a 0.1s stagger, yPercent 140→0 + rotate 10→0 (power4.out) and a
+    // soft opacity fade.
+    const itemsStart = panelInsertTime + panelDuration * MENU_TIMING.itemStartPct;
+    const cascadeEnd =
+      itemsStart + MENU_TIMING.itemDuration + (labels.length - 1) * MENU_TIMING.itemStagger;
+
     if (labels.length) {
-      const itemsStart = panelInsertTime + panelDuration * 0.15;
       tl.to(
         labels,
         {
           yPercent: 0,
           rotate: 0,
-          duration: 1,
+          opacity: 1,
+          duration: MENU_TIMING.itemDuration,
           ease: "power4.out",
-          stagger: { each: 0.1 },
+          stagger: { each: MENU_TIMING.itemStagger },
           onComplete: () => {
-            gsap.set(labels, { clearProps: "transform" });
+            gsap.set(labels, { clearProps: "transform,opacity" });
           },
         },
         itemsStart
       );
       tl.to(
         rows,
-        { "--sm-num-opacity": 1, duration: 0.6, ease: "power2.out", stagger: 0.08 },
-        itemsStart + 0.1
+        {
+          "--sm-num-opacity": 1,
+          duration: MENU_TIMING.numberDuration,
+          ease: "power2.out",
+          stagger: { each: MENU_TIMING.itemStagger },
+        },
+        itemsStart + MENU_TIMING.numberDelay
       );
     }
 
-    // Footer — socials at 40% into the panel slide.
-    const socialsStart = panelInsertTime + panelDuration * 0.4;
+    // Footer — anchored just before the cascade ends so it settles as the
+    // final link lands (panel-fraction fallback if no nav items exist).
+    const socialsStart = labels.length
+      ? cascadeEnd - MENU_TIMING.footerLeadGap
+      : panelInsertTime + panelDuration * 0.28;
     const footerStatic = [footerLead, socialsTitle, footerNote].filter(Boolean);
     if (footerStatic.length) {
-      tl.to(footerStatic, { opacity: 1, duration: 0.5, ease: "power2.out" }, socialsStart);
+      tl.to(
+        footerStatic,
+        { opacity: 1, duration: MENU_TIMING.footerDuration, ease: "power2.out" },
+        socialsStart
+      );
     }
     if (links.length) {
       tl.to(
@@ -199,14 +256,14 @@ export function StaggeredMenu({
         {
           y: 0,
           opacity: 1,
-          duration: 0.55,
+          duration: MENU_TIMING.footerDuration,
           ease: "power3.out",
-          stagger: { each: 0.08 },
+          stagger: { each: MENU_TIMING.socialStagger },
           onComplete: () => {
             gsap.set(links, { clearProps: "opacity" });
           },
         },
-        socialsStart + 0.04
+        socialsStart + MENU_TIMING.socialDelay
       );
     }
 
@@ -236,8 +293,8 @@ export function StaggeredMenu({
     const prelayers = Array.from(root.querySelectorAll("[data-menu-prelayer]"));
     closeTweenRef.current = gsap.to([...prelayers, panel], {
       xPercent: 100,
-      duration: 0.32,
-      ease: "power3.in",
+      duration: MENU_TIMING.closeDuration,
+      ease: "power3.inOut",
       overwrite: "auto",
       onComplete: () => {
         resetClosed();
@@ -310,8 +367,8 @@ export function StaggeredMenu({
               {navigation.map((item) => (
                 <li key={item.href} data-menu-item className="smg-item-wrap">
                   <a href={item.href} className="smg-item" onClick={close}>
-                    <span data-menu-item-label className="smg-item-label">
-                      {item.label}
+                    <span data-menu-item-label className="smg-item-mask">
+                      <span className="smg-item-label">{item.label}</span>
                     </span>
                     <span aria-hidden="true" className="smg-item-arrow">
                       <ArrowUpRight />
@@ -342,9 +399,8 @@ export function StaggeredMenu({
                   const href = s.href || undefined;
                   const SocialIcon = SOCIAL_ICON[s.icon];
                   return (
-                    <li key={s.label + i}>
+                    <li key={s.label + i} data-menu-social-link>
                       <a
-                        data-menu-social-link
                         className="smg-social"
                         href={href}
                         target={href ? "_blank" : undefined}
