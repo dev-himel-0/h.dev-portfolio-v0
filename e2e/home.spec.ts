@@ -61,6 +61,103 @@ test.describe("home", () => {
     }
   });
 
+  test("scroll arrow fades and slides up with page scroll, disappearing at the bottom", async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.goto("/");
+    await expect(page.locator("[data-curtain-content]")).toBeHidden({
+      timeout: 15_000,
+    });
+
+    const arrow = page.locator("[data-scroll-arrow]");
+    const line = page.locator("[data-scroll-line]");
+    const chevron = page.locator("[data-scroll-chevron]");
+    const container = page.locator("[data-hero-scroll]");
+    const arrowHeight = () =>
+      arrow.evaluate((element) => element.getBoundingClientRect().height);
+    const lineHeight = () =>
+      line.evaluate((element) => element.getBoundingClientRect().height);
+    const chevronOpacity = () =>
+      chevron.evaluate((element) => Number(getComputedStyle(element).opacity));
+    const opacity = () =>
+      container.evaluate((element) => Number(getComputedStyle(element).opacity));
+    const translateY = () =>
+      container.evaluate((element) => {
+        const matrix = getComputedStyle(element).transform.match(/matrix[^)]*\)/);
+        if (!matrix) return 0;
+        const values = matrix[0].match(/-?[\d.]+/g);
+        return values ? Number(values[values.length - 1]) : 0;
+      });
+
+    await expect
+      .poll(arrowHeight, "arrow draws in after the preloader")
+      .toBeGreaterThan(20);
+    await expect
+      .poll(lineHeight, "arrow line draws in after the preloader")
+      .toBeGreaterThan(20);
+    await expect
+      .poll(chevronOpacity, "arrow chevron reveals after the line")
+      .toBeGreaterThan(0.9);
+    const initial = await arrowHeight();
+    const initialOpacity = await opacity();
+    expect(initial).toBeGreaterThan(20);
+    expect(initialOpacity).toBeGreaterThan(0.9);
+
+    await page.evaluate(() =>
+      window.scrollTo(0, document.documentElement.scrollHeight / 2)
+    );
+    await expect
+      .poll(opacity, "arrow fades halfway down the page")
+      .toBeLessThan(initialOpacity - 0.1);
+    await expect
+      .poll(translateY, "arrow slides up halfway down the page")
+      .toBeLessThan(-10);
+    const halfwayHeight = await arrowHeight();
+    expect(halfwayHeight).toBeGreaterThan(initial - 5);
+
+    await page.evaluate(() =>
+      window.scrollTo(0, document.documentElement.scrollHeight)
+    );
+    await expect
+      .poll(opacity, "arrow is gone at the bottom of the page")
+      .toBeLessThan(0.05);
+    await expect
+      .poll(translateY, "arrow is slid up at the bottom of the page")
+      .toBeLessThan(-40);
+  });
+
+  test("keeps the scroll arrow at full length with reduced motion", async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+    await expect(page.locator("[data-curtain-content]")).toBeHidden({
+      timeout: 15_000,
+    });
+
+    const arrow = page.locator("[data-scroll-arrow]");
+    const container = page.locator("[data-hero-scroll]");
+    await expect(arrow).toBeVisible();
+    const arrowHeight = () =>
+      arrow.evaluate((element) => element.getBoundingClientRect().height);
+    const opacity = () =>
+      container.evaluate((element) => Number(getComputedStyle(element).opacity));
+
+    const initial = await arrowHeight();
+    expect(initial).toBeGreaterThan(20);
+
+    await page.evaluate(() =>
+      window.scrollTo(0, document.documentElement.scrollHeight)
+    );
+    await expect
+      .poll(arrowHeight, "arrow stays full length with reduced motion")
+      .toBeGreaterThan(initial - 1);
+    await expect
+      .poll(opacity, "arrow stays fully visible with reduced motion")
+      .toBeGreaterThan(0.9);
+  });
+
   test("renders the navbar with the menu toggle and monogram", async ({
     page,
   }) => {

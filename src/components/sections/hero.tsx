@@ -3,12 +3,13 @@
 import { useRef } from "react";
 import { ArrowUpRight } from "@phosphor-icons/react";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { Navbar } from "@/components/sections/navbar";
 import { FlipLink } from "@/components/ui/flip-link";
 import { hero } from "@/lib/data";
 
-gsap.registerPlugin(useGSAP);
+gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 const actionIcons = {
   "arrow-up-right": ArrowUpRight,
@@ -35,10 +36,20 @@ export function Hero({ isRevealed }: { isRevealed: boolean }) {
 
       gsap.set("[data-hero-line]", { willChange: "transform" });
       gsap.set(
-        ["[data-hero-rail-content]", "[data-hero-rail-line]", "[data-hero-scroll-line]"],
+        ["[data-hero-rail-content]", "[data-hero-rail-line]", "[data-scroll-arrow]"],
         { willChange: "transform" }
       );
       gsap.set("[data-hero-action]", { willChange: "transform,opacity" });
+      gsap.set("[data-scroll-line]", {
+        scaleY: 0,
+        transformOrigin: "50% 0%",
+        transformBox: "fill-box",
+        willChange: "transform",
+      });
+      gsap.set("[data-scroll-chevron]", {
+        autoAlpha: 0,
+        willChange: "transform,opacity",
+      });
 
       const timeline = gsap.timeline({
         delay: ENTRANCE_DELAY_S,
@@ -49,7 +60,9 @@ export function Hero({ isRevealed }: { isRevealed: boolean }) {
               "[data-hero-line]",
               "[data-hero-rail-content]",
               "[data-hero-rail-line]",
-              "[data-hero-scroll-line]",
+              "[data-scroll-arrow]",
+              "[data-scroll-line]",
+              "[data-scroll-chevron]",
               "[data-hero-action]",
             ],
             { clearProps: "willChange" }
@@ -89,38 +102,44 @@ export function Hero({ isRevealed }: { isRevealed: boolean }) {
           { y: 18, autoAlpha: 0, duration: 0.7, stagger: 0.1 },
           1.35
         )
-        .from("[data-hero-scroll]", { y: 8, autoAlpha: 0, duration: 0.5 }, 1.68)
-        .from(
-          "[data-hero-scroll-line]",
-          { scaleY: 0, transformOrigin: "top center", duration: 0.55 },
-          1.72
+        .to(
+          "[data-scroll-line]",
+          { scaleY: 1, duration: 0.9, ease: "power3.inOut" },
+          1.68
         )
-        .from(
-          "[data-scroll-arrow]",
-          { autoAlpha: 0, duration: 0.45, ease: "power2.out" },
-          1.8
+        .to(
+          "[data-scroll-chevron]",
+          { autoAlpha: 1, y: 0, duration: 0.4, ease: "power2.out" },
+          2.35
         );
 
-      const arrowTween = gsap.to("[data-scroll-arrow]", {
-        y: 4,
-        duration: 1.4,
-        delay: 2.55,
-        repeat: -1,
-        yoyo: true,
+      gsap.to("[data-scroll-arrow]", {
+        y: -10,
+        duration: 1.1,
         ease: "sine.inOut",
+        yoyo: true,
+        repeat: -1,
+        delay: ENTRANCE_DELAY_S + 2.4,
       });
 
-      const handleVisibility = () => {
-        if (document.hidden) arrowTween.pause();
-        else arrowTween.resume();
-      };
-
-      document.addEventListener("visibilitychange", handleVisibility);
-      handleVisibility();
-
-      return () => {
-        document.removeEventListener("visibilitychange", handleVisibility);
-      };
+      gsap.fromTo(
+        "[data-hero-scroll]",
+        { opacity: 1, y: 0 },
+        {
+          opacity: 0,
+          y: -64,
+          ease: "power3.inOut",
+          scrollTrigger: {
+            start: 0,
+            end: () =>
+              Math.max(
+                1,
+                rootRef.current?.offsetHeight ?? window.innerHeight
+              ),
+            scrub: 0.6,
+          },
+        }
+      );
     },
     {
       scope: rootRef,
@@ -212,26 +231,31 @@ export function Hero({ isRevealed }: { isRevealed: boolean }) {
         <div
           data-hero-scroll
           aria-hidden="true"
-          className="absolute left-1/2 flex -translate-x-1/2 flex-col items-center"
+          className="absolute left-1/2 -translate-x-1/2"
         >
-          <span className="text-[0.625rem] font-medium uppercase tracking-[0.32em]">
-            SCROLL
-          </span>
-          <span
-            data-hero-scroll-line
-            className="mt-3 h-11 w-px origin-top bg-black/60"
-          />
           <svg
             data-scroll-arrow
             aria-hidden="true"
-            className="-mt-0.5 size-3.5 text-black"
-            viewBox="0 0 12 12"
+            className="h-[clamp(3.5rem,8vh,5.5rem)] w-auto text-black"
+            viewBox="0 0 40 190"
             fill="none"
           >
-            <path
-              d="M2 4l4 4 4-4"
+            <line
+              data-scroll-line
+              x1="20"
+              y1="180"
+              x2="20"
+              y2="30"
               stroke="currentColor"
-              strokeWidth="1"
+              strokeWidth="2"
+              strokeLinecap="round"
+              className="origin-top [transform-box:fill-box]"
+            />
+            <path
+              data-scroll-chevron
+              d="M 6.666666666666666 166.66666666666666 L 20 180 L 33.333333333333336 166.66666666666666"
+              stroke="currentColor"
+              strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
             />
