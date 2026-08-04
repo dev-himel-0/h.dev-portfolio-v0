@@ -29,10 +29,16 @@ export function Preloader({ onFinished }: { onFinished?: () => void }) {
       const t = window.setTimeout(() => setDone(true), 0);
       return () => window.clearTimeout(t);
     }
+
+    if (done) {
+      lenis?.start();
+      return;
+    }
+
     lenis?.stop();
     window.scrollTo(0, 0);
     return () => lenis?.start();
-  }, [lenis]);
+  }, [done, lenis]);
 
   if (done) return null;
 

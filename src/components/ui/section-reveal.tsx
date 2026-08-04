@@ -17,6 +17,8 @@ interface SectionRevealProps {
   stagger?: number;
   /** ScrollTrigger start position. */
   start?: string;
+  /** Vertical rise distance (px) for the `fade` variant. Defaults to 48. */
+  distance?: number;
 }
 
 /**
@@ -30,6 +32,7 @@ export function SectionReveal({
   variant = "fade",
   stagger = 0.08,
   start = "top 85%",
+  distance = 48,
 }: SectionRevealProps) {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -48,7 +51,7 @@ export function SectionReveal({
           ? { yPercent: 110 }
           : variant === "tilt"
             ? { y: 60, rotateX: -6, opacity: 0 }
-            : { y: 48, opacity: 0 };
+            : { y: distance, opacity: 0 };
 
       gsap.from(targets, {
         ...from,

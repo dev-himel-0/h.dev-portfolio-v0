@@ -49,6 +49,7 @@ Premium, awwwards-style portfolio for **Himel** (frontend engineer, 4+ years) to
 - **GSAP is the main animation engine** — all scroll, enter/exit, preloader, menu, and timeline choreography uses GSAP (+ ScrollTrigger). `motion` is reserved for interactive micro-animations only (hover, tap, small state changes) — never use it for reveals or section transitions.
 - Lenis smooth scroll + GSAP ScrollTrigger for all reveals
 - One reusable `section-reveal` wrapper in `src/components/ui/` — reuse it, do not hand-roll reveals per section
+- **Section rail pattern**: every section (except hero) gets one `SectionRail` (`src/components/ui/section-rail.tsx`) pinned at mid-viewport on an alternating side — hero left → work right → services left → stack right → … Section titles sit on the **opposite side of the rail** (hero centered is the exception). Rail fades in when the section content reaches mid-viewport; as the next section becomes visible it fades up and slides up (−96px, 1.4s `power3.inOut`); instant state changes under `prefers-reduced-motion`
 - Every RAF loop (cursor, particles) pauses when the tab is hidden
 - `prefers-reduced-motion`: disable cursor, lenis, and heavy reveals
 - Custom cursor is desktop-only (never on touch devices)
