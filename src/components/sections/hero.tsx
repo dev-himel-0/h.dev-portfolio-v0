@@ -151,7 +151,7 @@ export function Hero({ isRevealed }: { isRevealed: boolean }) {
   return (
     <div
       ref={rootRef}
-      className="relative min-h-[100svh] w-full max-w-full overflow-hidden bg-white font-general text-black"
+      className="relative min-h-[100svh] w-full max-w-full overflow-hidden bg-white font-heading text-black"
     >
       <Navbar />
 

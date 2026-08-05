@@ -90,7 +90,7 @@ export function Work() {
         <SectionReveal variant="fade" distance={100} className="mb-14 lg:mb-20">
           <h2
             id="work-heading"
-            className="whitespace-nowrap font-general text-[clamp(1.75rem,6.5vw,5.5rem)] font-semibold leading-[0.82] tracking-[-0.03em]"
+            className="whitespace-nowrap font-heading text-[clamp(1.75rem,6.5vw,5.5rem)] font-semibold leading-[0.82] tracking-[-0.03em]"
           >
             <span className="inline-block pb-[0.03em]">{work.filledTitle}</span>{" "}
             <span className="hero-outline-text inline-block pb-[0.21em] tracking-[-0.025em]">
@@ -132,14 +132,14 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
         <span
           aria-hidden="true"
           data-work-index
-          className="hero-outline-text pointer-events-none absolute right-0 top-0 hidden select-none font-general text-[clamp(8.5rem,13vw,11.5rem)] font-semibold leading-none opacity-[0.06] lg:block"
+          className="hero-outline-text pointer-events-none absolute right-0 top-0 hidden select-none font-heading text-[clamp(8.5rem,13vw,11.5rem)] font-semibold leading-none opacity-[0.06] lg:block"
         >
           {numeral}
         </span>
         <div data-work-content className="relative">
           <p
             data-work-meta
-            className="font-geist-mono text-[0.625rem] uppercase tracking-[0.22em] text-black/50"
+            className="font-sans text-[0.625rem] uppercase tracking-[0.22em] text-black/50"
           >
             {project.year} — {project.role}
           </p>
@@ -265,7 +265,7 @@ function ProjectFigure({ project }: { project: Project }) {
           colorOnHover
         />
       ) : (
-        <span className="flex h-full w-full items-center justify-center font-geist-mono text-xs uppercase tracking-[0.32em] text-black/40">
+        <span className="flex h-full w-full items-center justify-center font-sans text-xs uppercase tracking-[0.32em] text-black/40">
           {project.year}
         </span>
       )}

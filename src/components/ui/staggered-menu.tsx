@@ -18,8 +18,8 @@ import { prefersReducedMotion } from "@/lib/utils";
 /**
  * Fullscreen b/w menu, adapted from React Bits' StaggeredMenu. Three black
  * curtain folds sweep in from the right (0.07s apart, power4.out), then a
- * fullscreen black panel slides over them with numbered Outfit items, a mono
- * email/availability footer and a socials row. All entrance/exit choreography
+ * fullscreen black panel slides over them with numbered General Sans items, a
+ * Montserrat email/availability footer and a socials row. All entrance/exit choreography
  * is a single GSAP timeline (timings in MENU_TIMING).
  *
  * The toggle button lives in the Navbar (this component only holds the overlay),

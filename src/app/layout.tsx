@@ -1,12 +1,10 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
-import { Geist, Geist_Mono, Outfit } from "next/font/google";
+import { Montserrat } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { SmoothScroll } from "@/components/ui/smooth-scroll";
 import { ScrollToTop } from "@/components/ui/scroll-to-top";
-
-const outfitHeading = Outfit({ subsets: ["latin"], variable: "--font-heading" });
 
 const generalSans = localFont({
   src: [
@@ -15,13 +13,11 @@ const generalSans = localFont({
     { path: "../fonts/GeneralSans-500.woff2", weight: "500", style: "normal" },
     { path: "../fonts/GeneralSans-400.woff2", weight: "400", style: "normal" },
   ],
-  variable: "--font-general",
+  variable: "--font-heading",
   display: "swap",
 });
 
-const geistSans = Geist({ subsets: ["latin"], variable: "--font-sans" });
-
-const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
+const montserrat = Montserrat({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
   title: "Himel — Frontend Engineer",
@@ -40,9 +36,7 @@ export default function RootLayout({
       className={cn(
         "h-full",
         "antialiased",
-        geistSans.variable,
-        geistMono.variable,
-        outfitHeading.variable,
+        montserrat.variable,
         generalSans.variable,
         "font-sans"
       )}

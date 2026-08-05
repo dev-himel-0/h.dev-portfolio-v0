@@ -95,7 +95,7 @@ export function MaskedAvatars({
                   {Icon ? (
                     <Icon aria-hidden="true" size={size * 0.48} />
                   ) : (
-                    <span className="font-geist-mono text-sm font-medium">
+                    <span className="font-sans text-sm font-medium">
                       {item.name.slice(0, 1)}
                     </span>
                   )}
@@ -106,7 +106,7 @@ export function MaskedAvatars({
                 data-tech-label
                 aria-hidden="true"
                 className={cn(
-                  "pointer-events-none absolute bottom-full left-1/2 mb-1 -translate-x-1/2 whitespace-nowrap font-geist-mono text-[0.625rem] uppercase tracking-[0.08em] text-black",
+                  "pointer-events-none absolute bottom-full left-1/2 mb-1 -translate-x-1/2 whitespace-nowrap font-sans text-[0.625rem] uppercase tracking-[0.08em] text-black",
                   "motion-safe:transition-[opacity,transform,filter] motion-safe:duration-200",
                   isActive
                     ? "translate-y-0 opacity-100 blur-0"

@@ -11,7 +11,7 @@ Premium, awwwards-style portfolio for **Himel** (frontend engineer, 4+ years) to
 ## Design language
 
 - **Pure black & white.** White background, black text, neutral grays only (oklch tokens already in `globals.css`). No gradients, no accent colors, no emojis, no decorative noise.
-- Typography: **Outfit** for display headings, **Geist** for body, **Geist Mono** for labels/numbers.
+- Typography: **General Sans** for display headings, **Montserrat** for body, **Montserrat** for labels/numbers.
 - Discipline: generous whitespace, hairline borders (`border-black/10`), large type. Clean and concise — **no AI-slop design or copy**.
 
 ## Tech stack

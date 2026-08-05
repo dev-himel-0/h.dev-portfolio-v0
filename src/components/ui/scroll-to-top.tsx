@@ -202,7 +202,7 @@ export function ScrollToTop() {
             r={RING_RADIUS}
             fill="none"
             stroke="currentColor"
-            strokeWidth="2"
+            strokeWidth="1.5"
             strokeLinecap="round"
             strokeDasharray={RING_CIRCUMFERENCE}
             strokeDashoffset={RING_CIRCUMFERENCE * (1 - progress)}
@@ -210,6 +210,11 @@ export function ScrollToTop() {
           />
         </svg>
         <ArrowUp weight="bold" className="stt-arrow" aria-hidden="true" />
+        <ArrowUp
+          weight="bold"
+          className="stt-arrow stt-arrow-ghost"
+          aria-hidden="true"
+        />
       </button>
     </>
   );

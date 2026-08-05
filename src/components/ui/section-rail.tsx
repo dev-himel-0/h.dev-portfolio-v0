@@ -43,6 +43,8 @@ export function SectionRail({
     let contentTopAbs = 0;
     let sectionBottomAbs = 0;
 
+    gsap.set(rail, { yPercent: -50, y: 0 });
+
     const measure = () => {
       contentTopAbs = content.getBoundingClientRect().top + window.scrollY;
       sectionBottomAbs = section.getBoundingClientRect().bottom + window.scrollY;
@@ -51,7 +53,7 @@ export function SectionRail({
 
     const show = () => {
       if (reducedMotion) {
-        gsap.set(rail, { opacity: 1, y: 0 });
+        gsap.set(rail, { opacity: 1, y: 0, yPercent: -50 });
         return;
       }
       gsap.to(rail, {
@@ -65,7 +67,7 @@ export function SectionRail({
 
     const hide = () => {
       if (reducedMotion) {
-        gsap.set(rail, { opacity: 0, y: 0 });
+        gsap.set(rail, { opacity: 0, y: 0, yPercent: -50 });
         return;
       }
       gsap.to(rail, {
@@ -120,7 +122,7 @@ export function SectionRail({
       <div
         ref={railRef}
         data-rail
-        className="sticky top-[50vh] flex -translate-y-1/2 flex-col items-center gap-4 self-start opacity-0"
+        className="sticky top-[50vh] flex flex-col items-center gap-4 self-start opacity-0"
       >
         <span className="size-1.5 bg-black" />
         <span className="h-14 w-px origin-top bg-black/50" />
