@@ -4,7 +4,6 @@ import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
 import { useLenis } from "lenis/react";
 import gsap from "gsap";
 import {
-  ArrowUpRight,
   EnvelopeSimple,
   GithubLogo,
   LinkedinLogo,
@@ -45,13 +44,17 @@ const MENU_TIMING = {
   itemStartPct: 0.15,
   itemDuration: 1.0,
   itemStagger: 0.1,
-  numberDuration: 0.6,
+  numberDuration: 0.9,
   numberDelay: 0.1,
+  numberHoverDuration: 0.5,
+  numberHoverScale: 1.3,
   footerLeadGap: 0.45,
   footerDuration: 0.5,
   socialStagger: 0.08,
   socialDelay: 0.04,
   closeDuration: 0.32,
+  itemHoverDuration: 0.65,
+  itemHoverStagger: 0.03,
 } as const;
 
 export function StaggeredMenu({
@@ -86,7 +89,12 @@ export function StaggeredMenu({
       rotate: 10,
       opacity: 0,
     });
-    gsap.set(panel.querySelectorAll("[data-menu-item]"), { "--sm-num-opacity": 0 });
+    gsap.set(panel.querySelectorAll<HTMLElement>(".smg-item"), {
+      "--sm-num-rise": "140%",
+      "--sm-num-rot": "12deg",
+      "--sm-num-scale": 1,
+      "--sm-num-opacity": 0,
+    });
     gsap.set(
       [
         ...Array.from(panel.querySelectorAll("[data-menu-footer-lead]")),
@@ -96,6 +104,8 @@ export function StaggeredMenu({
       { opacity: 0 }
     );
     gsap.set(panel.querySelectorAll("[data-menu-social-link]"), { y: 25, opacity: 0 });
+    gsap.set(panel.querySelectorAll(".smg-char-a"), { yPercent: 0 });
+    gsap.set(panel.querySelectorAll(".smg-char-b"), { yPercent: 100 });
   }, []);
 
   /** Instant open (prefers-reduced-motion): everything visible, no tween. */
@@ -113,7 +123,12 @@ export function StaggeredMenu({
     gsap.set(panel.querySelectorAll("[data-menu-item-label]"), {
       clearProps: "transform,opacity",
     });
-    gsap.set(panel.querySelectorAll("[data-menu-item]"), { "--sm-num-opacity": 1 });
+    gsap.set(panel.querySelectorAll<HTMLElement>(".smg-item"), {
+      "--sm-num-rise": "0%",
+      "--sm-num-rot": "0deg",
+      "--sm-num-scale": 1,
+      "--sm-num-opacity": 1,
+    });
     gsap.set(
       [
         ...Array.from(panel.querySelectorAll("[data-menu-footer-lead]")),
@@ -170,7 +185,7 @@ export function StaggeredMenu({
 
     const prelayers = Array.from(root.querySelectorAll<HTMLElement>("[data-menu-prelayer]"));
     const labels = Array.from(panel.querySelectorAll("[data-menu-item-label]"));
-    const rows = Array.from(panel.querySelectorAll("[data-menu-item]"));
+    const anchors = Array.from(panel.querySelectorAll<HTMLElement>(".smg-item"));
     const footerLead = panel.querySelector("[data-menu-footer-lead]");
     const socialsTitle = panel.querySelector("[data-menu-socials-title]");
     const footerNote = panel.querySelector("[data-menu-footer-note]");
@@ -226,11 +241,13 @@ export function StaggeredMenu({
         itemsStart
       );
       tl.to(
-        rows,
+        anchors,
         {
+          "--sm-num-rise": "0%",
+          "--sm-num-rot": "0deg",
           "--sm-num-opacity": 1,
           duration: MENU_TIMING.numberDuration,
-          ease: "power2.out",
+          ease: "power4.out",
           stagger: { each: MENU_TIMING.itemStagger },
         },
         itemsStart + MENU_TIMING.numberDelay
@@ -338,6 +355,76 @@ export function StaggeredMenu({
     if (openRef.current) onOpenChange(false);
   }, [onOpenChange]);
 
+  /**
+   * Letter-wave hover: chars are pre-split per row (`.smg-char-mask` with a
+   * resting `.smg-char-a` and a blank `.smg-char-b` parked one line below).
+   * On hover the resting copy rolls up out of the mask while the duplicate
+   * rolls in from below — a 0.03s stagger, 0.65s `power4.inOut`. The row
+   * number scales up 1→1.3 on the same tween (via `--sm-num-scale`). Pointer
+   * enter/leave are bound directly on each row (no bubbling surprises) and
+   * killed on unmount.
+   */
+  useLayoutEffect(() => {
+    const root = rootRef.current;
+    const panel = panelRef.current;
+    if (!root || !panel) return;
+
+    const rows = Array.from(root.querySelectorAll<HTMLElement>("[data-menu-item]"));
+    const resetChars = () => {
+      root.querySelectorAll<HTMLElement>(".smg-char-a").forEach((el) => gsap.set(el, { yPercent: 0 }));
+      root.querySelectorAll<HTMLElement>(".smg-char-b").forEach((el) => gsap.set(el, { yPercent: 100 }));
+    };
+
+    const wave = (row: HTMLElement, on: boolean) => {
+      if (prefersReducedMotion()) return;
+      const anchor = row.querySelector<HTMLElement>(".smg-item");
+      if (anchor) {
+        gsap.to(anchor, {
+          "--sm-num-scale": on ? MENU_TIMING.numberHoverScale : 1,
+          duration: MENU_TIMING.numberHoverDuration,
+          ease: "power4.out",
+          overwrite: "auto",
+        });
+      }
+      const rest = Array.from(row.querySelectorAll<HTMLElement>(".smg-char-a"));
+      const clone = Array.from(row.querySelectorAll<HTMLElement>(".smg-char-b"));
+      if (!rest.length || !clone.length) return;
+      gsap.to(rest, {
+        yPercent: on ? -100 : 0,
+        duration: MENU_TIMING.itemHoverDuration,
+        ease: "power4.inOut",
+        stagger: { each: MENU_TIMING.itemHoverStagger },
+        overwrite: "auto",
+      });
+      gsap.to(clone, {
+        yPercent: on ? 0 : 100,
+        duration: MENU_TIMING.itemHoverDuration,
+        ease: "power4.inOut",
+        stagger: { each: MENU_TIMING.itemHoverStagger },
+        overwrite: "auto",
+      });
+    };
+
+    resetChars();
+
+    const inHandlers = rows.map((row) => {
+      const enter = () => wave(row, true);
+      const leave = () => wave(row, false);
+      row.addEventListener("pointerenter", enter);
+      row.addEventListener("pointerleave", leave);
+      return { row, enter, leave };
+    });
+
+    return () => {
+      inHandlers.forEach(({ row, enter, leave }) => {
+        row.removeEventListener("pointerenter", enter);
+        row.removeEventListener("pointerleave", leave);
+      });
+      root.querySelectorAll<HTMLElement>(".smg-char").forEach((el) => gsap.killTweensOf(el));
+      root.querySelectorAll<HTMLElement>(".smg-item").forEach((el) => gsap.killTweensOf(el));
+    };
+  }, []);
+
   const SOCIAL_ICON: Record<SocialIcon, Icon> = {
     github: GithubLogo,
     linkedin: LinkedinLogo,
@@ -366,12 +453,25 @@ export function StaggeredMenu({
             <ul className="smg-list" role="list">
               {navigation.map((item) => (
                 <li key={item.href} data-menu-item className="smg-item-wrap">
-                  <a href={item.href} className="smg-item" onClick={close}>
+                  <a
+                        href={item.href}
+                        className="smg-item"
+                        onClick={close}
+                        aria-label={item.label}
+                      >
                     <span data-menu-item-label className="smg-item-mask">
-                      <span className="smg-item-label">{item.label}</span>
-                    </span>
-                    <span aria-hidden="true" className="smg-item-arrow">
-                      <ArrowUpRight />
+                      <span className="smg-word">
+                        {item.label.split("").map((char, index) => (
+                          <span key={index} className="smg-char-mask">
+                            <span className="smg-char smg-char-a">
+                              {char === " " ? "\u00A0" : char}
+                            </span>
+                            <span aria-hidden="true" className="smg-char smg-char-b">
+                              {char === " " ? "\u00A0" : char}
+                            </span>
+                          </span>
+                        ))}
+                      </span>
                     </span>
                   </a>
                 </li>

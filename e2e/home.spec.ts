@@ -417,6 +417,222 @@ test.describe("home", () => {
     }
   });
 
+  test("menu links are split into masked character pairs", async ({ page }) => {
+    await page.goto("/");
+    await page.locator("[data-hero-menu-toggle]").click();
+    const panel = page.locator("#staggered-menu-panel");
+    await expect(panel).toBeVisible();
+
+    await expect(panel.locator("[data-menu-item]")).toHaveCount(
+      navigation.length
+    );
+
+    for (const item of navigation) {
+      const link = panel.getByRole("link", { name: item.label });
+      const masks = link.locator(".smg-char-mask");
+      await expect(
+        masks,
+        `${item.label} is split into ${item.label.length} character masks`
+      ).toHaveCount(item.label.length);
+
+      const rest = await masks.locator(".smg-char-a").allTextContents();
+      const clone = await masks.locator(".smg-char-b").allTextContents();
+      expect(rest.join(""), "resting copy spells the label").toBe(item.label);
+      expect(clone.join(""), "duplicate copy spells the label").toBe(item.label);
+      await expect(masks.locator(".smg-char-b").first()).toHaveAttribute(
+        "aria-hidden",
+        "true"
+      );
+    }
+  });
+
+  test("menu label characters roll up in a wave on hover", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.goto("/");
+
+    // The toggle sits under the curtain while the preloader plays; wait for
+    // the reveal to finish so the menu opens cleanly.
+    await expect(page.locator("[data-curtain-content]")).toBeHidden({
+      timeout: 15_000,
+    });
+
+    await page.locator("[data-hero-menu-toggle]").click();
+    const panel = page.locator("#staggered-menu-panel");
+    await expect(panel).toBeVisible();
+
+    const link = panel.getByRole("link", { name: navigation[0].label });
+    await expect(link).toBeVisible({ timeout: 2_000 });
+
+    // Wait for the entrance cascade to settle (GSAP clears the masks' inline
+    // transform on completion) so the link no longer moves under the cursor.
+    await expect
+      .poll(() =>
+        link
+          .locator("[data-menu-item-label]")
+          .evaluate((el) => getComputedStyle(el).transform)
+      )
+      .toBe("none");
+
+    const rest = link.locator(".smg-char-a").first();
+    const clone = link.locator(".smg-char-b").first();
+
+    const restTransform = () =>
+      rest.evaluate((el) => getComputedStyle(el).transform);
+
+    await expect
+      .poll(restTransform, "resting copy sits flat before hover")
+      .toBe("matrix(1, 0, 0, 1, 0, 0)");
+
+    await link.hover();
+
+    await expect
+      .poll(restTransform, "resting copy rolls up out of the mask")
+      .not.toBe("matrix(1, 0, 0, 1, 0, 0)");
+
+    await expect
+      .poll(
+        () => clone.evaluate((el) => getComputedStyle(el).transform),
+        "duplicate rolls in to fill the mask"
+      )
+      .toBe("matrix(1, 0, 0, 1, 0, 0)");
+  });
+
+  test("menu numbers sit beside the labels and rise into view on open", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await page.locator("[data-hero-menu-toggle]").click();
+    const panel = page.locator("#staggered-menu-panel");
+    await expect(panel).toBeVisible();
+
+    const link = panel.getByRole("link", { name: navigation[0].label });
+    await expect(link).toBeVisible({ timeout: 2_000 });
+
+    const numberRise = () =>
+      link.evaluate((el) =>
+        getComputedStyle(el).getPropertyValue("--sm-num-rise").trim()
+      );
+
+    await expect
+      .poll(numberRise, "number rise settles flush on open")
+      .toBe("0%");
+
+    const numberStyle = await link.evaluate((el) => {
+      const style = getComputedStyle(el, "::before");
+      return {
+        left: parseFloat(style.left),
+        anchorWidth: el.getBoundingClientRect().width,
+        opacity: style.opacity,
+        fontSize: parseFloat(style.fontSize),
+      };
+    });
+    expect(
+      Math.abs(numberStyle.left - numberStyle.anchorWidth),
+      "number anchors to the label's right edge"
+    ).toBeLessThan(1);
+    expect(numberStyle.opacity, "number is fully visible after the reveal").toBe(
+      "1"
+    );
+
+    const labelFontSize = await link
+      .locator("[data-menu-item-label]")
+      .evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
+    expect(
+      numberStyle.fontSize,
+      "number scales with but stays smaller than the label"
+    ).toBeLessThan(labelFontSize);
+  });
+
+  test("menu numbers scale up and fill solid on hover", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.goto("/");
+
+    // The toggle sits under the curtain while the preloader plays; wait for
+    // the reveal to finish so the menu opens cleanly.
+    await expect(page.locator("[data-curtain-content]")).toBeHidden({
+      timeout: 15_000,
+    });
+
+    await page.locator("[data-hero-menu-toggle]").click();
+    const panel = page.locator("#staggered-menu-panel");
+    await expect(panel).toBeVisible();
+
+    const link = panel.getByRole("link", { name: navigation[0].label });
+    await expect(link).toBeVisible({ timeout: 2_000 });
+
+    // Wait for the entrance cascade to settle (the number's rise is the last
+    // tween per row) so the row is at rest before the hover check.
+    await expect
+      .poll(() =>
+        link.evaluate((el) =>
+          getComputedStyle(el).getPropertyValue("--sm-num-rise").trim()
+        )
+      )
+      .toBe("0%");
+
+    const numberScale = () =>
+      link.evaluate((el) =>
+        parseFloat(getComputedStyle(el).getPropertyValue("--sm-num-scale"))
+      );
+    const numberFill = () =>
+      link.evaluate((el) =>
+        getComputedStyle(el, "::before").getPropertyValue(
+          "-webkit-text-fill-color"
+        )
+      );
+
+    await expect.poll(numberScale, "number rests at scale 1").toBe(1);
+    await expect
+      .poll(numberFill, "number is outlined before hover")
+      .toBe("rgba(0, 0, 0, 0)");
+
+    await link.hover();
+
+    await expect.poll(numberScale, "number grows on hover").toBe(1.3);
+    await expect
+      .poll(numberFill, "number fills solid on hover")
+      .not.toBe("rgba(0, 0, 0, 0)");
+
+    await page.mouse.move(0, 0);
+    await expect
+      .poll(numberScale, "number returns to rest on leave")
+      .toBe(1);
+  });
+
+  test("menu links do not animate on hover with reduced motion", async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+
+    // Wait for the app to mount (curtain dismissed) so the toggle click
+    // always lands on the hydrated React handler.
+    await expect(page.locator("[data-curtain-content]")).toBeHidden({
+      timeout: 15_000,
+    });
+
+    await page.locator("[data-hero-menu-toggle]").click();
+    const panel = page.locator("#staggered-menu-panel");
+    await expect(panel).toBeVisible();
+
+    const link = panel.getByRole("link", { name: navigation[0].label });
+    await expect(link).toBeVisible({ timeout: 2_000 });
+
+    const rest = link.locator(".smg-char-a").first();
+    const before = await rest.evaluate((el) => getComputedStyle(el).transform);
+
+    await link.hover();
+    await page.waitForTimeout(400);
+
+    const after = await rest.evaluate((el) => getComputedStyle(el).transform);
+    expect(after, "hover leaves characters untouched").toBe(before);
+
+    const numberScale = await link.evaluate((el) =>
+      getComputedStyle(el).getPropertyValue("--sm-num-scale").trim()
+    );
+    expect(numberScale, "hover leaves the number at rest scale").toBe("1");
+  });
+
   test("closes the staggered menu on toggle, escape and click-away", async ({
     page,
   }) => {
@@ -444,6 +660,12 @@ test.describe("home", () => {
 
   test("menu panel covers the full viewport", async ({ page }) => {
     await page.goto("/");
+
+    // Wait for the app to mount (curtain dismissed) so the toggle click
+    // always lands on the hydrated React handler.
+    await expect(page.locator("[data-curtain-content]")).toBeHidden({
+      timeout: 15_000,
+    });
 
     await page.locator("[data-hero-menu-toggle]").click();
     const panel = page.locator("#staggered-menu-panel");
@@ -1069,6 +1291,12 @@ test.describe("home (responsive)", () => {
       await page.setViewportSize({ width, height });
       await page.goto("/");
 
+      // Wait for the app to mount (curtain dismissed) so the toggle click
+      // always lands on the hydrated React handler.
+      await expect(page.locator("[data-curtain-content]")).toBeHidden({
+        timeout: 15_000,
+      });
+
       const toggle = page.locator("[data-hero-menu-toggle]");
       await toggle.click();
 
@@ -1107,6 +1335,12 @@ test.describe("home (responsive)", () => {
   }) => {
     await page.setViewportSize({ width: 320, height: 568 });
     await page.goto("/");
+
+    // Wait for the app to mount so the section reveal is positioned before
+    // scrolling to it.
+    await expect(page.locator("[data-curtain-content]")).toBeHidden({
+      timeout: 15_000,
+    });
 
     const section = page.locator("#work");
     await expect(section).toBeAttached();
