@@ -34,6 +34,17 @@ test.describe("home", () => {
     });
   });
 
+  test("shows the odometer counter during the preloader", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+
+    const odometer = page.locator("[data-odometer]");
+    await expect(odometer).toBeVisible();
+    await expect(odometer.locator("[data-odometer-wheel]")).toHaveCount(3);
+
+    await expect(odometer).toBeHidden({ timeout: 10_000 });
+  });
+
   test("restores scrolling after the preloader finishes", async ({ page }) => {
     await page.goto("/");
 

@@ -4,6 +4,7 @@ import { useRef, type ReactNode } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { cn } from "@/lib/utils";
+import { Odometer, type OdometerHandle } from "@/components/ui/odometer";
 
 gsap.registerPlugin(useGSAP);
 
@@ -20,7 +21,7 @@ interface CurtainRevealProps {
   fadeDuration?: number;
   /**
    * When set, the curtain drives itself: a progress line under the content
-   * fills over `progress` ms with a 0-100% counter, then the content fades
+   * fills over `progress` ms with a 0-100% odometer, then the content fades
    * out and the panels wipe away.
    */
   progress?: number;
@@ -37,8 +38,8 @@ interface CurtainRevealProps {
  * (the loader words). Two modes:
  * - `play`: children fade out, then the bands wipe upward with a stagger.
  * - `progress`: a single hairline fills left-to-right across a bare black
- *   field (no track) with a centered 0-100% counter on a black chip that
- *   masks the line as it passes — an expo glide with an overshoot snap and
+ *   field (no track) with a centered odometer on a black chip that masks the
+ *   line as it passes — an expo glide with an overshoot snap and
  *   a light breath before children fade and the bands wipe (the line is the
  *   timer).
  * Under `prefers-reduced-motion` it completes instantly without animating.
@@ -56,7 +57,7 @@ export function CurtainReveal({
   className,
 }: CurtainRevealProps) {
   const rootRef = useRef<HTMLDivElement>(null);
-  const countRef = useRef<HTMLSpanElement>(null);
+  const odometerRef = useRef<OdometerHandle>(null);
 
   useGSAP(
     () => {
@@ -93,7 +94,7 @@ export function CurtainReveal({
 
       if (progress !== undefined) {
         const fill = root.querySelector<HTMLElement>("[data-curtain-progress-fill]");
-        const count = countRef.current;
+        const odometer = root.querySelector<HTMLElement>("[data-odometer]");
 
         if (fill) {
           const state = { v: 0 };
@@ -104,12 +105,12 @@ export function CurtainReveal({
 
           const write = () => {
             gsap.set(fill, { scaleX: state.v });
-            if (count) count.textContent = `${Math.round(state.v * 100)}%`;
+            odometerRef.current?.set(Math.round(state.v * 100));
           };
 
           const tl = gsap.timeline();
           tl.fromTo(
-            count,
+            odometer,
             { autoAlpha: 0, y: 6 },
             { autoAlpha: 1, y: 0, duration: 0.5, ease: "power2.out" },
             0.15
@@ -154,19 +155,17 @@ export function CurtainReveal({
           <div className="flex w-fit flex-col items-center">
             {children}
             {progress !== undefined && (
-              <div className="relative mt-8 w-3/5">
+              <div className="relative mt-8 w-[clamp(12rem,26vw,22rem)]">
                 <div className="h-px overflow-hidden">
                   <div
                     data-curtain-progress-fill
                     className="h-px w-full origin-left scale-x-0 bg-white will-change-transform"
                   />
                 </div>
-                <span
-                  ref={countRef}
-                  className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-black px-2 font-mono text-sm font-light leading-none tracking-wider tabular-nums text-white/80"
-                >
-                  0%
-                </span>
+                <Odometer
+                  ref={odometerRef}
+                  className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+                />
               </div>
             )}
           </div>

@@ -1,18 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useLenis } from "lenis/react";
-import { FlipFadeText } from "@/components/ui/flip-fade-text";
 import { CurtainReveal } from "@/components/ui/curtain-reveal";
+import { FlipFadeText } from "@/components/ui/flip-fade-text";
+import { useLenis } from "lenis/react";
+import { useEffect, useState } from "react";
 
-const WORDS = ["Frontend", "Engineer", "Creative"];
+const WORDS = ["Idea", "Design & Build", "Ship"];
 const WORD_INTERVAL_MS = 2200;
 /** Words flip in over letterDuration + staggerDelay * (len - 1). */
-const LAST_WORD_FLIP_MS = 0.6 * 1000 + 0.1 * 1000 * (WORDS[WORDS.length - 1].length);
+const LAST_WORD_FLIP_MS =
+  0.6 * 1000 + 0.1 * 1000 * WORDS[WORDS.length - 1].length;
 /** Hold the fully-formed last word before revealing. */
 const HOLD_MS = 800;
 /** Progress line duration — the line is the loader's timer. */
-const PROGRESS_MS = (WORDS.length - 1) * WORD_INTERVAL_MS + LAST_WORD_FLIP_MS + HOLD_MS;
+const PROGRESS_MS =
+  (WORDS.length - 1) * WORD_INTERVAL_MS + LAST_WORD_FLIP_MS + HOLD_MS;
 
 /**
  * Full-screen preloader: white words cycling on a black five-band curtain at

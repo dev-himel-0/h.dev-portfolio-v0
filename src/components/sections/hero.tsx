@@ -16,12 +16,12 @@ const actionIcons = {
 };
 
 /**
- * Gap between the preloader wiping up and the hero's first beat. The terminal
- * wipe (fade 0.4 + 0.1 offset + 5 bands × 1.0s power4.inOut / 0.08 stagger)
- * clears ~1.9s after wipe-start; this delay lands the opening beats (name
- * ~0.5-1.5s into the timeline) right as the bands leave the screen.
+ * Gap between the preloader wipe starting and the hero's first beat. The
+ * terminal wipe (content fade 0.4 + 0.1 offset + 5 bands × 1.0s power4.inOut
+ * / 0.08 stagger) fully clears ~1.8s after wipe-start. The timeline begins
+ * just as the last bands leave, so every beat below plays on an open screen.
  */
-const ENTRANCE_DELAY_S = 1.2;
+const ENTRANCE_DELAY_S = 1.65;
 
 export function Hero({ isRevealed }: { isRevealed: boolean }) {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -71,46 +71,47 @@ export function Hero({ isRevealed }: { isRevealed: boolean }) {
       });
 
       timeline
-        .from("[data-hero-mono]", { y: -12, autoAlpha: 0, duration: 0.55 }, 0.15)
+        .from("[data-hero-greeting]", { y: 10, autoAlpha: 0, duration: 0.55 }, 0.1)
+        .from("[data-hero-mono]", { y: -12, autoAlpha: 0, duration: 0.55 }, 0.1)
         .from(
           "[data-hero-menu-toggle]",
           { y: -10, autoAlpha: 0, duration: 0.5 },
-          0.25
+          0.22
         )
         .from(
           "[data-hero-rail-content]",
-          { yPercent: -110, autoAlpha: 0, duration: 0.9, ease: "expo.out" },
-          0.35
+          { y: 10, autoAlpha: 0, duration: 0.5, ease: "power3.out" },
+          0.18
         )
         .from(
           "[data-hero-rail-line]",
           { scaleY: 0, transformOrigin: "top center", duration: 0.7, ease: "power3.out" },
-          0.5
+          0.26
         )
         .from(
           "[data-hero-line='filled']",
-          { yPercent: 110, autoAlpha: 0, duration: 0.9, ease: "expo.out" },
-          0.5
+          { yPercent: 110, autoAlpha: 0, duration: 1, ease: "expo.out" },
+          0.34
         )
         .from(
           "[data-hero-line='outlined']",
-          { yPercent: 110, autoAlpha: 0, duration: 0.95, ease: "expo.out" },
-          0.7
+          { yPercent: 110, autoAlpha: 0, duration: 1.05, ease: "expo.out" },
+          0.48
         )
         .from(
           "[data-hero-action]",
           { y: 18, autoAlpha: 0, duration: 0.7, stagger: 0.1 },
-          1.35
+          1.0
         )
         .to(
           "[data-scroll-line]",
           { scaleY: 1, duration: 0.9, ease: "power3.inOut" },
-          1.68
+          1.3
         )
         .to(
           "[data-scroll-chevron]",
           { autoAlpha: 1, y: 0, duration: 0.4, ease: "power2.out" },
-          2.35
+          1.8
         );
 
       gsap.to("[data-scroll-arrow]", {
@@ -119,7 +120,7 @@ export function Hero({ isRevealed }: { isRevealed: boolean }) {
         ease: "sine.inOut",
         yoyo: true,
         repeat: -1,
-        delay: ENTRANCE_DELAY_S + 2.4,
+        delay: ENTRANCE_DELAY_S + 2.15,
       });
 
       gsap.fromTo(
@@ -188,6 +189,13 @@ export function Hero({ isRevealed }: { isRevealed: boolean }) {
         </div>
 
         <div className="relative z-10 mx-auto flex w-full max-w-[75rem] -translate-y-[0.6vh] flex-col items-center">
+          <p
+            data-hero-greeting
+            className="mb-[clamp(0.75rem,2.5vh,1.5rem)] text-[1.0625rem] font-normal tracking-[0.18em] text-black/70"
+          >
+            Hi there, I am <strong className="font-medium text-[1.125rem]">Himel</strong>
+          </p>
+
           <h1
             id="hero-heading"
             className="hero-title w-full text-center text-[clamp(2.625rem,14.5vw,7.25rem)] font-semibold leading-[0.82] tracking-[-0.03em] lg:text-[clamp(7.25rem,11.5vw,11.75rem)]"

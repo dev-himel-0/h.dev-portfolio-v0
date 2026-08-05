@@ -122,16 +122,20 @@ export function SectionRail({
       <div
         ref={railRef}
         data-rail
-        className="sticky top-[50vh] flex flex-col items-center gap-4 self-start opacity-0"
+        className="sticky top-[50vh] self-start opacity-0"
       >
-        <span className="size-1.5 bg-black" />
-        <span className="h-14 w-px origin-top bg-black/50" />
-        <span
-          data-rail-label
-          className="text-[0.625rem] font-medium uppercase tracking-[0.22em] text-black/60 [writing-mode:vertical-rl]"
-        >
-          {index}
-        </span>
+        <div className="overflow-hidden">
+          <div className="flex flex-col items-center gap-4 will-change-transform">
+            <span className="size-1.5 bg-black" />
+            <span className="h-14 w-px origin-top bg-black/50" />
+            <span
+              data-rail-label
+              className="text-[0.625rem] font-medium uppercase tracking-[0.22em] text-black/60 [writing-mode:vertical-rl]"
+            >
+              {index}
+            </span>
+          </div>
+        </div>
       </div>
     </div>
   );
