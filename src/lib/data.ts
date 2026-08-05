@@ -85,6 +85,19 @@ export const work = {
   outlinedTitle: "Projects",
 };
 
+/**
+ * About section manifesto. Each entry renders as one editorial statement,
+ * wrapping to at most two lines at display size on desktop. The section
+ * grows slightly beyond the 60vh frame to accommodate the longer copy.
+ */
+export const about = {
+  manifesto: [
+    "Crafting design that turns ambitious ideas into products people trust",
+    "Turning complex experiences into interfaces that feel simple, intuitive, and human",
+    "Bringing every detail together to create products that perform beautifully and endure",
+  ],
+};
+
 export const stats = [
   { value: 4, suffix: "+", label: "Years of experience" },
   { value: 20, suffix: "+", label: "Projects shipped" },

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -22,8 +22,6 @@ const GLASS_SCROLL = 72;
 function buildLines(opening: boolean) {
   const from = opening ? "Menu" : "Close";
   const to = opening ? "Close" : "Menu";
-
-  if (prefersReducedMotion()) return [to];
 
   const seq = [from];
   let last = from;
@@ -49,7 +47,7 @@ export function Navbar() {
   const spinRef = useRef<HTMLSpanElement>(null);
   const spinTweenRef = useRef<gsap.core.Tween | null>(null);
   const mountedRef = useRef(false);
-  const lines = buildLines(open);
+  const lines = useMemo(() => buildLines(open), [open]);
 
   const toggleMenu = () => setOpen((value) => !value);
 
@@ -57,6 +55,10 @@ export function Navbar() {
     const inner = textInnerRef.current;
     const spin = spinRef.current;
     if (!inner) return;
+
+    // Neutralize the `.smg-toggle-lines` CSS `translate` default (-80%) so the
+    // GSAP transform below is the only positioning — avoids a double shift.
+    inner.style.translate = "0 0";
 
     if (!mountedRef.current) {
       mountedRef.current = true;
@@ -67,7 +69,9 @@ export function Navbar() {
     }
 
     if (prefersReducedMotion()) {
-      gsap.set(inner, { yPercent: 0 });
+      gsap.set(inner, {
+        yPercent: -(((lines.length - 1) / lines.length) * 100),
+      });
       spinTweenRef.current?.kill();
       gsap.set(spin, { rotate: open ? 225 : 0 });
       return;

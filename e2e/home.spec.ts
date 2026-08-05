@@ -1,11 +1,13 @@
 import { expect, test } from "@playwright/test";
 
 import {
+  about,
   hero,
   navigation,
   profile,
   projects,
   socials,
+  stats,
   work,
 } from "../src/lib/data";
 
@@ -204,6 +206,54 @@ test.describe("home", () => {
       .toBe("Menu");
 
     await expect(page.locator("#staggered-menu-panel")).toBeHidden();
+  });
+
+  test("toggle markup is deterministic on load with reduced motion", async ({
+    page,
+  }) => {
+    const hydrationErrors: string[] = [];
+    page.on("console", (msg) => {
+      if (msg.type() === "error" && /hydration/i.test(msg.text())) {
+        hydrationErrors.push(msg.text());
+      }
+    });
+
+    await page.goto("/");
+
+    const toggle = page.locator("[data-hero-menu-toggle]");
+    await expect(toggle).toBeVisible();
+
+    const lineCount = await toggle.locator(".smg-toggle-line").count();
+    expect(lineCount).toBeGreaterThan(1);
+
+    await expect
+      .poll(
+        () =>
+          toggle.locator(".smg-toggle-lines").evaluate((el) => {
+            const html = el as HTMLElement;
+            const lines = Array.from(html.querySelectorAll(".smg-toggle-line"));
+            const lineHeight = lines[0]?.getBoundingClientRect().height || 1;
+            const match = window
+              .getComputedStyle(html)
+              .transform.match(/[-.\d]+/g);
+            const translateY =
+              match && match.length >= 6 ? Number(match[5]) : 0;
+            const index = Math.min(
+              lines.length - 1,
+              Math.max(0, Math.round(-translateY / lineHeight))
+            );
+            return lines[index]?.textContent ?? "";
+          }),
+        "toggle settles on Menu under reduced motion"
+      )
+      .toBe("Menu");
+
+    await expect
+      .poll(
+        () => hydrationErrors.length,
+        "no hydration mismatch on load under reduced motion"
+      )
+      .toBe(0);
   });
 
   test("navbar background is hidden while the hero is on screen", async ({
@@ -539,6 +589,9 @@ test.describe("home", () => {
     page,
   }) => {
     await page.goto("/");
+    await expect(page.locator("[data-curtain-content]")).toBeHidden({
+      timeout: 15_000,
+    });
 
     const row = page.locator("[data-work-row]").first();
     await expect(row).toBeAttached();
@@ -547,6 +600,7 @@ test.describe("home", () => {
         .querySelector("[data-work-row]")
         ?.scrollIntoView({ block: "center" });
     });
+    await expect(row).toBeInViewport();
 
     const rowBox = await row.boundingBox();
     const infoBox = await row.locator("[data-work-info]").boundingBox();
@@ -603,6 +657,10 @@ test.describe("home", () => {
       const img = row.locator("[data-work-figure] img");
       await expect(img).toHaveCount(1);
       await expect(img).toHaveAttribute("src", /images\.unsplash\.com/);
+      await expect(img).toHaveAttribute(
+        "loading",
+        index === 0 ? "eager" : "lazy"
+      );
     }
   });
 
@@ -645,6 +703,278 @@ test.describe("home", () => {
       const avatar = avatars.nth(index);
       await avatar.hover();
       await expect(avatar.locator("[data-tech-label]")).toBeVisible();
+    }
+  });
+});
+
+test.describe("about", () => {
+  const waitForPage = async (page: import("@playwright/test").Page) => {
+    await expect(page.locator("[data-curtain-content]")).toBeHidden({
+      timeout: 15_000,
+    });
+  };
+
+  const stripY = (strip: import("@playwright/test").Locator) =>
+    strip.evaluate((el) => {
+      const element = el as HTMLElement;
+      const matrix = getComputedStyle(element).transform;
+      if (!matrix || matrix === "none") return 0;
+      return new DOMMatrixReadOnly(matrix).m42;
+    });
+
+  const stripTarget = (strip: import("@playwright/test").Locator) =>
+    strip.evaluate((el) => {
+      const element = el as HTMLElement;
+      return -(Number(element.dataset.digit) * element.offsetHeight) / 10;
+    });
+
+  const visibleDigit = (strip: import("@playwright/test").Locator) =>
+    strip.evaluate((el) => {
+      const element = el as HTMLElement;
+      const containerTop = element.parentElement!.getBoundingClientRect().top;
+      const children = Array.from(element.children);
+      return children.findIndex(
+        (child) =>
+          Math.abs(child.getBoundingClientRect().top - containerTop) < 2
+      );
+    });
+
+  test("renders manifesto, stats, and socials without a title or rail", async ({
+    page,
+  }) => {
+    await page.goto("/");
+
+    const section = page.locator("#about");
+    await expect(section).toBeAttached();
+    await expect(section).toHaveAttribute("aria-label", "About");
+
+    await expect(section.locator("h2")).toHaveCount(0);
+    await expect(section.locator("[data-rail]")).toHaveCount(0);
+
+    const paragraphs = section.locator("[data-stagger-text]");
+    await expect(paragraphs).toHaveCount(about.manifesto.length);
+    for (const line of about.manifesto) {
+      await expect(
+        paragraphs.filter({ hasText: line }).first()
+      ).toBeVisible();
+      await expect(
+        paragraphs.filter({ hasText: line }).locator("[data-stagger-unit]")
+      ).toHaveCount(
+        line.split(/\s+/).filter(Boolean).length
+      );
+    }
+
+    const statCells = section.locator("[data-about-stat]");
+    await expect(statCells).toHaveCount(stats.length);
+    for (const stat of stats) {
+      await expect(statCells.filter({ hasText: stat.label }).first()).toContainText(
+        stat.label
+      );
+    }
+
+    const socialRows = section.locator("[data-social-row-inner]");
+    await expect(socialRows).toHaveCount(socials.length);
+    for (const social of socials) {
+      await expect(
+        socialRows.filter({ hasText: social.label }).first()
+      ).toBeVisible();
+    }
+  });
+
+  test("fits a statement frame with the manifesto capped at two lines per statement on desktop", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await waitForPage(page);
+
+    await page.evaluate(() => document.fonts.ready);
+
+    const section = page.locator("#about");
+    await expect(section).toBeAttached();
+
+    const viewport = page.viewportSize() ?? { width: 0, height: 0 };
+    if (viewport.width < 1024) return;
+
+    const box = await section.boundingBox();
+    expect(box).not.toBeNull();
+    expect(
+      box!.height,
+      "about section stays within 80vh on desktop"
+    ).toBeLessThanOrEqual(viewport.height * 0.8 + 2);
+
+    const lineCounts = await section
+      .locator("[data-stagger-text]")
+      .evaluateAll((paragraphs) =>
+        paragraphs.map((paragraph) => paragraph.getClientRects().length)
+      );
+    for (const [index, count] of lineCounts.entries()) {
+      expect(
+        count,
+        `manifesto statement ${index + 1} wraps to at most two lines`
+      ).toBeLessThanOrEqual(2);
+    }
+  });
+
+  test("menu About link scrolls to the about section", async ({ page }) => {
+    await page.goto("/");
+    await waitForPage(page);
+
+    await page.locator("[data-hero-menu-toggle]").click();
+    const link = page.getByRole("link", { name: "About" });
+    await expect(link).toBeVisible();
+    await link.click();
+
+    await expect(page.locator("#staggered-menu-panel")).toBeHidden();
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
+    await expect
+      .poll(() =>
+        page.locator("#about").evaluate((el) => el.getBoundingClientRect().top)
+      )
+      .toBeLessThanOrEqual(page.viewportSize()?.height ?? 900);
+    await expect(page.locator("#about")).toBeInViewport();
+  });
+
+  test("odometer rolls from zero on scroll entry", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.goto("/");
+    await waitForPage(page);
+
+    await page.evaluate(() => {
+      document
+        .querySelector("[data-about-stats]")
+        ?.scrollIntoView({ block: "center" });
+    });
+
+    const firstStrip = page.locator("[data-odometer-strip]").first();
+    await expect
+      .poll(() => stripY(firstStrip), "odometer catches the roll mid-flight")
+      .toBeGreaterThan((await stripTarget(firstStrip)) + 1);
+
+    const strips = page.locator("[data-odometer-strip]");
+    const count = await strips.count();
+    for (let index = 0; index < count; index += 1) {
+      const strip = strips.nth(index);
+      const digit = Number(await strip.getAttribute("data-digit"));
+      await expect
+        .poll(() => visibleDigit(strip), `digit column ${index} settles`)
+        .toBe(digit);
+    }
+
+    await expect(page.locator("[data-stat-label]").first()).toHaveCSS(
+      "opacity",
+      "1"
+    );
+  });
+
+  test("manifesto words stagger reveal on scroll", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.goto("/");
+    await waitForPage(page);
+
+    await page.evaluate(() => {
+      document
+        .querySelector("[data-about-manifesto]")
+        ?.scrollIntoView({ block: "center" });
+    });
+
+    const words = page.locator("[data-about-manifesto] [data-stagger-unit]");
+    await expect(words).toHaveCount(
+      about.manifesto
+        .map((line) => line.split(/\s+/).filter(Boolean).length)
+        .reduce((total, count) => total + count, 0)
+    );
+
+    await expect
+      .poll(
+        () =>
+          words.first().evaluate((el) => {
+            const matrix = getComputedStyle(el as HTMLElement).transform;
+            if (!matrix || matrix === "none") return 0;
+            return new DOMMatrixReadOnly(matrix).m42;
+          }),
+        "manifesto words catch the reveal mid-flight"
+      )
+      .toBeGreaterThan(0);
+
+    await expect
+      .poll(
+        () =>
+          words.evaluateAll((units) =>
+            Math.max(
+              ...units.map((el) => {
+                const matrix = getComputedStyle(el as HTMLElement).transform;
+                if (!matrix || matrix === "none") return 0;
+                return new DOMMatrixReadOnly(matrix).m42;
+              })
+            )
+          ),
+        "manifesto words settle into place"
+      )
+      .toBe(0);
+  });
+
+  test("reduced motion shows final stats and socials instantly", async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+    await waitForPage(page);
+
+    await page.evaluate(() => {
+      document.querySelector("#about")?.scrollIntoView({ block: "start" });
+    });
+
+    const strips = page.locator("[data-odometer-strip]");
+    const count = await strips.count();
+    expect(count).toBeGreaterThan(0);
+    for (let index = 0; index < count; index += 1) {
+      const strip = strips.nth(index);
+      const digit = Number(await strip.getAttribute("data-digit"));
+      await expect.poll(() => visibleDigit(strip)).toBe(digit);
+    }
+
+    await expect(page.locator("[data-stat-label]").first()).toHaveCSS(
+      "opacity",
+      "1"
+    );
+    const socialRow = page.locator("[data-social-row-inner]").first();
+    await expect(socialRow).toBeVisible();
+  });
+
+  test("social rows reveal on scroll and link only when a href exists", async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.goto("/");
+    await waitForPage(page);
+
+    const rows = page.locator("[data-social-rows] [data-social-row-inner]");
+    await expect(rows).toHaveCount(socials.length);
+
+    await page.evaluate(() => {
+      document
+        .querySelector("[data-social-rows]")
+        ?.scrollIntoView({ block: "center" });
+    });
+
+    for (let index = 0; index < await rows.count(); index += 1) {
+      const row = rows.nth(index);
+      await expect
+        .poll(() => stripY(row), `social row ${index} slides into place`)
+        .toBe(0);
+    }
+
+    for (const social of socials) {
+      const row = rows.filter({ hasText: social.label }).first();
+      await expect(row).toBeVisible();
+      await expect(row).toContainText(social.label);
+
+      const link = page.getByRole("link", { name: social.label });
+      if (social.href) {
+        await expect(link).toHaveAttribute("href", social.href);
+      } else {
+        await expect(link).toHaveCount(0);
+      }
     }
   });
 });
@@ -770,12 +1100,54 @@ test.describe("home (responsive)", () => {
 
     for (const project of projects) {
       const row = rows.filter({ hasText: project.title }).first();
+      await expect(row).toBeVisible();
       const box = await row.boundingBox();
       expect(box, project.title).not.toBeNull();
       fitInViewport(box!, 320);
       await expect(row.locator("[data-work-index]")).toBeHidden();
       await expect(row.locator("[data-work-meta]")).toContainText(project.year);
     }
+  });
+
+  test("about section fits without horizontal overflow at 320px", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 320, height: 568 });
+    await page.goto("/");
+    await expect(page.locator("[data-curtain-content]")).toBeHidden({
+      timeout: 15_000,
+    });
+
+    const section = page.locator("#about");
+    await expect(section).toBeAttached();
+    await page.evaluate(() => {
+      document.querySelector("#about")?.scrollIntoView({ block: "start" });
+    });
+
+    const paragraphs = section.locator("[data-stagger-text]");
+    for (let index = 0; index < await paragraphs.count(); index += 1) {
+      const box = await paragraphs.nth(index).boundingBox();
+      expect(box, `manifesto paragraph ${index}`).not.toBeNull();
+      fitInViewport(box!, 320);
+    }
+
+    const statCells = section.locator("[data-about-stat]");
+    for (let index = 0; index < await statCells.count(); index += 1) {
+      const box = await statCells.nth(index).boundingBox();
+      expect(box, `stat cell ${index}`).not.toBeNull();
+      fitInViewport(box!, 320);
+    }
+
+    const socialRows = section.locator("[data-social-row-inner]");
+    for (let index = 0; index < await socialRows.count(); index += 1) {
+      const box = await socialRows.nth(index).boundingBox();
+      expect(box, `social row ${index}`).not.toBeNull();
+      fitInViewport(box!, 320);
+    }
+
+    expect(
+      await page.evaluate(() => document.documentElement.scrollWidth)
+    ).toBeLessThanOrEqual(320);
   });
 });
 

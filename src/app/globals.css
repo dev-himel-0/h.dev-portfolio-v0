@@ -603,6 +603,12 @@ header[data-open="true"] .navbar-bg {
 }
 
 .smg-toggle-lines {
+  /* Pre-JS default: the cycling sequence is always exactly 5 lines and the
+     settled label is the last one, so -80% shows the correct closed label
+     ("Menu") before hydration instead of the first line ("Close"). Standalone
+     `translate` (not `transform`) so GSAP's yPercent tweens never parse it;
+     the Navbar effect zeroes it inline the moment it takes over. */
+  translate: 0 -80%;
   display: flex;
   flex-direction: column;
   line-height: 1;

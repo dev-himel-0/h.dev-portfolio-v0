@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import { About } from "@/components/sections/about";
 import { Hero } from "@/components/sections/hero";
 import { Preloader } from "@/components/sections/preloader";
 import { Work } from "@/components/sections/work";
@@ -12,6 +13,7 @@ export function HomeExperience() {
   return (
     <main className="w-full max-w-full overflow-x-clip">
       <Hero isRevealed={heroRevealed} />
+      <About />
       <Work />
       <Preloader onFinished={revealHero} />
     </main>

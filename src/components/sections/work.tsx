@@ -123,7 +123,7 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
 
   const content = (
     <>
-      <ProjectFigure project={project} />
+      <ProjectFigure project={project} eager={index === 0} />
 
       <div
         data-work-info
@@ -197,7 +197,13 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
  * and grayscale -> color reveal from ImageReveal. Skipped under
  * `prefers-reduced-motion` and on touch devices.
  */
-function ProjectFigure({ project }: { project: Project }) {
+function ProjectFigure({
+  project,
+  eager = false,
+}: {
+  project: Project;
+  eager?: boolean;
+}) {
   const ref = useRef<HTMLElement>(null);
 
   useGSAP(
@@ -263,6 +269,7 @@ function ProjectFigure({ project }: { project: Project }) {
           className="h-full w-full"
           parallax={16}
           colorOnHover
+          loading={eager ? "eager" : undefined}
         />
       ) : (
         <span className="flex h-full w-full items-center justify-center font-sans text-xs uppercase tracking-[0.32em] text-black/40">
