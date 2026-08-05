@@ -751,18 +751,12 @@ test.describe("about", () => {
     await expect(section.locator("h2")).toHaveCount(0);
     await expect(section.locator("[data-rail]")).toHaveCount(0);
 
-    const paragraphs = section.locator("[data-stagger-text]");
-    await expect(paragraphs).toHaveCount(about.manifesto.length);
-    for (const line of about.manifesto) {
-      await expect(
-        paragraphs.filter({ hasText: line }).first()
-      ).toBeVisible();
-      await expect(
-        paragraphs.filter({ hasText: line }).locator("[data-stagger-unit]")
-      ).toHaveCount(
-        line.split(/\s+/).filter(Boolean).length
-      );
-    }
+    const paragraph = section.locator("[data-stagger-text]");
+    await expect(paragraph).toHaveCount(1);
+    await expect(paragraph).toContainText(about.manifesto);
+    await expect(paragraph.locator("[data-stagger-unit]")).toHaveCount(
+      about.manifesto.split(/\s+/).filter(Boolean).length
+    );
 
     const statCells = section.locator("[data-about-stat]");
     await expect(statCells).toHaveCount(stats.length);
@@ -781,9 +775,7 @@ test.describe("about", () => {
     }
   });
 
-  test("fits a statement frame with the manifesto capped at two lines per statement on desktop", async ({
-    page,
-  }) => {
+  test("fits a statement frame on desktop", async ({ page }) => {
     await page.goto("/");
     await waitForPage(page);
 
@@ -801,18 +793,6 @@ test.describe("about", () => {
       box!.height,
       "about section stays within 80vh on desktop"
     ).toBeLessThanOrEqual(viewport.height * 0.8 + 2);
-
-    const lineCounts = await section
-      .locator("[data-stagger-text]")
-      .evaluateAll((paragraphs) =>
-        paragraphs.map((paragraph) => paragraph.getClientRects().length)
-      );
-    for (const [index, count] of lineCounts.entries()) {
-      expect(
-        count,
-        `manifesto statement ${index + 1} wraps to at most two lines`
-      ).toBeLessThanOrEqual(2);
-    }
   });
 
   test("menu About link scrolls to the about section", async ({ page }) => {
@@ -879,9 +859,7 @@ test.describe("about", () => {
 
     const words = page.locator("[data-about-manifesto] [data-stagger-unit]");
     await expect(words).toHaveCount(
-      about.manifesto
-        .map((line) => line.split(/\s+/).filter(Boolean).length)
-        .reduce((total, count) => total + count, 0)
+      about.manifesto.split(/\s+/).filter(Boolean).length
     );
 
     await expect
@@ -911,6 +889,51 @@ test.describe("about", () => {
         "manifesto words settle into place"
       )
       .toBe(0);
+  });
+
+  test("manifesto is left-aligned and no word is cut off by its mask", async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.goto("/");
+    await waitForPage(page);
+
+    await page.evaluate(() => {
+      document
+        .querySelector("[data-about-manifesto]")
+        ?.scrollIntoView({ block: "center" });
+    });
+
+    const paragraph = page.locator("[data-about-manifesto] [data-stagger-text]");
+    await expect(paragraph).toHaveCSS("text-align", "left");
+
+    const words = page.locator("[data-about-manifesto] [data-stagger-unit]");
+    await expect
+      .poll(() =>
+        words.evaluateAll((units) =>
+          Math.max(
+            ...units.map((el) => {
+              const matrix = getComputedStyle(el as HTMLElement).transform;
+              if (!matrix || matrix === "none") return 0;
+              return new DOMMatrixReadOnly(matrix).m42;
+            })
+          )
+        )
+      )
+      .toBe(0);
+
+    const clipped = await words.evaluateAll((units) =>
+      units.filter((el) => {
+        const unit = el as HTMLElement;
+        const mask = unit.parentElement;
+        if (!mask) return false;
+        return (
+          unit.getBoundingClientRect().bottom >
+          mask.getBoundingClientRect().bottom + 0.5
+        );
+      }).length
+    );
+    expect(clipped, "no manifesto word is cut off by its mask").toBe(0);
   });
 
   test("reduced motion shows final stats and socials instantly", async ({

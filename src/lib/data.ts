@@ -86,16 +86,15 @@ export const work = {
 };
 
 /**
- * About section manifesto. Each entry renders as one editorial statement,
- * wrapping to at most two lines at display size on desktop. The section
- * grows slightly beyond the 60vh frame to accommodate the longer copy.
+ * About section manifesto. Rendered as a single left-aligned paragraph
+ * that flows and wraps naturally; the section grows slightly beyond the
+ * 60vh frame to accommodate the copy.
  */
 export const about = {
-  manifesto: [
-    "Crafting design that turns ambitious ideas into products people trust",
-    "Turning complex experiences into interfaces that feel simple, intuitive, and human",
-    "Bringing every detail together to create products that perform beautifully and endure",
-  ],
+  manifesto:
+    "Crafting design that turns ambitious ideas into products people trust. " +
+    "Turning complex experiences into interfaces that feel simple, intuitive, and human. " +
+    "Bringing every detail together to create products that perform beautifully and endure.",
 };
 
 export const stats = [

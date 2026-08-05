@@ -18,10 +18,10 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 /**
  * About — a single cinematic 60svh frame between the hero and the work. The
- * whole statement is centered: a three-line staggered manifesto, a slim
- * odometer band that rolls into place, a typographic social row with
- * hairline separators, and a quiet credits line. Skipped under
- * `prefers-reduced-motion` (instant, final state).
+ * statement is centered as a block: a single left-aligned flowing manifesto
+ * paragraph, a slim odometer band that rolls into place, a typographic
+ * social row with hairline separators, and a quiet credits line. Skipped
+ * under `prefers-reduced-motion` (instant, final state).
  */
 export function About() {
   const rootRef = useRef<HTMLElement>(null);
@@ -130,18 +130,14 @@ export function About() {
         data-about-content
         className="mx-auto w-full max-w-[58rem] px-5 text-center sm:px-8"
       >
-        <div data-about-manifesto className="flex flex-col items-center gap-[0.35em]">
-          {about.manifesto.map((line, index) => (
-            <StaggerText
-              key={line}
-              as="p"
-              divideBy="word"
-              delay={index * 0.08}
-              className="font-heading text-[clamp(1.375rem,2.6vw,2.25rem)] font-semibold leading-[1.06] tracking-[-0.03em]"
-            >
-              {line}
-            </StaggerText>
-          ))}
+        <div data-about-manifesto>
+          <StaggerText
+            as="p"
+            divideBy="word"
+            className="text-left font-heading text-[clamp(1.375rem,2.6vw,2.25rem)] font-semibold leading-[1.15] tracking-[-0.03em]"
+          >
+            {about.manifesto}
+          </StaggerText>
         </div>
 
         <div
