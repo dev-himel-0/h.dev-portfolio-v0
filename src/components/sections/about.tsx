@@ -134,7 +134,7 @@ export function About() {
           <StaggerText
             as="p"
             divideBy="word"
-            className="text-left font-heading text-[clamp(1.375rem,2.6vw,2.25rem)] font-semibold leading-[1.15] tracking-[-0.03em]"
+            className="text-left font-heading text-[clamp(1.375rem,2.6vw,2.25rem)] font-semibold leading-[1.15] tracking-[0.01em]"
           >
             {about.manifesto}
           </StaggerText>
