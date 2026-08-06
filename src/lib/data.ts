@@ -18,6 +18,7 @@ export interface Service {
   title: string;
   description: string;
   tags: string[];
+  image: string;
 }
 
 export interface StackItem {
@@ -57,6 +58,7 @@ export const profile = {
 
 export const navigation: NavigationItem[] = [
   { label: "Work", href: "#work" },
+  { label: "Services", href: "#services" },
   { label: "About", href: "#about" },
   { label: "Contact", href: "#contact" },
 ];
@@ -156,26 +158,40 @@ export const services: Service[] = [
     description:
       "Placeholder copy. Production-ready websites and web apps built with modern frameworks, clean architecture, and obsessive attention to detail.",
     tags: ["React", "Next.js", "TypeScript"],
+    image:
+      "https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=900&auto=format&fit=crop",
   },
   {
     title: "UI Implementation",
     description:
       "Placeholder copy. Pixel-perfect conversion of design to code, with a strong eye for typography, spacing, and visual hierarchy.",
     tags: ["Tailwind", "Design Systems"],
+    image:
+      "https://images.unsplash.com/photo-1558655146-d09347e92766?q=80&w=900&auto=format&fit=crop",
   },
   {
     title: "Motion & Interaction",
     description:
       "Placeholder copy. Smooth scroll experiences, micro-interactions, and animation that makes interfaces feel alive without slowing them down.",
     tags: ["GSAP", "Lenis", "Motion"],
+    image:
+      "https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=900&auto=format&fit=crop",
   },
   {
     title: "Performance",
     description:
       "Placeholder copy. Auditing and optimizing load times, Core Web Vitals, and rendering — because speed is part of the design.",
     tags: ["Lighthouse", "Core Web Vitals"],
+    image:
+      "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=900&auto=format&fit=crop",
   },
 ];
+
+export const servicesSection = {
+  index: "03",
+  filledTitle: "What Can I",
+  outlinedTitle: "Offer",
+};
 
 export const stack: StackItem[] = [
   { name: "React", color: "#61DAFB" },

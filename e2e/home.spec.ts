@@ -6,6 +6,8 @@ import {
   navigation,
   profile,
   projects,
+  services,
+  servicesSection,
   socials,
   stats,
   work,
@@ -711,7 +713,7 @@ test.describe("home", () => {
     await expect(heading).toContainText(work.filledTitle);
     await expect(heading).toContainText(work.outlinedTitle);
 
-    const railLabel = page.locator("[data-rail-label]");
+    const railLabel = page.locator("#work [data-rail-label]");
     await expect(railLabel).toHaveText(work.index);
     if ((page.viewportSize()?.width ?? 0) >= 1024) {
       await expect(railLabel).toBeVisible();
@@ -759,7 +761,7 @@ test.describe("home", () => {
   }) => {
     await page.goto("/");
 
-    const rail = page.locator("[data-rail]");
+    const rail = page.locator("#work [data-rail]");
     const viewportH = page.viewportSize()?.height ?? 0;
     const viewportW = page.viewportSize()?.width ?? 0;
     if ((page.viewportSize()?.width ?? 0) < 1024) {
@@ -775,18 +777,21 @@ test.describe("home", () => {
     await page.evaluate(() => window.scrollTo(0, 0));
     await expect.poll(opacityOf, "rail hidden while the hero is on screen").toBe(0);
 
-    const { cardsTopAbs, scrollable } = await page.evaluate(() => {
+    const { cardsTopAbs, workBottomAbs, scrollable } = await page.evaluate(() => {
       const cards = document
         .querySelector("[data-work-cards]")
         ?.getBoundingClientRect();
+      const work = document.querySelector("#work")?.getBoundingClientRect();
       return {
         cardsTopAbs: (cards?.top ?? 0) + window.scrollY,
+        workBottomAbs: (work?.bottom ?? 0) + window.scrollY,
         scrollable: document.documentElement.scrollHeight - window.innerHeight,
       };
     });
 
     const start = Math.max(0, cardsTopAbs - viewportH / 2 + 30);
-    const end = Math.max(start, scrollable - 60);
+    const workRailEnd = workBottomAbs - viewportH - 4;
+    const end = Math.max(start, workRailEnd - 60);
     const offsets = [
       start,
       Math.round(start + (end - start) * 0.35),
@@ -812,7 +817,10 @@ test.describe("home", () => {
       ).toBeGreaterThan(viewportW / 2);
     }
 
-    await page.evaluate((y) => window.scrollTo(0, y), scrollable);
+    await page.evaluate(
+      (y) => window.scrollTo(0, y),
+      Math.min(scrollable, workRailEnd + 20)
+    );
     await expect
       .poll(opacityOf, "rail gone once the next section would start showing")
       .toBe(0);
@@ -937,6 +945,101 @@ test.describe("home", () => {
       await avatar.hover();
       await expect(avatar.locator("[data-tech-label]")).toBeVisible();
     }
+  });
+});
+
+test.describe("services", () => {
+  test("renders after work with the right-aligned heading and left rail", async ({
+    page,
+  }) => {
+    await page.goto("/");
+
+    const section = page.locator("#services");
+    await expect(section).toBeAttached();
+    await expect(section.locator("#services-heading")).toContainText(
+      servicesSection.filledTitle
+    );
+    await expect(section.locator("#services-heading")).toContainText(
+      servicesSection.outlinedTitle
+    );
+
+    const workTop = await page.locator("#work").evaluate((element) =>
+      element.getBoundingClientRect().top + window.scrollY
+    );
+    const servicesTop = await section.evaluate(
+      (element) => element.getBoundingClientRect().top + window.scrollY
+    );
+    expect(servicesTop).toBeGreaterThan(workTop);
+
+    const rail = section.locator("[data-rail]");
+    await expect(rail.locator("[data-rail-label]")).toHaveText(
+      servicesSection.index
+    );
+    if ((page.viewportSize()?.width ?? 0) >= 1024) {
+      await expect(rail).toBeVisible();
+      const railBox = await rail.boundingBox();
+      expect(railBox).not.toBeNull();
+      expect(railBox!.x).toBeLessThan((page.viewportSize()?.width ?? 0) / 2);
+    } else {
+      await expect(rail).toBeHidden();
+    }
+  });
+
+  test("switches the active service and detail panel on hover", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await expect(page.locator("[data-curtain-content]")).toBeHidden({
+      timeout: 15_000,
+    });
+
+    const section = page.locator("#services");
+    const rows = section.locator("[data-service-row]");
+    await expect(rows).toHaveCount(services.length);
+    await expect(rows.first()).toHaveAttribute("aria-pressed", "true");
+
+    for (const [index, service] of services.entries()) {
+      const row = rows.nth(index);
+      await expect(row).toContainText(service.title);
+      await expect(row).toContainText(service.tags[0]);
+    }
+
+    if ((page.viewportSize()?.width ?? 0) >= 1024) {
+      await rows.nth(1).hover();
+      await expect(rows.nth(0)).toHaveAttribute("aria-pressed", "false");
+      await expect(rows.nth(1)).toHaveAttribute("aria-pressed", "true");
+      await expect(section.locator("[data-service-detail-panel]")).toContainText(
+        services[1].description
+      );
+      await expect(section.locator("[data-service-pointer-card]")).toBeVisible();
+    }
+  });
+
+  test("keeps the service selector usable on mobile without horizontal overflow", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/");
+
+    const section = page.locator("#services");
+    await expect(section.locator("[data-service-row]")).toHaveCount(
+      services.length
+    );
+    await expect(section.locator("[data-service-detail-panel]")).toBeVisible();
+    await expect(section.locator("[data-service-pointer-card]")).toBeHidden();
+
+    const hasOverflow = await page.evaluate(
+      () => document.documentElement.scrollWidth > window.innerWidth
+    );
+    expect(hasOverflow).toBe(false);
+
+    await section.locator("[data-service-row]").nth(2).click();
+    await expect(
+      section.locator("[data-service-row]").nth(2)
+    ).toHaveAttribute("aria-pressed", "true");
+    await expect(section.locator("[data-service-detail-panel]")).toContainText(
+      services[2].description
+    );
   });
 });
 
