@@ -543,7 +543,7 @@ test.describe("home", () => {
     ).toBeLessThan(labelFontSize);
   });
 
-  test("menu numbers scale up and fill solid on hover", async ({ page }) => {
+  test("menu numbers stay outlined and muted on hover", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "no-preference" });
     await page.goto("/");
 
@@ -590,8 +590,8 @@ test.describe("home", () => {
 
     await expect.poll(numberScale, "number grows on hover").toBe(1.3);
     await expect
-      .poll(numberFill, "number fills solid on hover")
-      .not.toBe("rgba(0, 0, 0, 0)");
+      .poll(numberFill, "number stays outlined on hover")
+      .toBe("rgba(0, 0, 0, 0)");
 
     await page.mouse.move(0, 0);
     await expect

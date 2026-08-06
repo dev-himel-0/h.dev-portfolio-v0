@@ -44,7 +44,7 @@ const MENU_TIMING = {
   itemStartPct: 0.15,
   itemDuration: 1.0,
   itemStagger: 0.1,
-  numberDuration: 0.9,
+  numberDuration: 1.05,
   numberDelay: 0.1,
   numberHoverDuration: 0.5,
   numberHoverScale: 1.3,
@@ -90,8 +90,8 @@ export function StaggeredMenu({
       opacity: 0,
     });
     gsap.set(panel.querySelectorAll<HTMLElement>(".smg-item"), {
-      "--sm-num-rise": "140%",
-      "--sm-num-rot": "12deg",
+      "--sm-num-rise": "180%",
+      "--sm-num-rot": "15deg",
       "--sm-num-scale": 1,
       "--sm-num-opacity": 0,
     });
@@ -246,11 +246,11 @@ export function StaggeredMenu({
           "--sm-num-rise": "0%",
           "--sm-num-rot": "0deg",
           "--sm-num-opacity": 1,
-          duration: MENU_TIMING.numberDuration,
-          ease: "power4.out",
+          duration: MENU_TIMING.numberDuration + 0.15,
+          ease: "power3.out",
           stagger: { each: MENU_TIMING.itemStagger },
         },
-        itemsStart + MENU_TIMING.numberDelay
+        itemsStart + MENU_TIMING.numberDelay + 0.08
       );
     }
 
