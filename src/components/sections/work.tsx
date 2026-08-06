@@ -46,10 +46,9 @@ const technologyIcons = {
 };
 
 /**
- * Editorial project list: each card sticks at the top of the viewport while
- * the next card scrolls up over it, and each row fades up from below as it
- * enters. Images wipe open through the ImageReveal clip. Skipped under
- * `prefers-reduced-motion`.
+ * Editorial project list: desktop cards stack at the top of the viewport,
+ * shrinking the card behind them from 1 -> 0.8 as the next card arrives.
+ * Images keep their independent ImageReveal effects.
  */
 export function Work() {
   const rootRef = useRef<HTMLElement>(null);
@@ -57,17 +56,34 @@ export function Work() {
 
   useGSAP(
     () => {
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      const rows = gsap.utils.toArray<HTMLElement>("[data-work-row]");
+      const media = gsap.matchMedia();
 
-      gsap.utils.toArray<HTMLElement>("[data-work-row]").forEach((row) => {
-        gsap.from(row, {
-          y: 100,
-          opacity: 0,
-          duration: 1.1,
-          ease: "power3.out",
-          scrollTrigger: { trigger: row, start: "top 88%", once: true },
+      media.add(
+        "(min-width: 810px) and (prefers-reduced-motion: no-preference)",
+        () => {
+          rows.slice(0, -1).forEach((row, index) => {
+            const nextRow = rows[index + 1];
+
+            gsap.fromTo(
+              row,
+              { scale: 1 },
+              {
+                scale: 0.8,
+                ease: "power1.inOut",
+                transformOrigin: "50% 50%",
+                scrollTrigger: {
+                  trigger: nextRow,
+                  start: "top bottom",
+                  end: "top 80px",
+                  scrub: 0.3,
+                },
+              }
+            );
+          });
         });
-      });
+
+      return () => media.revert();
     },
     { scope: rootRef }
   );
@@ -176,7 +192,7 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
   );
 
   const cardClass = cn(
-    "work-card group sticky top-20 flex w-full flex-col gap-10 bg-white pt-10 sm:pt-12 lg:flex-row lg:gap-14 lg:pt-14",
+    "work-card group relative flex w-full flex-col gap-10 bg-white pt-10 sm:pt-12 min-[810px]:sticky min-[810px]:top-20 min-[810px]:z-[1] min-[810px]:will-change-transform lg:flex-row lg:gap-14 lg:pt-14",
     flipped && "lg:flex-row-reverse"
   );
 

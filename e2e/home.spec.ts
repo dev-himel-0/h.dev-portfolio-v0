@@ -843,6 +843,57 @@ test.describe("home", () => {
     }
   });
 
+  test("scales the previous work card as the next card reaches the sticky rail", async ({
+    page,
+  }) => {
+    test.skip((page.viewportSize()?.width ?? 0) < 810, "desktop stack only");
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.goto("/");
+    await expect(page.locator("[data-curtain-content]")).toBeHidden({
+      timeout: 15_000,
+    });
+
+    const rows = page.locator("[data-work-row]");
+    const viewportHeight = page.viewportSize()?.height ?? 0;
+    const nextTop = await rows.nth(1).evaluate(
+      (element) => element.getBoundingClientRect().top + window.scrollY
+    );
+
+    const scaleOf = () =>
+      rows.first().evaluate((element) => {
+        const transform = getComputedStyle(element).transform;
+        if (transform === "none") return 1;
+        return Number.parseFloat(transform.match(/^matrix\(([^,]+)/)?.[1] ?? "1");
+      });
+
+    await page.evaluate(
+      (y) => window.scrollTo(0, y),
+      Math.max(0, Math.round(nextTop - viewportHeight - 20))
+    );
+    await expect.poll(scaleOf).toBeGreaterThan(0.98);
+
+    await page.evaluate((y) => window.scrollTo(0, y), Math.round(nextTop - 60));
+    await expect.poll(scaleOf).toBeLessThanOrEqual(0.82);
+
+    await expect(rows.first()).toHaveCSS("position", "sticky");
+    await expect(rows.first()).toHaveCSS("top", "80px");
+    await expect(rows.first()).toHaveCSS("z-index", "1");
+  });
+
+  test("keeps work cards in normal flow below the stack breakpoint", async ({
+    page,
+  }) => {
+    test.skip((page.viewportSize()?.width ?? 0) >= 810, "mobile flow only");
+    await page.goto("/");
+
+    const rows = page.locator("[data-work-row]");
+    await expect(rows).toHaveCount(projects.length);
+    for (let index = 0; index < projects.length; index += 1) {
+      await expect(rows.nth(index)).toHaveCSS("position", "relative");
+      await expect(rows.nth(index)).toHaveCSS("transform", "none");
+    }
+  });
+
   test("work rail appears with the cards and fades away when the section ends", async ({
     page,
   }) => {
