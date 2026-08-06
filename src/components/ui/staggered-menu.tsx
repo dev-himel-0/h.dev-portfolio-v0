@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
 import { useLenis } from "lenis/react";
 import gsap from "gsap";
+import { CustomEase } from "gsap/CustomEase";
 import {
   EnvelopeSimple,
   GithubLogo,
@@ -14,45 +15,47 @@ import { navigation, profile, socials } from "@/lib/data";
 import type { SocialIcon } from "@/lib/data";
 import { prefersReducedMotion } from "@/lib/utils";
 
+gsap.registerPlugin(CustomEase);
+
 /**
  * Fullscreen b/w menu, adapted from React Bits' StaggeredMenu. Three black
- * curtain folds sweep in from the right (0.07s apart, power4.out), then a
- * fullscreen black panel slides over them with numbered General Sans items, a
- * Montserrat email/availability footer and a socials row. All entrance/exit choreography
- * is a single GSAP timeline (timings in MENU_TIMING).
+ * curtain folds sweep in from the right using the measured Yunox timing, then a
+ * fullscreen black panel and its content settle over them with numbered General
+ * Sans items, a Montserrat email/availability footer and a socials row. All
+ * entrance/exit choreography is a single GSAP timeline.
  *
  * The toggle button lives in the Navbar (this component only holds the overlay),
  * so state is controlled via `open` / `onOpenChange`.
  */
 const PRELAYER_COLORS = ["#000000", "#0a0a0a", "#161616"] as const;
+const YUNOX_MENU_EASE = CustomEase.create(
+  "yunox-menu",
+  "M0,0 C0.12,0.23 0.5,1 1,1"
+);
 
 /**
- * Entrance/exit choreography timings (s) — the classic theatrical opening:
- * three curtain folds sweep in 0.07s apart, the panel pushes in on their
- * tail, then the nav links rise one at a time (1.0s each, 0.1s stagger,
- * yPercent 140 + rotate 10, power4.out) with an opacity fade, settling the
- * last link around ~1.5s. The footer/socials are anchored just before the
- * end of that cascade so they settle as the final link lands. GSAP animates
- * only elements with no CSS transform/opacity transition
- * (`[data-menu-item-label]` mask, social `<li>`) so nothing fights the tween.
+ * Entrance/exit choreography timings (s). The first three values mirror the
+ * Yunox preview: 0.8s movement, 0.2s fold offset, and a cubic-bezier-like
+ * ease. The panel begins at 0.5s and menu content begins at 0.75s while the
+ * final fold is still settling.
  */
 const MENU_TIMING = {
-  curtainDuration: 0.5,
-  curtainStagger: 0.07,
-  panelDelay: 0.08,
-  panelDuration: 0.65,
-  itemStartPct: 0.15,
-  itemDuration: 1.0,
-  itemStagger: 0.1,
-  numberDuration: 1.05,
-  numberDelay: 0.1,
+  curtainDuration: 0.8,
+  curtainStagger: 0.2,
+  panelDelay: 0.5,
+  panelDuration: 0.8,
+  contentDelay: 0.75,
+  itemDuration: 0.8,
+  itemStagger: 0.08,
+  numberDuration: 0.8,
+  numberDelay: 0.05,
   numberHoverDuration: 0.5,
   numberHoverScale: 1.3,
-  footerLeadGap: 0.45,
-  footerDuration: 0.5,
+  footerLeadGap: 0.35,
+  footerDuration: 0.45,
   socialStagger: 0.08,
   socialDelay: 0.04,
-  closeDuration: 0.32,
+  closeDuration: 0.4,
   itemHoverDuration: 0.65,
   itemHoverStagger: 0.03,
 } as const;
@@ -69,7 +72,7 @@ export function StaggeredMenu({
   const openRef = useRef(open);
   const openTimelineRef = useRef<gsap.core.Timeline | null>(null);
   const closeTweenRef = useRef<gsap.core.Tween | null>(null);
-  const busyRef = useRef(false);
+  const hasInteractedRef = useRef(false);
   const lenis = useLenis();
 
   useLayoutEffect(() => {
@@ -78,7 +81,8 @@ export function StaggeredMenu({
 
   /**
    * Initial closed item states — before opening, after closing, on mount.
-   * Values match React Bits (yPercent 140 / rotate 10, socials y 25).
+   * The masks retain the existing editorial rise while the curtain timing
+   * follows the Yunox reveal.
    */
   const resetClosed = useCallback(() => {
     const root = rootRef.current;
@@ -171,14 +175,13 @@ export function StaggeredMenu({
   const playOpen = useCallback(() => {
     const root = rootRef.current;
     const panel = panelRef.current;
-    if (!root || !panel || busyRef.current) return;
+    if (!root || !panel) return;
 
     if (prefersReducedMotion()) {
       finishOpen();
       return;
     }
 
-    busyRef.current = true;
     openTimelineRef.current?.kill();
     closeTweenRef.current?.kill();
     closeTweenRef.current = null;
@@ -196,31 +199,33 @@ export function StaggeredMenu({
 
     const tl = gsap.timeline({ paused: true });
 
-    // Curtain sweep — three folds cascade in, 0.07s apart (classic opening).
+    // Curtain sweep — three folds enter from right to left, 0.2s apart.
     prelayers.forEach((el, i) => {
       tl.fromTo(
         el,
         { xPercent: 100 },
-        { xPercent: 0, duration: MENU_TIMING.curtainDuration, ease: "power4.out" },
+        {
+          xPercent: 0,
+          duration: MENU_TIMING.curtainDuration,
+          ease: YUNOX_MENU_EASE,
+        },
         i * MENU_TIMING.curtainStagger
       );
     });
-    const lastTime = (prelayers.length - 1) * MENU_TIMING.curtainStagger;
 
-    // Panel insertion — slides in on the folds' tail, 0.65s power4.out.
-    const panelInsertTime = lastTime + (prelayers.length ? MENU_TIMING.panelDelay : 0);
+    // Panel insertion overlaps the folds, matching the reference's layered
+    // reveal rather than waiting for the last curtain to finish.
+    const panelInsertTime = prelayers.length ? MENU_TIMING.panelDelay : 0;
     const panelDuration = MENU_TIMING.panelDuration;
     tl.fromTo(
       panel,
       { xPercent: 100 },
-      { xPercent: 0, duration: panelDuration, ease: "power4.out" },
+      { xPercent: 0, duration: panelDuration, ease: YUNOX_MENU_EASE },
       panelInsertTime
     );
 
-    // Items — begin 15% into the panel slide: each masked label rises 1.0s
-    // with a 0.1s stagger, yPercent 140→0 + rotate 10→0 (power4.out) and a
-    // soft opacity fade.
-    const itemsStart = panelInsertTime + panelDuration * MENU_TIMING.itemStartPct;
+    // Items — begin at the reference's 0.75s content reveal point.
+    const itemsStart = MENU_TIMING.contentDelay;
     const cascadeEnd =
       itemsStart + MENU_TIMING.itemDuration + (labels.length - 1) * MENU_TIMING.itemStagger;
 
@@ -232,7 +237,7 @@ export function StaggeredMenu({
           rotate: 0,
           opacity: 1,
           duration: MENU_TIMING.itemDuration,
-          ease: "power4.out",
+          ease: YUNOX_MENU_EASE,
           stagger: { each: MENU_TIMING.itemStagger },
           onComplete: () => {
             gsap.set(labels, { clearProps: "transform,opacity" });
@@ -246,11 +251,11 @@ export function StaggeredMenu({
           "--sm-num-rise": "0%",
           "--sm-num-rot": "0deg",
           "--sm-num-opacity": 1,
-          duration: MENU_TIMING.numberDuration + 0.15,
-          ease: "power3.out",
+          duration: MENU_TIMING.numberDuration,
+          ease: YUNOX_MENU_EASE,
           stagger: { each: MENU_TIMING.itemStagger },
         },
-        itemsStart + MENU_TIMING.numberDelay + 0.08
+        itemsStart + MENU_TIMING.numberDelay
       );
     }
 
@@ -263,7 +268,7 @@ export function StaggeredMenu({
     if (footerStatic.length) {
       tl.to(
         footerStatic,
-        { opacity: 1, duration: MENU_TIMING.footerDuration, ease: "power2.out" },
+        { opacity: 1, duration: MENU_TIMING.footerDuration, ease: YUNOX_MENU_EASE },
         socialsStart
       );
     }
@@ -274,7 +279,7 @@ export function StaggeredMenu({
           y: 0,
           opacity: 1,
           duration: MENU_TIMING.footerDuration,
-          ease: "power3.out",
+          ease: YUNOX_MENU_EASE,
           stagger: { each: MENU_TIMING.socialStagger },
           onComplete: () => {
             gsap.set(links, { clearProps: "opacity" });
@@ -284,10 +289,6 @@ export function StaggeredMenu({
       );
     }
 
-    tl.eventCallback("onComplete", () => {
-      busyRef.current = false;
-    });
-
     openTimelineRef.current = tl;
     tl.play(0);
   }, [finishOpen, resetClosed]);
@@ -295,14 +296,13 @@ export function StaggeredMenu({
   const playClose = useCallback(() => {
     const root = rootRef.current;
     const panel = panelRef.current;
-    if (!root || !panel || busyRef.current) return;
+    if (!root || !panel) return;
 
     if (prefersReducedMotion()) {
       finishClose();
       return;
     }
 
-    busyRef.current = true;
     openTimelineRef.current?.kill();
     openTimelineRef.current = null;
     closeTweenRef.current?.kill();
@@ -311,18 +311,22 @@ export function StaggeredMenu({
     closeTweenRef.current = gsap.to([...prelayers, panel], {
       xPercent: 100,
       duration: MENU_TIMING.closeDuration,
-      ease: "power3.inOut",
+      ease: YUNOX_MENU_EASE,
       overwrite: "auto",
       onComplete: () => {
+        gsap.set(panel, { autoAlpha: 0 });
         resetClosed();
-        busyRef.current = false;
       },
     });
   }, [finishClose, resetClosed]);
 
   useEffect(() => {
-    if (open) playOpen();
-    else playClose();
+    if (open) {
+      hasInteractedRef.current = true;
+      playOpen();
+    } else if (hasInteractedRef.current) {
+      playClose();
+    }
   }, [open, playOpen, playClose]);
 
   useEffect(() => {

@@ -2,13 +2,19 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import gsap from "gsap";
+import { CustomEase } from "gsap/CustomEase";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { profile } from "@/lib/data";
 import { prefersReducedMotion } from "@/lib/utils";
 import { StaggeredMenu } from "@/components/ui/staggered-menu";
 
-gsap.registerPlugin(ScrollTrigger, useGSAP);
+gsap.registerPlugin(ScrollTrigger, useGSAP, CustomEase);
+
+const YUNOX_TOGGLE_EASE = CustomEase.create(
+  "yunox-toggle",
+  "M0,0 C0.12,0.23 0.5,1 1,1"
+);
 
 const TEXT_CYCLE = 3;
 
@@ -44,17 +50,21 @@ export function Navbar() {
   const headerRef = useRef<HTMLElement>(null);
   const bgRef = useRef<HTMLDivElement>(null);
   const textInnerRef = useRef<HTMLSpanElement>(null);
-  const spinRef = useRef<HTMLSpanElement>(null);
-  const spinTweenRef = useRef<gsap.core.Tween | null>(null);
+  const iconFirstRef = useRef<HTMLSpanElement>(null);
+  const iconSecondRef = useRef<HTMLSpanElement>(null);
+  const iconTimelineRef = useRef<gsap.core.Timeline | null>(null);
   const mountedRef = useRef(false);
   const lines = useMemo(() => buildLines(open), [open]);
+
+  const ICON_OFFSET = 3;
 
   const toggleMenu = () => setOpen((value) => !value);
 
   useEffect(() => {
     const inner = textInnerRef.current;
-    const spin = spinRef.current;
-    if (!inner) return;
+    const first = iconFirstRef.current;
+    const second = iconSecondRef.current;
+    if (!inner || !first || !second) return;
 
     // Neutralize the `.smg-toggle-lines` CSS `translate` default (-80%) so the
     // GSAP transform below is the only positioning — avoids a double shift.
@@ -65,6 +75,8 @@ export function Navbar() {
       gsap.set(inner, {
         yPercent: -(((lines.length - 1) / lines.length) * 100),
       });
+      gsap.set(first, { xPercent: -50, yPercent: -50, y: -ICON_OFFSET, rotate: 0 });
+      gsap.set(second, { xPercent: -50, yPercent: -50, y: ICON_OFFSET, rotate: 0 });
       return;
     }
 
@@ -72,8 +84,19 @@ export function Navbar() {
       gsap.set(inner, {
         yPercent: -(((lines.length - 1) / lines.length) * 100),
       });
-      spinTweenRef.current?.kill();
-      gsap.set(spin, { rotate: open ? 225 : 0 });
+      iconTimelineRef.current?.kill();
+      gsap.set(first, {
+        xPercent: -50,
+        yPercent: -50,
+        y: open ? 0 : -ICON_OFFSET,
+        rotate: open ? 45 : 0,
+      });
+      gsap.set(second, {
+        xPercent: -50,
+        yPercent: -50,
+        y: open ? 0 : ICON_OFFSET,
+        rotate: open ? -45 : 0,
+      });
       return;
     }
 
@@ -85,18 +108,30 @@ export function Navbar() {
       overwrite: true,
     });
 
-    spinTweenRef.current?.kill();
-    spinTweenRef.current = gsap.to(spin, {
-      rotate: open ? 225 : 0,
-      duration: open ? 0.8 : 0.35,
-      ease: open ? "power4.out" : "power3.inOut",
-      overwrite: "auto",
-    });
+    iconTimelineRef.current?.kill();
+    iconTimelineRef.current = gsap
+      .timeline({
+        defaults: {
+          duration: open ? 0.4 : 0.3,
+          ease: YUNOX_TOGGLE_EASE,
+          overwrite: "auto",
+        },
+      })
+      .to(
+        first,
+        { y: open ? 0 : -ICON_OFFSET, rotate: open ? 45 : 0 },
+        0
+      )
+      .to(
+        second,
+        { y: open ? 0 : ICON_OFFSET, rotate: open ? -45 : 0 },
+        0
+      );
   }, [open, lines]);
 
   useEffect(() => {
     return () => {
-      spinTweenRef.current?.kill();
+      iconTimelineRef.current?.kill();
     };
   }, []);
 
@@ -189,9 +224,9 @@ export function Navbar() {
               ))}
             </span>
           </span>
-          <span ref={spinRef} className="smg-toggle-icon" aria-hidden="true">
-            <span className="smg-toggle-bar" />
-            <span className="smg-toggle-bar smg-toggle-bar-v" />
+          <span className="smg-toggle-icon" aria-hidden="true">
+            <span ref={iconFirstRef} className="smg-toggle-bar smg-toggle-bar-a" />
+            <span ref={iconSecondRef} className="smg-toggle-bar smg-toggle-bar-b" />
           </span>
         </button>
       </header>

@@ -382,6 +382,9 @@ test.describe("home", () => {
     page,
   }) => {
     await page.goto("/");
+    await expect(page.locator("[data-curtain-content]")).toBeHidden({
+      timeout: 15_000,
+    });
 
     const toggle = page.locator("[data-hero-menu-toggle]");
     await toggle.click();
@@ -419,8 +422,86 @@ test.describe("home", () => {
     }
   });
 
+  test("uses a three-fold right-to-left reveal and Yunox-style menu icon", async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.goto("/");
+    await expect(page.locator("[data-curtain-content]")).toBeHidden({
+      timeout: 15_000,
+    });
+
+    const toggle = page.locator("[data-hero-menu-toggle]");
+    const folds = page.locator("[data-menu-prelayer]");
+    const firstBar = toggle.locator(".smg-toggle-bar-a");
+    const secondBar = toggle.locator(".smg-toggle-bar-b");
+    expect(await folds.count()).toBe(3);
+
+    const iconState = (bar: import("@playwright/test").Locator) =>
+      bar.evaluate((element) => {
+        const matrix = new DOMMatrixReadOnly(getComputedStyle(element).transform);
+        return {
+          x: matrix.e,
+          y: matrix.f,
+          rotation: Math.round((Math.atan2(matrix.b, matrix.a) * 180) / Math.PI),
+        };
+      });
+
+    const closedFirst = await iconState(firstBar);
+    const closedSecond = await iconState(secondBar);
+    expect(closedFirst.rotation).toBe(0);
+    expect(closedSecond.rotation).toBe(0);
+    expect(closedFirst.y).toBeLessThan(0);
+    expect(closedSecond.y).toBeGreaterThan(0);
+
+    await toggle.click();
+    const viewport = page.viewportSize();
+    expect(viewport).not.toBeNull();
+
+    await page.waitForTimeout(100);
+    const foldOffsets = await folds.evaluateAll((elements) =>
+      elements.map((element) => new DOMMatrixReadOnly(getComputedStyle(element).transform).e)
+    );
+    expect(foldOffsets[0]).toBeLessThan(foldOffsets[1]);
+    expect(foldOffsets[1]).toBeLessThanOrEqual(foldOffsets[2]);
+    expect(foldOffsets[0]).toBeLessThan((viewport?.width ?? 0) * 0.9);
+
+    await expect
+      .poll(() => iconState(firstBar).then((state) => state.rotation))
+      .toBe(45);
+    await expect
+      .poll(() => iconState(secondBar).then((state) => state.rotation))
+      .toBe(-45);
+
+    await expect
+      .poll(
+        () =>
+          folds.evaluateAll((elements) =>
+            elements.map(
+              (element) => new DOMMatrixReadOnly(getComputedStyle(element).transform).e
+            )
+          ),
+        { timeout: 2_500 }
+      )
+      .toEqual([0, 0, 0]);
+
+    await toggle.click();
+    await expect(page.locator("#staggered-menu-panel")).toBeHidden({
+      timeout: 2_500,
+    });
+    await expect
+      .poll(() => iconState(firstBar).then((state) => state.rotation))
+      .toBe(0);
+    await expect
+      .poll(() => iconState(secondBar).then((state) => state.rotation))
+      .toBe(0);
+  });
+
   test("menu links are split into masked character pairs", async ({ page }) => {
     await page.goto("/");
+    await expect(page.locator("[data-curtain-content]")).toBeHidden({
+      timeout: 15_000,
+    });
     await page.locator("[data-hero-menu-toggle]").click();
     const panel = page.locator("#staggered-menu-panel");
     await expect(panel).toBeVisible();
@@ -503,6 +584,9 @@ test.describe("home", () => {
     page,
   }) => {
     await page.goto("/");
+    await expect(page.locator("[data-curtain-content]")).toBeHidden({
+      timeout: 15_000,
+    });
     await page.locator("[data-hero-menu-toggle]").click();
     const panel = page.locator("#staggered-menu-panel");
     await expect(panel).toBeVisible();
@@ -639,6 +723,9 @@ test.describe("home", () => {
     page,
   }) => {
     await page.goto("/");
+    await expect(page.locator("[data-curtain-content]")).toBeHidden({
+      timeout: 15_000,
+    });
 
     const toggle = page.locator("[data-hero-menu-toggle]");
     const panel = page.locator("#staggered-menu-panel");

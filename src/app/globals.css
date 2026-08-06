@@ -586,10 +586,7 @@ header[data-open="true"] .navbar-bg {
   width: 0.875rem;
   height: 0.875rem;
   flex: 0 0 0.875rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  will-change: transform;
+  display: block;
 }
 
 .smg-toggle-bar {
@@ -600,11 +597,7 @@ header[data-open="true"] .navbar-bg {
   height: 1px;
   border-radius: 0.5px;
   background: currentColor;
-  transform: translate(-50%, -50%);
-}
-
-.smg-toggle-bar-v {
-  transform: translate(-50%, -50%) rotate(90deg);
+  will-change: transform;
 }
 
 /* ---- Scroll-to-top button ---- */
