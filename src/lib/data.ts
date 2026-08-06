@@ -189,8 +189,9 @@ export const services: Service[] = [
 
 export const servicesSection = {
   index: "03",
-  filledTitle: "What Can I",
+  filledTitle: "What I",
   outlinedTitle: "Offer",
+  label: "CAPABILITIES",
 };
 
 export const stack: StackItem[] = [

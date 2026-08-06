@@ -962,6 +962,20 @@ test.describe("services", () => {
     await expect(section.locator("#services-heading")).toContainText(
       servicesSection.outlinedTitle
     );
+    await expect(section.locator("[data-service-interaction]")).toContainText(
+      servicesSection.label
+    );
+    await expect(section.locator("[data-service-interaction]")).toContainText(
+      String(services.length).padStart(2, "0")
+    );
+
+    const dividerBox = await section
+      .locator("[data-service-header-divider]")
+      .boundingBox();
+    const listBox = await section.locator("[data-service-list]").boundingBox();
+    expect(dividerBox).not.toBeNull();
+    expect(listBox).not.toBeNull();
+    expect(listBox!.y).toBeCloseTo(dividerBox!.y + dividerBox!.height, 0);
 
     const workTop = await page.locator("#work").evaluate((element) =>
       element.getBoundingClientRect().top + window.scrollY
@@ -1040,6 +1054,26 @@ test.describe("services", () => {
     await expect(section.locator("[data-service-detail-panel]")).toContainText(
       services[2].description
     );
+  });
+
+  test("keeps the pointer card still with reduced motion", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+
+    const section = page.locator("#services");
+    await expect(section).toBeAttached();
+    await expect(page.locator("[data-curtain-content]")).toBeHidden({
+      timeout: 15_000,
+    });
+    await page.evaluate(() => {
+      document
+        .querySelector("#services [data-service-row]")
+        ?.scrollIntoView({ block: "center" });
+    });
+    await section.locator("[data-service-row]").first().hover();
+    await expect(
+      section.locator("[data-service-pointer-card] > div")
+    ).toHaveCSS("opacity", "0");
   });
 });
 
