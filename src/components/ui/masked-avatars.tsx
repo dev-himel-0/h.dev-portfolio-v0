@@ -1,8 +1,8 @@
 "use client";
 
+import { cn } from "@/lib/utils";
 import { useState, type CSSProperties } from "react";
 import type { IconType } from "react-icons";
-import { cn } from "@/lib/utils";
 
 export interface MaskedAvatarItem {
   name: string;
@@ -40,11 +40,12 @@ export function MaskedAvatars({
       <ul
         role="list"
         className="m-0 flex list-none items-end p-0"
-        style={{ paddingTop: 24 }}
+        style={{ paddingTop: 0 }}
       >
         {items.map((item, index) => {
           const isActive = activeIndex === index;
-          const isNeighbor = activeIndex !== null && Math.abs(activeIndex - index) === 1;
+          const isNeighbor =
+            activeIndex !== null && Math.abs(activeIndex - index) === 1;
           const Icon = item.icon;
 
           return (
@@ -72,7 +73,7 @@ export function MaskedAvatars({
               <div
                 className={cn(
                   "flex size-full items-center justify-center rounded-full border-[3px] border-black/15 bg-white text-black shadow-[0_0_0_1px_rgba(0,0,0,0.08)]",
-                  "group-focus-visible:ring-2 group-focus-visible:ring-black group-focus-visible:ring-offset-2"
+                  "group-focus-visible:ring-2 group-focus-visible:ring-black group-focus-visible:ring-offset-2",
                 )}
                 style={
                   {
@@ -93,7 +94,10 @@ export function MaskedAvatars({
                   className="text-black"
                 >
                   {Icon ? (
-                    <Icon aria-hidden="true" size={size * 0.48} />
+                    <Icon
+                      aria-hidden="true"
+                      size={size * 0.48}
+                    />
                   ) : (
                     <span className="font-sans text-sm font-medium">
                       {item.name.slice(0, 1)}
@@ -110,7 +114,7 @@ export function MaskedAvatars({
                   "motion-safe:transition-[opacity,transform,filter] motion-safe:duration-200",
                   isActive
                     ? "translate-y-0 opacity-100 blur-0"
-                    : "translate-y-1 opacity-0 blur-[3px]"
+                    : "translate-y-1 opacity-0 blur-[3px]",
                 )}
               >
                 {item.name}

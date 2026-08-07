@@ -5,6 +5,7 @@ import { About } from "@/components/sections/about";
 import { Hero } from "@/components/sections/hero";
 import { Preloader } from "@/components/sections/preloader";
 import { Services } from "@/components/sections/services";
+import { Stack } from "@/components/sections/stack";
 import { Work } from "@/components/sections/work";
 
 export function HomeExperience() {
@@ -17,6 +18,7 @@ export function HomeExperience() {
       <About />
       <Work />
       <Services />
+      <Stack />
       <Preloader onFinished={revealHero} />
     </main>
   );

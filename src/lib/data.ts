@@ -27,6 +27,12 @@ export interface StackItem {
   color: string;
 }
 
+export interface StackCapability {
+  title: string;
+  description: string;
+  tools: string[];
+}
+
 export type SocialIcon = "github" | "linkedin" | "x" | "email";
 
 export interface SocialLink {
@@ -59,6 +65,7 @@ export const profile = {
 export const navigation: NavigationItem[] = [
   { label: "Work", href: "#work" },
   { label: "Services", href: "#services" },
+  { label: "What I Use", href: "#stack" },
   { label: "About", href: "#about" },
   { label: "Contact", href: "#contact" },
 ];
@@ -192,6 +199,39 @@ export const servicesSection = {
   filledTitle: "What I",
   outlinedTitle: "Offer",
   label: "CAPABILITIES",
+};
+
+export const stackCapabilities: StackCapability[] = [
+  {
+    title: "Web Development",
+    description:
+      "A focused frontend foundation for products that need to feel fast, stable, and effortless to use.",
+    tools: ["React", "Next.js", "TypeScript", "Node.js"],
+  },
+  {
+    title: "UI Implementation",
+    description:
+      "Design systems and interfaces translated into precise, responsive code without losing the original intent.",
+    tools: ["Figma", "Tailwind CSS", "Storybook", "TypeScript"],
+  },
+  {
+    title: "Motion & Interaction",
+    description:
+      "Motion with purpose: clear transitions, tactile feedback, and smooth scroll experiences that support the story.",
+    tools: ["GSAP", "Motion", "Lenis", "React"],
+  },
+  {
+    title: "Performance",
+    description:
+      "A performance-first workflow that keeps the experience quick from the first render through every interaction.",
+    tools: ["Lighthouse", "Chrome DevTools", "Vercel", "Core Web Vitals"],
+  },
+];
+
+export const stackSection = {
+  index: "04",
+  filledTitle: "What I",
+  outlinedTitle: "Use",
 };
 
 export const stack: StackItem[] = [

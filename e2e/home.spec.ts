@@ -9,6 +9,8 @@ import {
   services,
   servicesSection,
   socials,
+  stackCapabilities,
+  stackSection,
   stats,
   work,
 } from "../src/lib/data";
@@ -520,8 +522,12 @@ test.describe("home", () => {
 
       const rest = await masks.locator(".smg-char-a").allTextContents();
       const clone = await masks.locator(".smg-char-b").allTextContents();
-      expect(rest.join(""), "resting copy spells the label").toBe(item.label);
-      expect(clone.join(""), "duplicate copy spells the label").toBe(item.label);
+      expect(rest.join("").replace(/\u00a0/g, " "), "resting copy spells the label").toBe(
+        item.label
+      );
+      expect(clone.join("").replace(/\u00a0/g, " "), "duplicate copy spells the label").toBe(
+        item.label
+      );
       await expect(masks.locator(".smg-char-b").first()).toHaveAttribute(
         "aria-hidden",
         "true"
@@ -1008,8 +1014,12 @@ test.describe("home", () => {
 
       await expect(row).toHaveCSS("border-top-width", "0px");
 
-      const infoBox = await row.locator("[data-work-info]").boundingBox();
-      expect(infoBox, project.title).not.toBeNull();
+      const info = row.locator("[data-work-info]");
+      await expect(info).toBeVisible();
+      const infoBox = await info.evaluate((element) => {
+        const rect = element.getBoundingClientRect();
+        return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
+      });
 
       const numeral = row.locator("[data-work-index]");
       if ((page.viewportSize()?.width ?? 0) >= 1024) {
@@ -1023,8 +1033,12 @@ test.describe("home", () => {
         ).toBeCloseTo(infoBox!.x + infoBox!.width, 0);
         expect(numeralBox!.y, project.title).toBeCloseTo(infoBox!.y, 0);
 
-        const contentBox = await row.locator("[data-work-content]").boundingBox();
-        expect(contentBox, project.title).not.toBeNull();
+        const contentBox = await row
+          .locator("[data-work-content]")
+          .evaluate((element) => {
+            const rect = element.getBoundingClientRect();
+            return { y: rect.y, height: rect.height };
+          });
         expect(
           infoBox!.y + infoBox!.height - (contentBox!.y + contentBox!.height),
           `${project.title}: info content stays bottom-aligned (pb-2 padding only)`
@@ -1107,13 +1121,19 @@ test.describe("services", () => {
       String(services.length).padStart(2, "0")
     );
 
-    const dividerBox = await section
-      .locator("[data-service-header-divider]")
-      .boundingBox();
-    const listBox = await section.locator("[data-service-list]").boundingBox();
-    expect(dividerBox).not.toBeNull();
-    expect(listBox).not.toBeNull();
-    expect(listBox!.y).toBeCloseTo(dividerBox!.y + dividerBox!.height, 0);
+    const divider = section.locator("[data-service-header-divider]");
+    const serviceList = section.locator("[data-service-list]");
+    await expect(divider).toBeVisible();
+    await expect(serviceList).toBeVisible();
+    const dividerBox = await divider.evaluate((element) => {
+      const rect = element.getBoundingClientRect();
+      return { y: rect.y, height: rect.height };
+    });
+    const listBox = await serviceList.evaluate((element) => {
+      const rect = element.getBoundingClientRect();
+      return { y: rect.y };
+    });
+    expect(listBox.y).toBeCloseTo(dividerBox.y + dividerBox.height, 0);
 
     const workTop = await page.locator("#work").evaluate((element) =>
       element.getBoundingClientRect().top + window.scrollY
@@ -1212,6 +1232,231 @@ test.describe("services", () => {
     await expect(
       section.locator("[data-service-pointer-card] > div")
     ).toHaveCSS("opacity", "0");
+  });
+});
+
+test.describe("stack", () => {
+  test("renders the What I Use bento after services with a right rail", async ({
+    page,
+  }) => {
+    await page.goto("/");
+
+    const section = page.locator("#stack");
+    await expect(section).toBeAttached();
+    await expect(section.locator("#stack-heading")).toContainText(
+      stackSection.filledTitle
+    );
+    await expect(section.locator("#stack-heading")).toContainText(
+      stackSection.outlinedTitle
+    );
+    await expect(section).not.toContainText("TOOLS & SYSTEMS");
+    await expect(section.locator("[data-magic-bento]")).toBeVisible();
+    await expect(section.locator("[data-bento-cell]")).toHaveCount(
+      stackCapabilities.length
+    );
+
+    for (const capability of stackCapabilities) {
+      const card = section.locator("[data-stack-card]").nth(
+        stackCapabilities.indexOf(capability)
+      );
+      await expect(card).toContainText(capability.title);
+      await expect(card).toContainText(capability.description);
+      await expect(card.locator("[data-stack-icon]")).toHaveCount(1);
+      await expect(card.locator("[data-tech-avatar]")).toHaveCount(
+        capability.tools.length
+      );
+    }
+
+    const servicesTop = await page.locator("#services").evaluate((element) =>
+      element.getBoundingClientRect().top + window.scrollY
+    );
+    const stackTop = await section.evaluate(
+      (element) => element.getBoundingClientRect().top + window.scrollY
+    );
+    expect(stackTop).toBeGreaterThan(servicesTop);
+
+    const rail = section.locator("[data-rail]");
+    await expect(rail.locator("[data-rail-label]")).toHaveText(
+      stackSection.index
+    );
+    if ((page.viewportSize()?.width ?? 0) >= 1024) {
+      const gridBox = await section.locator("[data-magic-bento]").boundingBox();
+      const firstCellBox = await section.locator("[data-bento-cell]").nth(0).boundingBox();
+      const secondCellBox = await section.locator("[data-bento-cell]").nth(1).boundingBox();
+      const firstIconBox = await section.locator("[data-stack-icon]").nth(0).boundingBox();
+      const secondIconBox = await section.locator("[data-stack-icon]").nth(1).boundingBox();
+      const firstTitleBox = await section.locator("[data-stack-title]").nth(0).boundingBox();
+      const secondTitleBox = await section.locator("[data-stack-title]").nth(1).boundingBox();
+      const firstDescriptionBox = await section.locator("[data-stack-description]").nth(0).boundingBox();
+      const secondDescriptionBox = await section.locator("[data-stack-description]").nth(1).boundingBox();
+      const cellBoxes = await section.locator("[data-bento-cell]").evaluateAll((elements) =>
+        elements.map((element) => element.getBoundingClientRect().bottom)
+      );
+      const toolBottoms = await section.locator("[data-stack-tools]").evaluateAll((elements) =>
+        elements.map((element) => element.getBoundingClientRect().bottom)
+      );
+      const titleSizes = await section.locator("[data-stack-title]").evaluateAll((elements) =>
+        elements.map((element) => Number.parseFloat(getComputedStyle(element).fontSize))
+      );
+      const titleLineCounts = await section.locator("[data-stack-title]").evaluateAll((elements) =>
+        elements.map((element) => {
+          const style = getComputedStyle(element);
+          return Math.round(element.getBoundingClientRect().height / parseFloat(style.lineHeight));
+        })
+      );
+      const descriptionHeights = await section.locator("[data-stack-description]").evaluateAll((elements) =>
+        elements.map((element) => element.getBoundingClientRect().height)
+      );
+      const iconColors = await section.locator("[data-stack-icon]").evaluateAll((elements) =>
+        elements.map((element) => getComputedStyle(element).color)
+      );
+      expect(gridBox).not.toBeNull();
+      expect(firstCellBox).not.toBeNull();
+      expect(secondCellBox).not.toBeNull();
+      expect(firstIconBox).not.toBeNull();
+      expect(secondIconBox).not.toBeNull();
+      expect(firstTitleBox).not.toBeNull();
+      expect(secondTitleBox).not.toBeNull();
+      expect(firstDescriptionBox).not.toBeNull();
+      expect(secondDescriptionBox).not.toBeNull();
+      expect(gridBox!.width).toBeGreaterThan(gridBox!.height);
+      expect(Math.abs(firstCellBox!.width - secondCellBox!.width)).toBeGreaterThan(1);
+      const firstIconTop = firstCellBox!.y - firstIconBox!.y;
+      const firstIconRight =
+        firstIconBox!.x + firstIconBox!.width -
+        (firstCellBox!.x + firstCellBox!.width);
+      const secondIconTop = secondCellBox!.y - secondIconBox!.y;
+      const secondIconRight =
+        secondIconBox!.x + secondIconBox!.width -
+        (secondCellBox!.x + secondCellBox!.width);
+      const firstVisibleWidth =
+        (firstCellBox!.x + firstCellBox!.width - firstIconBox!.x) /
+        firstIconBox!.width;
+      const firstVisibleHeight =
+        (firstIconBox!.y + firstIconBox!.height - firstCellBox!.y) /
+        firstIconBox!.height;
+      const secondVisibleWidth =
+        (secondCellBox!.x + secondCellBox!.width - secondIconBox!.x) /
+        secondIconBox!.width;
+      const secondVisibleHeight =
+        (secondIconBox!.y + secondIconBox!.height - secondCellBox!.y) /
+        secondIconBox!.height;
+      expect(firstIconTop).toBeGreaterThan(0);
+      expect(secondIconTop).toBeGreaterThan(0);
+      expect(firstIconRight).toBeGreaterThan(0);
+      expect(secondIconRight).toBeGreaterThan(0);
+      expect(firstVisibleWidth).toBeGreaterThan(0.6);
+      expect(firstVisibleHeight).toBeGreaterThan(0.6);
+      expect(secondVisibleWidth).toBeGreaterThan(0.6);
+      expect(secondVisibleHeight).toBeGreaterThan(0.6);
+      expect(new Set(iconColors).size).toBe(1);
+      expect(firstTitleBox!.y - firstCellBox!.y).toBeLessThan(80);
+      expect(secondTitleBox!.y - secondCellBox!.y).toBeLessThan(80);
+      expect(titleSizes[0]).toBeGreaterThan(titleSizes[1]);
+      expect(titleLineCounts[1]).toBe(1);
+      expect(titleLineCounts[2]).toBe(1);
+      expect(Math.max(...descriptionHeights) - Math.min(...descriptionHeights)).toBeLessThan(1);
+      expect(firstTitleBox!.x + firstTitleBox!.width).toBeLessThan(
+        firstIconBox!.x
+      );
+      const bottomGaps = cellBoxes.map((bottom, index) => bottom - toolBottoms[index]);
+      expect(Math.max(...bottomGaps) - Math.min(...bottomGaps)).toBeLessThan(1);
+
+      await expect(rail).toBeVisible();
+      const railBox = await rail.boundingBox();
+      expect(railBox).not.toBeNull();
+      expect(railBox!.x).toBeGreaterThan((page.viewportSize()?.width ?? 0) / 2);
+    } else {
+      await expect(rail).toBeHidden();
+    }
+  });
+
+  test("slides the ghost icon fully into view on hover without changing its fade", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    await expect(page.locator("[data-curtain-content]")).toBeHidden({
+      timeout: 15_000,
+    });
+
+    const card = page.locator("[data-stack-card]").first();
+    const icon = card.locator("[data-stack-icon]");
+    await card.hover();
+    await page.waitForTimeout(900);
+
+    const hovered = await card.evaluate((el) => {
+      const cardRect = el.getBoundingClientRect();
+      const iconRect = el.querySelector("[data-stack-icon]")!.getBoundingClientRect();
+      return {
+        rightInside: iconRect.right <= cardRect.right + 0.5,
+        topInside: iconRect.top >= cardRect.top - 0.5,
+        color: getComputedStyle(el.querySelector("[data-stack-icon]")!).color,
+      };
+    });
+    expect(hovered.rightInside).toBe(true);
+    expect(hovered.topInside).toBe(true);
+    expect(hovered.color).toContain("0.03");
+
+    await page.mouse.move(10, 10);
+    await page.waitForTimeout(900);
+
+    const idle = await card.evaluate((el) => {
+      const cardRect = el.getBoundingClientRect();
+      const iconRect = el.querySelector("[data-stack-icon]")!.getBoundingClientRect();
+      return {
+        bleedsRight: iconRect.right > cardRect.right + 0.5,
+        bleedsTop: iconRect.top < cardRect.top - 0.5,
+        color: getComputedStyle(el.querySelector("[data-stack-icon]")!).color,
+      };
+    });
+    expect(idle.bleedsRight).toBe(true);
+    expect(idle.bleedsTop).toBe(true);
+    expect(idle.color).toContain("0.03");
+  });
+
+  test("slides the ghost icon instantly on hover with reduced motion", async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+    await expect(page.locator("[data-curtain-content]")).toBeHidden({
+      timeout: 15_000,
+    });
+
+    const card = page.locator("[data-stack-card]").first();
+    await card.hover();
+    await page.waitForTimeout(300);
+
+    const state = await card.evaluate((el) => {
+      const cardRect = el.getBoundingClientRect();
+      const iconRect = el.querySelector("[data-stack-icon]")!.getBoundingClientRect();
+      return {
+        rightInside: iconRect.right <= cardRect.right + 0.5,
+        topInside: iconRect.top >= cardRect.top - 0.5,
+        color: getComputedStyle(el.querySelector("[data-stack-icon]")!).color,
+      };
+    });
+    expect(state.rightInside).toBe(true);
+    expect(state.topInside).toBe(true);
+    expect(state.color).toContain("0.03");
+  });
+
+  test("keeps the bento usable on mobile without horizontal overflow", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/");
+
+    const section = page.locator("#stack");
+    await expect(section.locator("[data-bento-cell]")).toHaveCount(
+      stackCapabilities.length
+    );
+    await expect(section.locator("[data-tech-stack]").first()).toBeVisible();
+
+    const hasOverflow = await page.evaluate(
+      () => document.documentElement.scrollWidth > window.innerWidth
+    );
+    expect(hasOverflow).toBe(false);
   });
 });
 
@@ -1525,14 +1770,19 @@ test.describe("home (responsive)", () => {
 
       const heading = page.locator("#hero-heading");
       await expect(heading).toBeVisible();
-      await expect.poll(() => heading.boundingBox()).not.toBeNull();
-      const headingBox = await heading.boundingBox();
-      fitInViewport(headingBox!, width);
+      const headingBox = await heading.evaluate((element) => {
+        const rect = element.getBoundingClientRect();
+        return { x: rect.x, width: rect.width };
+      });
+      fitInViewport(headingBox, width);
 
       const actions = page.locator("[data-hero-action]");
       for (const action of await actions.all()) {
-        await expect.poll(() => action.boundingBox()).not.toBeNull();
-        const box = await action.boundingBox();
+        await expect(action).toBeVisible();
+        const box = await action.evaluate((element) => {
+          const rect = element.getBoundingClientRect();
+          return { x: rect.x, width: rect.width };
+        });
         fitInViewport(box!, width);
       }
 
