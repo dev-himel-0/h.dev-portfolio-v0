@@ -7,6 +7,7 @@ import {
   profile,
   projects,
   services,
+  serviceIconSources,
   servicesSection,
   socials,
   stackCapabilities,
@@ -1173,7 +1174,14 @@ test.describe("services", () => {
     for (const [index, service] of services.entries()) {
       const row = rows.nth(index);
       await expect(row).toContainText(service.title);
-      await expect(row).toContainText(service.tags[0]);
+      const icon = row.locator("[data-service-icon]");
+      await expect(icon).toBeVisible();
+      await expect(icon).toHaveAttribute(
+        "src",
+        serviceIconSources[service.icon].src
+      );
+      const iconBox = await icon.boundingBox();
+      expect(iconBox?.width ?? 0).toBeGreaterThan(28);
     }
 
     if ((page.viewportSize()?.width ?? 0) >= 1024) {
@@ -1184,6 +1192,16 @@ test.describe("services", () => {
         services[1].description
       );
       await expect(section.locator("[data-service-pointer-card]")).toBeVisible();
+      const pointerImage = section.locator("[data-service-pointer-image]");
+      await expect(pointerImage).toBeVisible();
+      await expect(pointerImage).toHaveAttribute(
+        "src",
+        services[1].image
+      );
+      await expect(section.locator("[data-service-pointer-card] > div")).toHaveCSS(
+        "border-width",
+        "0px"
+      );
     }
   });
 
@@ -2135,5 +2153,86 @@ test.describe("scroll-to-top", () => {
     // Curtain should not appear
     const curtain = page.locator(".stt-curtain");
     await expect(curtain).toBeHidden();
+  });
+});
+
+test.describe("navigation wipe", () => {
+  const waitForPage = async (page: import("@playwright/test").Page) => {
+    await expect(page.locator("[data-curtain-content]")).toBeHidden({
+      timeout: 15_000,
+    });
+  };
+
+  const curtain = (page: import("@playwright/test").Page) =>
+    page.locator("[data-wipe-curtain]");
+
+  test("menu link click plays the curtain wipe and lands on the section", async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.goto("/");
+    await waitForPage(page);
+
+    await page.locator("[data-hero-menu-toggle]").click();
+    const link = page.getByRole("link", {
+      name: navigation[0].label,
+      exact: true,
+    });
+    await expect(link).toBeVisible();
+    await link.click();
+
+    await expect(curtain(page)).toBeVisible({ timeout: 2_000 });
+    await expect(curtain(page)).toBeHidden({ timeout: 5_000 });
+
+    await expect(page.locator("#staggered-menu-panel")).toBeHidden();
+    await expect(page.locator(navigation[0].href)).toBeInViewport();
+  });
+
+  test("hero CTA click plays the curtain wipe and lands on the section", async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.goto("/");
+    await waitForPage(page);
+
+    const action = hero.actions[0];
+    await page.getByRole("link", { name: action.label }).click();
+
+    await expect(curtain(page)).toBeVisible({ timeout: 2_000 });
+    await expect(curtain(page)).toBeHidden({ timeout: 5_000 });
+
+    await expect(page.locator(action.href)).toBeInViewport();
+  });
+
+  test("monogram click wipes back to the hero", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.goto("/");
+    await waitForPage(page);
+
+    await page.evaluate(() =>
+      window.scrollTo(0, document.documentElement.scrollHeight / 2)
+    );
+    await expect
+      .poll(() => page.evaluate(() => window.scrollY))
+      .toBeGreaterThan(0);
+
+    await page.locator("[data-hero-mono]").click();
+
+    await expect(curtain(page)).toBeVisible({ timeout: 2_000 });
+    await expect(curtain(page)).toBeHidden({ timeout: 5_000 });
+    await expect(page.locator("#hero-heading")).toBeInViewport();
+  });
+
+  test("nav links scroll instantly without the curtain under reduced motion", async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+    await waitForPage(page);
+
+    await page.getByRole("link", { name: hero.actions[0].label }).click();
+
+    await expect(curtain(page)).toBeHidden();
+    await expect(page.locator(hero.actions[0].href)).toBeInViewport();
   });
 });

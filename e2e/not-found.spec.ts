@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { notFound, profile } from "../src/lib/data";
+import { notFound } from "../src/lib/data";
 
 const MISSING_PATH = "/this-page-does-not-exist";
 
@@ -59,18 +59,11 @@ test.describe("not found", () => {
     await expect(page.getByText(MISSING_PATH)).toBeVisible();
   });
 
-  test("links home and email from the action list", async ({ page }) => {
+  test("links home from the action link", async ({ page }) => {
     await page.goto(MISSING_PATH);
 
-    for (const action of notFound.actions) {
-      await expect(page.getByRole("link", { name: action.label })).toHaveAttribute(
-        "href",
-        action.href
-      );
-    }
-    await expect(
-      page.getByRole("link", { name: notFound.actions[1].label })
-    ).toHaveAttribute("href", `mailto:${profile.email}`);
+    const homeLink = page.getByRole("link", { name: "Back home" });
+    await expect(homeLink).toHaveAttribute("href", "/");
   });
 
   test("shows all content immediately with reduced motion", async ({ page }) => {
@@ -79,9 +72,7 @@ test.describe("not found", () => {
 
     await expect(page.locator("[data-fuzzy-text]").first()).toBeVisible();
     await expect(page.getByText(notFound.message)).toBeVisible();
-    for (const action of notFound.actions) {
-      await expect(page.getByRole("link", { name: action.label })).toBeVisible();
-    }
+    await expect(page.getByRole("link", { name: "Back home" })).toBeVisible();
   });
 
   test("stays within the viewport on mobile", async ({ page }) => {

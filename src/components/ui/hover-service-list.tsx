@@ -12,7 +12,11 @@ import {
   useTransform,
   useVelocity,
 } from "motion/react";
-import { servicesSection, type Service } from "@/lib/data";
+import {
+  serviceIconSources,
+  servicesSection,
+  type Service,
+} from "@/lib/data";
 import { cn } from "@/lib/utils";
 
 interface HoverServiceListProps {
@@ -21,7 +25,7 @@ interface HoverServiceListProps {
 
 /**
  * Editorial service selector adapted from the hover-testimonial reference:
- * rows drive the detail panel while a monochrome image follows the pointer on
+ * rows drive the detail panel while a service image follows the pointer on
  * fine pointers. Pointer coordinates stay outside React state so movement
  * never re-renders the section.
  */
@@ -182,7 +186,7 @@ export function HoverServiceList({ services }: HoverServiceListProps) {
           style={{ x: followX, y: followY }}
         >
           <motion.div
-            className="relative -ml-[95px] -mt-[119px] h-[238px] w-[190px] overflow-hidden bg-black/10 grayscale contrast-105"
+            className="relative -ml-[95px] -mt-[119px] h-[238px] w-[190px] overflow-hidden bg-black/10"
             style={{ rotate: cardRotation }}
             initial={false}
             animate={{
@@ -196,13 +200,13 @@ export function HoverServiceList({ services }: HoverServiceListProps) {
                 key={activeService.title}
                 data-service-pointer-image
                 src={activeService.image}
-                alt=""
+                alt={`${activeService.title} preview`}
                 draggable={false}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.32, ease: "easeOut" }}
-                className="absolute inset-0 size-full object-cover"
+                className="absolute inset-0 size-full object-cover grayscale contrast-105"
               />
             </AnimatePresence>
           </motion.div>
@@ -210,6 +214,7 @@ export function HoverServiceList({ services }: HoverServiceListProps) {
 
         {services.map((service, index) => {
           const active = index === activeIndex;
+          const icon = serviceIconSources[service.icon];
 
           return (
             <div key={service.title}>
@@ -259,12 +264,19 @@ export function HoverServiceList({ services }: HoverServiceListProps) {
                   {service.title}
                 </span>
                 <span
+                  aria-hidden="true"
                   className={cn(
-                    "whitespace-nowrap font-sans text-[0.625rem] uppercase tracking-[0.14em] text-black/40 transition-colors duration-300 motion-reduce:transition-none",
+                    "flex size-10 shrink-0 items-center justify-end text-black/40 transition-colors duration-300 motion-reduce:transition-none",
                     active && "text-black"
                   )}
                 >
-                  {service.tags[0]}
+                  <img
+                    data-service-icon
+                    src={icon.src}
+                    alt={icon.alt}
+                    draggable={false}
+                    className="size-8 object-contain sm:size-9 lg:size-10"
+                  />
                 </span>
               </button>
               <div aria-hidden="true" className="h-px bg-black/10" />

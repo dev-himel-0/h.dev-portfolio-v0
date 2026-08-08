@@ -1,90 +1,106 @@
 "use client";
 
-import { useRef, useState, type ReactNode } from "react";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
-
-gsap.registerPlugin(useGSAP);
-
-interface PageTransitionProps {
-  /** Unique key of the current route; a change triggers the wipe. */
-  routeKey: string;
-  /** The current route's content — swapped underneath the cover layer. */
-  children: ReactNode;
-  /** Total cover + reveal duration in ms (keep between 400–600). */
-  duration?: number;
-  /**
-   * Fired as the cover lifts, letting the incoming page run its masked
-   * editorial entrance (mirrors the preloader → hero `isRevealed` handoff).
-   */
-  onEnter?: () => void;
-}
-
-function prefersReducedMotion() {
-  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-}
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { usePathname } from "next/navigation";
+import { prefersReducedMotion } from "@/lib/utils";
+import { markSoftNavigation } from "@/lib/navigation";
+import {
+  completeWipe,
+  isWipeReady,
+  wipeCoverDeferred,
+  wipeReveal,
+} from "@/lib/wipe";
 
 /**
- * Route transition layer for future multi-page navigation. On `routeKey`
- * change, a near-black panel wipes up over the outgoing page, the incoming
- * `children` mounts underneath, then the panel wipes up and away while
- * `onEnter` starts the incoming page's masked entrance. Skipped (instant)
- * under `prefers-reduced-motion`. Not mounted anywhere yet — wire it into
- * the root layout once real routes exist.
+ * Route transition choreography for the shared curtain wipe. The invariant:
+ * the incoming page must never paint over an uncovered viewport — it only
+ * appears while the curtain is already up, and is revealed by the wipe.
+ *
+ * - Forward navigations (link clicks) are covered by `WipeCurtain`'s
+ *   interceptor: panels animate in from bottom (yPercent 101 → 0) to cover
+ *   the current viewport, `router.push` runs under full cover, and the
+ *   reveal lifts the curtain once the incoming route commits.
+ * - Back/forward navigation (`popstate`) cannot be intercepted in advance,
+ *   but `popstate` fires before Next commits the route: the cover goes up
+ *   right there, and the reveal waits for the commit below.
+ * - Entrance: a page loaded directly (typed URL, refresh) on any route
+ *   except home starts covered (yPercent 0) and immediately reveals
+ *   (yPercent 0 → -101), so the page is never visible before the
+ *   transition animation. Home keeps its preloader as the entrance instead.
+ *
+ * Soft navigation is detected during render via the "adjust state during
+ * render" pattern: the layout renders before its children on every commit, so
+ * by the time the incoming page's components render, `isSoftNavigation()`
+ * already reports true — home can skip its preloader for the wipe. Hard
+ * loads never mark it, so the preloader still plays on first visit. Wipes are
+ * skipped (instant) under `prefers-reduced-motion`.
  */
-export function PageTransition({
-  routeKey,
-  children,
-  duration = 460,
-  onEnter,
-}: PageTransitionProps) {
-  const layerRef = useRef<HTMLDivElement>(null);
-  const committedRouteRef = useRef(routeKey);
-  const [content, setContent] = useState<{ route: string; node: ReactNode }>({
-    route: routeKey,
-    node: children,
-  });
+export function PageTransition({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+  const [previousPathname, setPreviousPathname] = useState(pathname);
+  const lastPathnameRef = useRef(pathname);
+  const mountPathRef = useRef(pathname);
 
-  useGSAP(
-    () => {
-      const layer = layerRef.current;
-      if (layer) gsap.set(layer, { yPercent: 100 });
+  // Detect soft navigation during render, before the incoming page renders.
+  if (pathname !== previousPathname) {
+    setPreviousPathname(pathname);
+    markSoftNavigation();
+  }
 
-      if (routeKey === committedRouteRef.current) return;
-      if (!layer || prefersReducedMotion()) {
-        committedRouteRef.current = routeKey;
-        setContent({ route: routeKey, node: children });
-        return;
-      }
+  // Back/forward only — `popstate` never fires for router.push or Link. The
+  // cover goes up the moment `popstate` fires, i.e. BEFORE the incoming
+  // route commits, so every paint of the new page happens underneath it.
+  // `completeWipe` below lifts the curtain once the commit has landed.
+  useEffect(() => {
+    const onPopState = () => {
+      wipeCoverDeferred(() => {});
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
 
-      const half = duration / 2 / 1000;
-      const timeline = gsap.timeline();
-      timeline
-        .to(layer, { yPercent: 0, duration: half, ease: "power3.in" })
-        .add(() => {
-          committedRouteRef.current = routeKey;
-          setContent({ route: routeKey, node: children });
-        })
-        .to(layer, {
-          yPercent: -100,
-          duration: half,
-          ease: "power4.inOut",
-          onStart: onEnter,
-        });
+  // The route has committed and painted under the curtain — lift it.
+  // Covers both the popstate wipe above and link-click wipes from
+  // `WipeCurtain`; a no-op when no wipe is pending (e.g. reduced motion).
+  useEffect(() => {
+    if (pathname === lastPathnameRef.current) return;
+    lastPathnameRef.current = pathname;
+    completeWipe();
+  }, [pathname]);
 
-      return () => timeline.kill();
-    },
-    { dependencies: [routeKey, children, duration, onEnter] }
-  );
+  /**
+   * Entrance wipe for directly-loaded pages: any hard load on a route other
+   * than home (typed URL, refresh — e.g. the 404 page or future case-study
+   * routes) starts the curtain covered (yPercent 0) and reveals it
+   * (yPercent 0 → -101) so the page is never visible before the animation.
+   * Home keeps the preloader, so it is skipped there. The effect deliberately
+   * runs once per mount (empty deps): soft navigations reuse the interceptor
+   * or the popstate wipe, never this path.
+   */
+  useEffect(() => {
+    if (mountPathRef.current === "/") return;
+    if (prefersReducedMotion()) return;
 
-  return (
-    <div className="min-h-full">
-      <div aria-hidden="true">{content.route === routeKey ? children : content.node}</div>
-      <div
-        ref={layerRef}
-        aria-hidden="true"
-        className="pointer-events-none fixed inset-0 z-[90] bg-black will-change-transform"
-      />
-    </div>
-  );
+    let cancelled = false;
+    // Wait for the wipe overlay (mounted by `WipeCurtain`, a sibling) to
+    // register before animating; cap the wait so a missing overlay degrades
+    // to an instant reveal instead of spinning forever.
+    const play = (frame: number) => {
+      requestAnimationFrame(() => {
+        if (cancelled) return;
+        if (!isWipeReady() && frame < 240) {
+          play(frame + 1);
+          return;
+        }
+        wipeReveal();
+      });
+    };
+    play(0);
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return <div className="min-h-full">{children}</div>;
 }

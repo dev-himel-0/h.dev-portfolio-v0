@@ -5,6 +5,8 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import { SmoothScroll } from "@/components/ui/smooth-scroll";
 import { ScrollToTop } from "@/components/ui/scroll-to-top";
+import { PageTransition } from "@/components/ui/page-transition";
+import { WipeCurtain } from "@/components/ui/wipe-curtain";
 
 const generalSans = localFont({
   src: [
@@ -43,8 +45,11 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <SmoothScroll>
-          {children}
-          <ScrollToTop />
+          <PageTransition>
+            {children}
+            <ScrollToTop />
+          </PageTransition>
+          <WipeCurtain />
         </SmoothScroll>
       </body>
     </html>

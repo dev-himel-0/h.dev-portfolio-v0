@@ -18,8 +18,37 @@ export interface Service {
   title: string;
   description: string;
   tags: string[];
+  icon: ServiceIcon;
   image: string;
 }
+
+export type ServiceIcon =
+  | "product-design"
+  | "framer-development"
+  | "ui-ux-design"
+  | "creative-direction";
+
+export const serviceIconSources: Record<
+  ServiceIcon,
+  { alt: string; src: string }
+> = {
+  "product-design": {
+    alt: "Product design icon",
+    src: "https://framerusercontent.com/images/rA85Y0EWOdi7zZR56JJDPw4A.png?width=512&height=512",
+  },
+  "framer-development": {
+    alt: "Framer development icon",
+    src: "https://framerusercontent.com/images/Or7wABqMyvcDnGzNVDaUoWHodS4.png?width=512&height=512",
+  },
+  "ui-ux-design": {
+    alt: "UI/UX design icon",
+    src: "https://framerusercontent.com/images/dyqoaLEefg6sDhPk1JjxTFRigI.png?width=512&height=512",
+  },
+  "creative-direction": {
+    alt: "Creative direction icon",
+    src: "https://framerusercontent.com/images/ktaqYAtXQMTeq7J0vNxH0Mkhoc.png?width=512&height=512",
+  },
+};
 
 export interface StackItem {
   name: string;
@@ -165,6 +194,7 @@ export const services: Service[] = [
     description:
       "Placeholder copy. Production-ready websites and web apps built with modern frameworks, clean architecture, and obsessive attention to detail.",
     tags: ["React", "Next.js", "TypeScript"],
+    icon: "framer-development",
     image:
       "https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=900&auto=format&fit=crop",
   },
@@ -173,6 +203,7 @@ export const services: Service[] = [
     description:
       "Placeholder copy. Pixel-perfect conversion of design to code, with a strong eye for typography, spacing, and visual hierarchy.",
     tags: ["Tailwind", "Design Systems"],
+    icon: "ui-ux-design",
     image:
       "https://images.unsplash.com/photo-1558655146-d09347e92766?q=80&w=900&auto=format&fit=crop",
   },
@@ -181,6 +212,7 @@ export const services: Service[] = [
     description:
       "Placeholder copy. Smooth scroll experiences, micro-interactions, and animation that makes interfaces feel alive without slowing them down.",
     tags: ["GSAP", "Lenis", "Motion"],
+    icon: "creative-direction",
     image:
       "https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=900&auto=format&fit=crop",
   },
@@ -189,6 +221,7 @@ export const services: Service[] = [
     description:
       "Placeholder copy. Auditing and optimizing load times, Core Web Vitals, and rendering — because speed is part of the design.",
     tags: ["Lighthouse", "Core Web Vitals"],
+    icon: "product-design",
     image:
       "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=900&auto=format&fit=crop",
   },

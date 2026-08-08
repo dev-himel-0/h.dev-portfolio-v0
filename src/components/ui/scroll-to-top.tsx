@@ -1,32 +1,24 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ArrowUp } from "@phosphor-icons/react";
-import gsap from "gsap";
-import { useLenis } from "lenis/react";
-import { prefersReducedMotion } from "@/lib/utils";
+import { wipeCover } from "@/lib/wipe";
 
 const RING_RADIUS = 20;
 const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
 const SHOW_THRESHOLD = 0.2;
-const CURTAIN_PANELS = 5;
 
 /**
- * Floating circular scroll-to-top button with an SVG progress ring and a
- * cinematic curtain-wipe reveal on click. The button appears after scrolling
- * past 20% of the page; clicking it wipes the viewport with black vertical
- * bands (bottom → top), scrolls to the hero, then wipes them away to reveal
- * the page. Hidden when the staggered menu is open or while the preloader
- * is active. Falls back to a plain smooth scroll under `prefers-reduced-motion`.
+ * Floating circular scroll-to-top button with an SVG progress ring. The
+ * button appears after scrolling past 20% of the page; clicking it plays the
+ * shared curtain wipe (see `WipeCurtain` / `src/lib/wipe.ts`), scrolls to the
+ * hero while the viewport is covered, then wipes away to reveal the page.
+ * Hidden when the staggered menu is open or while the preloader is active.
  */
 export function ScrollToTop() {
   const [progress, setProgress] = useState(0);
   const [shouldShow, setShouldShow] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const curtainRef = useRef<HTMLDivElement>(null);
-  const panelsRef = useRef<HTMLDivElement[]>([]);
-  const busyRef = useRef(false);
-  const lenis = useLenis();
 
   // ── Scroll progress tracking ──────────────────────────────────────
   useEffect(() => {
@@ -92,85 +84,17 @@ export function ScrollToTop() {
     return () => observer.disconnect();
   }, []);
 
-  // ── Curtain wipe animation ────────────────────────────────────────
+  // ── Scroll to top through the shared curtain wipe ──────────────────
   const handleClick = useCallback(() => {
-    if (busyRef.current) return;
-    busyRef.current = true;
-
-    if (prefersReducedMotion()) {
-      window.scrollTo({ top: 0, behavior: "instant" });
-      busyRef.current = false;
-      return;
-    }
-
-    const curtain = curtainRef.current;
-    const panels = panelsRef.current.filter(Boolean);
-    if (!curtain || panels.length === 0) {
-      window.scrollTo({ top: 0, behavior: "instant" });
-      busyRef.current = false;
-      return;
-    }
-
-    lenis?.stop();
-
-    gsap.set(curtain, { display: "flex" });
-    gsap.set(panels, { yPercent: 101, autoAlpha: 1 });
-
-    const tl = gsap.timeline({
-      onComplete: () => {
-        gsap.set(curtain, { display: "none" });
-        lenis?.start();
-        busyRef.current = false;
-      },
-    });
-
-    // Phase 1: Wipe in from bottom
-    tl.to(panels, {
-      yPercent: 0,
-      duration: 0.5,
-      ease: "power4.out",
-      stagger: 0.07,
-    });
-
-    // Phase 2: Scroll to top while covered
-    tl.add(() => {
+    wipeCover(() => {
       window.scrollTo({ top: 0, behavior: "instant" });
     });
-
-    // Phase 3: Brief hold
-    tl.to({}, { duration: 0.15 });
-
-    // Phase 4: Wipe out to top
-    tl.to(panels, {
-      yPercent: -101,
-      duration: 0.8,
-      ease: "power4.inOut",
-      stagger: 0.08,
-    });
-  }, [lenis]);
+  }, []);
 
   const shouldHide = menuOpen || preloaderActive;
 
   return (
     <>
-      {/* Curtain overlay for the wipe animation */}
-      <div
-        ref={curtainRef}
-        aria-hidden="true"
-        className="stt-curtain"
-        style={{ display: "none" }}
-      >
-        {Array.from({ length: CURTAIN_PANELS }).map((_, i) => (
-          <div
-            key={i}
-            ref={(el) => {
-              if (el) panelsRef.current[i] = el;
-            }}
-            className="stt-curtain-panel"
-          />
-        ))}
-      </div>
-
       {/* Scroll-to-top button */}
       <button
         type="button"

@@ -23,7 +23,13 @@ const actionIcons = {
  */
 const ENTRANCE_DELAY_S = 1.65;
 
-export function Hero({ isRevealed }: { isRevealed: boolean }) {
+export function Hero({
+  isRevealed,
+  entranceDelay = ENTRANCE_DELAY_S,
+}: {
+  isRevealed: boolean;
+  entranceDelay?: number;
+}) {
   const rootRef = useRef<HTMLDivElement>(null);
 
   useGSAP(
@@ -52,7 +58,7 @@ export function Hero({ isRevealed }: { isRevealed: boolean }) {
       });
 
       const timeline = gsap.timeline({
-        delay: ENTRANCE_DELAY_S,
+        delay: entranceDelay,
         defaults: { ease: "power4.out" },
         onComplete: () => {
           gsap.set(
