@@ -251,3 +251,14 @@ export const socials: SocialLink[] = [
   { label: "X / Twitter", href: "", icon: "x" },
   { label: "Email", href: "", icon: "email" },
 ];
+
+/** 404 page copy. */
+export const notFound = {
+  status: "404",
+  label: "Page not found",
+  message: "This page doesn’t exist. It never did.",
+  actions: [
+    { label: "Back home", href: "/" },
+    { label: "Say hello", href: `mailto:${profile.email}` },
+  ],
+};
