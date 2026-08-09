@@ -161,6 +161,11 @@
   *::-webkit-scrollbar {
     display: none;
   }
+
+  [data-circle-cursor-active="true"],
+  [data-circle-cursor-active="true"] * {
+    cursor: none !important;
+  }
 }
 
 .hero-outline-text {
@@ -749,6 +754,37 @@ header[data-open="true"] .navbar-bg {
   flex: 1;
   background: #000;
   will-change: transform;
+}
+
+/* Desktop-only circle cursor host. The white ink uses difference blending so
+   it remains visible across the site's light and dark surfaces. */
+.circle-cursor {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: none;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  mix-blend-mode: difference;
+}
+
+.circle-cursor[data-enabled="true"] {
+  display: block;
+}
+
+.circle-cursor-element {
+  pointer-events: none;
+}
+
+.circle-cursor-spark {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  display: block;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
