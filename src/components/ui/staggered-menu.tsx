@@ -448,6 +448,7 @@ export function StaggeredMenu({
         ref={panelRef}
         id="staggered-menu-panel"
         className="smg-panel"
+        data-lenis-prevent
         aria-label="Menu"
         aria-hidden={!open}
         inert={!open}

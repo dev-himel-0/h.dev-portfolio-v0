@@ -1,13 +1,12 @@
 "use client";
 
 import { ReactLenis } from "lenis/react";
-import gsap from "gsap";
 import { useEffect, useRef, useState } from "react";
 import type { ComponentRef } from "react";
 
 /**
- * Global smooth-scroll provider (Lenis), synced with the GSAP ticker.
- * Disabled entirely when the user prefers reduced motion.
+ * Satz-compatible global smooth-scroll provider. Satz uses Lenis 1.1.9 with
+ * a 1.4-second duration and a standalone requestAnimationFrame loop.
  */
 export function SmoothScroll({ children }: { children: React.ReactNode }) {
   const lenisRef = useRef<ComponentRef<typeof ReactLenis>>(null);
@@ -23,19 +22,55 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (reduced) return;
-    const update = (time: number) => lenisRef.current?.lenis?.raf(time * 1000);
-    gsap.ticker.add(update);
-    gsap.ticker.lagSmoothing(0);
+
+    let rafId = 0;
+    let pausedForVisibility = false;
+
+    const loop = (time: number) => {
+      lenisRef.current?.lenis?.raf(time);
+      rafId = window.requestAnimationFrame(loop);
+    };
+
+    const onVisibilityChange = () => {
+      const lenis = lenisRef.current?.lenis;
+      if (!lenis) return;
+
+      if (document.visibilityState === "hidden") {
+        pausedForVisibility = true;
+        window.cancelAnimationFrame(rafId);
+      } else if (pausedForVisibility) {
+        pausedForVisibility = false;
+        // Reset Lenis' clock so a background-tab gap does not jump the scroll.
+        lenis.time = performance.now();
+        rafId = window.requestAnimationFrame(loop);
+      }
+    };
+
+    rafId = window.requestAnimationFrame(loop);
+    document.addEventListener("visibilitychange", onVisibilityChange);
+
     return () => {
-      gsap.ticker.remove(update);
-      gsap.ticker.lagSmoothing(500);
+      window.cancelAnimationFrame(rafId);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
     };
   }, [reduced]);
 
   if (reduced) return <>{children}</>;
 
   return (
-    <ReactLenis root options={{ autoRaf: false }} ref={lenisRef}>
+    <ReactLenis
+      root
+      autoRaf={false}
+      options={{
+        duration: 1.4,
+        lerp: 0.1,
+        smoothWheel: true,
+        syncTouch: false,
+        touchMultiplier: 1,
+        wheelMultiplier: 1,
+      }}
+      ref={lenisRef}
+    >
       {children}
     </ReactLenis>
   );

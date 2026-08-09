@@ -2,6 +2,7 @@
 
 import { CurtainReveal } from "@/components/ui/curtain-reveal";
 import { FlipFadeText } from "@/components/ui/flip-fade-text";
+import { scrollToInstant } from "@/lib/wipe";
 import { useLenis } from "lenis/react";
 import { useEffect, useState } from "react";
 
@@ -38,7 +39,7 @@ export function Preloader({ onFinished }: { onFinished?: () => void }) {
     }
 
     lenis?.stop();
-    window.scrollTo(0, 0);
+    scrollToInstant(0);
     return () => lenis?.start();
   }, [done, lenis]);
 

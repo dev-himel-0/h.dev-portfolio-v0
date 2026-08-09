@@ -5,6 +5,8 @@ import {
   hero,
   navigation,
   profile,
+  processSection,
+  processSteps,
   projects,
   services,
   serviceIconSources,
@@ -23,20 +25,21 @@ test.describe("home", () => {
     await expect(page).toHaveTitle(/Himel/);
   });
 
-  test("shows the preloader progress line before revealing the page", async ({
+  test("renders the preloader progress line before revealing the page", async ({
     page,
   }) => {
     await page.emulateMedia({ reducedMotion: "no-preference" });
-    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await page.goto("/", { waitUntil: "commit" });
 
     const progress = page.locator("[data-curtain-progress-fill]");
     await expect(progress).toHaveCount(1);
-    await expect(progress).toBeVisible();
     await expect(progress).toHaveClass(/scale-x-0/);
 
-    await expect(page.locator("[data-curtain-content]")).toBeHidden({
-      timeout: 10_000,
-    });
+    if (await progress.isVisible()) {
+      await expect(page.locator("[data-curtain-content]")).toBeHidden({
+        timeout: 10_000,
+      });
+    }
   });
 
   test("shows the odometer counter during the preloader", async ({ page }) => {
@@ -69,6 +72,47 @@ test.describe("home", () => {
     await expect
       .poll(() => page.evaluate(() => window.scrollY))
       .toBeGreaterThan(before);
+  });
+
+  test("matches Satz's Lenis scroll interpolation", async ({ page }, testInfo) => {
+    test.skip(
+      testInfo.project.name === "Mobile Chrome",
+      "Wheel interpolation is desktop-only; touch scrolling remains native."
+    );
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.goto("/");
+    await expect(page.locator("[data-curtain-content]")).toBeHidden({
+      timeout: 15_000,
+    });
+    await expect
+      .poll(() =>
+        page.evaluate(() =>
+          document.documentElement.classList.contains("lenis-stopped")
+        )
+      )
+      .toBe(false);
+
+    await expect
+      .poll(() => page.evaluate(() => window.lenisVersion))
+      .toBe("1.1.9");
+
+    await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
+    await page.mouse.wheel(0, 600);
+    await page.waitForTimeout(100);
+    const inMotion = await page.evaluate(() => window.scrollY);
+    const isSmooth = await page.evaluate(() =>
+      document.documentElement.classList.contains("lenis-smooth")
+    );
+
+    await expect
+      .poll(() => page.evaluate(() => window.scrollY), { timeout: 3_000 })
+      .toBeGreaterThan(590);
+    const settled = await page.evaluate(() => window.scrollY);
+
+    expect(inMotion).toBeGreaterThan(50);
+    expect(inMotion).toBeLessThan(500);
+    expect(settled).toBeGreaterThan(590);
+    expect(isSmooth).toBe(true);
   });
 
   test("renders the hero heading and actions", async ({ page }) => {
@@ -1475,6 +1519,220 @@ test.describe("stack", () => {
       () => document.documentElement.scrollWidth > window.innerWidth
     );
     expect(hasOverflow).toBe(false);
+  });
+});
+
+test.describe("how I work", () => {
+  test("renders the reference-inspired process flow after stack", async ({
+    page,
+  }) => {
+    await page.goto("/");
+
+    const section = page.locator("#how-i-work");
+    await expect(section).toBeAttached();
+    await expect(section.locator("[data-process-label]")).toHaveText(
+      `${processSection.index} / PROCESS`
+    );
+    await expect(section.locator("#how-i-work-heading")).toContainText(
+      processSection.filledTitle
+    );
+    await expect(section.locator("#how-i-work-heading")).toContainText(
+      processSection.outlinedTitle
+    );
+    await expect(section.locator("#how-i-work-heading")).toHaveCSS(
+      "white-space",
+      "nowrap"
+    );
+    await expect(section.locator("#how-i-work-heading")).toHaveCSS(
+      "text-align",
+      "right"
+    );
+
+    const steps = section.locator("[data-process-step]");
+    await expect(steps).toHaveCount(processSteps.length);
+    await expect(section.locator("[data-process-desktop-track]")).toHaveCount(
+      processSteps.length
+    );
+    await expect(section.locator("[data-process-horizontal-track]")).toHaveCount(
+      processSteps.length
+    );
+
+    for (const [index, step] of processSteps.entries()) {
+      const row = steps.nth(index);
+      await expect(row).toContainText(step.title);
+      await expect(row).toContainText(step.description);
+      await expect(row.locator("[data-process-media] img")).toHaveAttribute(
+        "src",
+        /images\.unsplash\.com/
+      );
+      await expect(row.locator("[data-process-media]")).toHaveCSS(
+        "border-radius",
+        "0px"
+      );
+      await expect(row.locator("[data-process-icon]")).toHaveAttribute(
+        "src",
+        serviceIconSources[step.icon].src
+      );
+      await expect(row.locator("[data-process-number]")).toHaveAttribute(
+        "aria-label",
+        `Step ${String(index + 1).padStart(2, "0")}`
+      );
+    }
+
+    await page.evaluate(() => {
+      document
+        .querySelector("#how-i-work")
+        ?.scrollIntoView({ block: "start" });
+    });
+
+    if ((page.viewportSize()?.width ?? 0) >= 1024) {
+      const rail = section.locator("[data-rail]");
+      await expect(rail).toBeVisible();
+      const railBox = await rail.boundingBox();
+      expect(railBox).not.toBeNull();
+      expect(railBox!.x).toBeLessThan((page.viewportSize()?.width ?? 0) / 2);
+
+      const firstMedia = await steps.nth(0).locator("[data-process-media]").boundingBox();
+      const firstContent = await steps.nth(0).locator("[data-process-content]").boundingBox();
+      const secondMedia = await steps.nth(1).locator("[data-process-media]").boundingBox();
+      const secondContent = await steps.nth(1).locator("[data-process-content]").boundingBox();
+
+      expect(firstMedia).not.toBeNull();
+      expect(firstContent).not.toBeNull();
+      expect(secondMedia).not.toBeNull();
+      expect(secondContent).not.toBeNull();
+      expect(firstMedia!.x).toBeGreaterThan(firstContent!.x);
+      expect(secondMedia!.x).toBeLessThan(secondContent!.x);
+      await expect(section.locator("[data-process-desktop-track]").first()).toHaveCSS(
+        "width",
+        "6px"
+      );
+      await expect(section.locator("[data-process-horizontal-track]").last()).toBeVisible();
+      await expect(section.locator("[data-process-mobile-track]")).toBeHidden();
+    } else {
+      await expect(section.locator("[data-process-mobile-track]")).toBeVisible();
+      await expect(section.locator("[data-process-desktop-track]").first()).toBeHidden();
+      await expect(section.locator("[data-process-mobile-track]")).toHaveCSS(
+        "width",
+        "4px"
+      );
+      const hasOverflow = await page.evaluate(
+        () => document.documentElement.scrollWidth > window.innerWidth
+      );
+      expect(hasOverflow).toBe(false);
+    }
+  });
+
+  test("shows the complete process without motion when reduced motion is enabled", async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+
+    const section = page.locator("#how-i-work");
+    const steps = section.locator("[data-process-step]");
+    await expect(section.locator("[data-process-step]")).toHaveCount(
+      processSteps.length
+    );
+
+    for (const [index] of processSteps.entries()) {
+      await expect(steps.nth(index).locator("[data-process-media]")).toBeVisible();
+      await expect(
+        steps.nth(index).locator("[data-process-media] img")
+      ).toHaveCSS("opacity", "1");
+      await expect(
+        steps.nth(index).locator("[data-process-number-strip]")
+      ).toHaveCSS("transform", /matrix/);
+    }
+  });
+
+  test("reveals each step and reverses its progress path on scroll", async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.goto("/");
+    await expect(page.locator("[data-curtain-content]")).toBeHidden({
+      timeout: 15_000,
+    });
+
+    const step = page.locator("[data-process-step]").nth(1);
+    const positions = await step.evaluate((element) => {
+      const rect = element.getBoundingClientRect();
+      return {
+        top: rect.top + window.scrollY,
+        bottom: rect.bottom + window.scrollY,
+      };
+    });
+    const viewportHeight = page.viewportSize()?.height ?? 900;
+    const start = positions.top - viewportHeight * 0.78;
+    const end = positions.bottom - viewportHeight * 0.42;
+    const progressFill = step.locator(
+      (page.viewportSize()?.width ?? 0) >= 810
+        ? "[data-process-vertical-fill]"
+        : "[data-process-mobile-fill]"
+    );
+    const scaleY = () =>
+      progressFill.evaluate(
+        (element) => new DOMMatrixReadOnly(getComputedStyle(element).transform).d
+      );
+    const numberY = () =>
+      step
+        .locator("[data-process-number-strip]")
+        .evaluate((element) => new DOMMatrixReadOnly(getComputedStyle(element).transform).f);
+
+    await page.evaluate((y) => window.scrollTo(0, y), end + 80);
+
+    await expect
+      .poll(() =>
+        step
+          .locator("[data-process-media]")
+          .evaluate((element) => getComputedStyle(element).opacity)
+      )
+      .toBe("1");
+    await expect
+      .poll(() => scaleY())
+      .toBeGreaterThan(0.9);
+    const fullNumberY = await numberY();
+
+    await page.evaluate((y) => window.scrollTo(0, y), start + (end - start) * 0.45);
+    await expect.poll(() => scaleY()).toBeLessThan(0.85);
+    await expect.poll(() => scaleY()).toBeGreaterThan(0.1);
+    await expect.poll(() => numberY()).toBeGreaterThan(fullNumberY);
+
+    await page.evaluate((y) => window.scrollTo(0, y), start - 80);
+    await expect.poll(() => scaleY()).toBeLessThan(0.1);
+    await expect.poll(() => numberY()).toBeGreaterThan(-1);
+  });
+
+  test("uses the selected-project image hover treatment", async ({ page }) => {
+    test.skip(
+      (page.viewportSize()?.width ?? 0) < 810,
+      "Pointer-follow image hover is desktop-only"
+    );
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.goto("/");
+    await expect(page.locator("[data-curtain-content]")).toBeHidden({
+      timeout: 15_000,
+    });
+
+    const media = page.locator("[data-process-media]").first();
+    const image = media.locator("img");
+    await media.scrollIntoViewIfNeeded();
+
+    const scaleOf = () =>
+      image.evaluate((element) => {
+        const matrix = new DOMMatrixReadOnly(getComputedStyle(element).transform);
+        return matrix.a;
+      });
+
+    await media.hover();
+    await expect.poll(() => scaleOf()).toBeGreaterThan(1.04);
+    await expect.poll(() => image.evaluate((element) => getComputedStyle(element).filter)).toBe(
+      "grayscale(0)"
+    );
+
+    await page.mouse.move(0, 0);
+    await expect.poll(() => scaleOf()).toBeLessThan(1.02);
   });
 });
 

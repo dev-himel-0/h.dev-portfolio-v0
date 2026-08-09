@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { ArrowUp } from "@phosphor-icons/react";
-import { wipeCover } from "@/lib/wipe";
+import { scrollToInstant, wipeCover } from "@/lib/wipe";
 
 const RING_RADIUS = 20;
 const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
@@ -87,7 +87,7 @@ export function ScrollToTop() {
   // ── Scroll to top through the shared curtain wipe ──────────────────
   const handleClick = useCallback(() => {
     wipeCover(() => {
-      window.scrollTo({ top: 0, behavior: "instant" });
+      scrollToInstant(0);
     });
   }, []);
 

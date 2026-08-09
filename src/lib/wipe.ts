@@ -116,6 +116,20 @@ function runAction(action: () => void) {
   }
 }
 
+/** Jump under a covered wipe without leaving Lenis' target out of sync. */
+export function scrollToInstant(target: number | HTMLElement) {
+  if (lenis) {
+    lenis.scrollTo(target, { immediate: true, force: true });
+    return;
+  }
+
+  const top =
+    typeof target === "number"
+      ? target
+      : target.getBoundingClientRect().top + window.scrollY;
+  window.scrollTo({ top, behavior: "instant" });
+}
+
 function resetWipe() {
   if (overlayEl) gsap.set(overlayEl, { display: "none" });
   lenis?.start();

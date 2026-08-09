@@ -131,6 +131,22 @@
   html {
     @apply font-sans;
   }
+  /* Lenis owns the native root scroll position while its RAF loop animates it. */
+  html.lenis {
+    height: auto;
+  }
+  html.lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+  }
+  html.lenis.lenis-smooth [data-lenis-prevent] {
+    overscroll-behavior: contain;
+  }
+  html.lenis.lenis-stopped {
+    overflow: hidden;
+  }
+  html.lenis.lenis-scrolling iframe {
+    pointer-events: none;
+  }
   /* No visible scrollbars anywhere — page and panels still scroll. */
   html {
     scrollbar-width: none;

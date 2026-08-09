@@ -62,6 +62,15 @@ export interface StackCapability {
   tools: string[];
 }
 
+export interface ProcessStep {
+  title: string;
+  description: string;
+  eyebrow: string;
+  icon: ServiceIcon;
+  image: string;
+  imageAlt: string;
+}
+
 export type SocialIcon = "github" | "linkedin" | "x" | "email";
 
 export interface SocialLink {
@@ -265,6 +274,55 @@ export const stackSection = {
   index: "04",
   filledTitle: "What I",
   outlinedTitle: "Use",
+};
+
+export const processSteps: ProcessStep[] = [
+  {
+    title: "Idea",
+    eyebrow: "01 / CLARITY",
+    description:
+      "We start by clarifying the problem, the audience, and the feeling the experience should leave behind.",
+    icon: "product-design",
+    image:
+      "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1600&auto=format&fit=crop",
+    imageAlt: "Placeholder image of a workspace for the idea phase",
+  },
+  {
+    title: "Design",
+    eyebrow: "02 / DIRECTION",
+    description:
+      "The direction takes shape through structure, typography, and interaction decisions that make the product feel intentional.",
+    icon: "ui-ux-design",
+    image:
+      "https://images.unsplash.com/photo-1558655146-d09347e92766?q=80&w=1600&auto=format&fit=crop",
+    imageAlt: "Placeholder image of interface design work",
+  },
+  {
+    title: "Build",
+    eyebrow: "03 / PRECISION",
+    description:
+      "I translate the design into responsive, maintainable code while protecting the details that make the interface feel alive.",
+    icon: "framer-development",
+    image:
+      "https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=1600&auto=format&fit=crop",
+    imageAlt: "Placeholder image of a frontend development workspace",
+  },
+  {
+    title: "Ship",
+    eyebrow: "04 / MOMENTUM",
+    description:
+      "Before launch, I refine the final details, test the experience, and make sure it is fast, clear, and ready to perform.",
+    icon: "creative-direction",
+    image:
+      "https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=1600&auto=format&fit=crop",
+    imageAlt: "Placeholder image representing a shipped digital product",
+  },
+];
+
+export const processSection = {
+  index: "05",
+  filledTitle: "How I",
+  outlinedTitle: "Work",
 };
 
 export const stack: StackItem[] = [

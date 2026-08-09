@@ -3,6 +3,7 @@
 import { useCallback, useState } from "react";
 import { About } from "@/components/sections/about";
 import { Hero } from "@/components/sections/hero";
+import { HowIWork } from "@/components/sections/how-i-work";
 import { Preloader } from "@/components/sections/preloader";
 import { Services } from "@/components/sections/services";
 import { Stack } from "@/components/sections/stack";
@@ -27,6 +28,7 @@ export function HomeExperience() {
       <Work />
       <Services />
       <Stack />
+      <HowIWork />
       {softNavigation ? null : <Preloader onFinished={revealHero} />}
     </main>
   );

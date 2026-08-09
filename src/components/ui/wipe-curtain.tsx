@@ -6,6 +6,7 @@ import { useLenis } from "lenis/react";
 import {
   completeWipe,
   registerWipeCurtain,
+  scrollToInstant,
   unregisterWipeCurtain,
   wipeCover,
   wipeCoverDeferred,
@@ -72,10 +73,7 @@ export function WipeCurtain() {
         const targetId = href.slice(1);
         wipeCover(() => {
           const section = targetId ? document.getElementById(targetId) : null;
-          const top = section
-            ? section.getBoundingClientRect().top + window.scrollY
-            : 0;
-          window.scrollTo({ top, behavior: "instant" });
+          scrollToInstant(section ?? 0);
         });
         return;
       }

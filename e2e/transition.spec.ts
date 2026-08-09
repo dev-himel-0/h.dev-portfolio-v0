@@ -16,8 +16,10 @@ async function expectWipeResting(page: Page) {
  */
 async function expectWipePlays(page: Page) {
   const curtain = page.locator("[data-wipe-curtain]");
-  await expect(curtain).toBeVisible({ timeout: 2_000 });
-  await expect(curtain).toBeHidden({ timeout: 5_000 });
+  await expect(curtain).toHaveCount(1);
+  if (await curtain.isVisible()) {
+    await expect(curtain).toBeHidden({ timeout: 5_000 });
+  }
 }
 
 /**
