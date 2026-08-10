@@ -17,6 +17,7 @@ const DOT_SIZE = 8;
 const SMOOTHNESS = 5;
 const HOVER_SIZE = 60;
 const HOVER_COLOR = "rgba(255, 255, 255, 0.2)";
+const TRANSPARENT = "rgba(255, 255, 255, 0)";
 const FOCUS_HALO_SIZE = 76;
 const FOCUS_HALO_COLOR = "rgba(255, 255, 255, 0.42)";
 const SPARK_COUNT = 8;
@@ -324,14 +325,14 @@ export function CircleCursor() {
             width: RING_SIZE,
             height: RING_SIZE,
             opacity: 0,
-            backgroundColor: "transparent",
+            backgroundColor: TRANSPARENT,
             borderWidth: RING_THICKNESS,
           }}
           animate={{
             width: hovered ? HOVER_SIZE : RING_SIZE,
             height: hovered ? HOVER_SIZE : RING_SIZE,
             opacity: visible ? 1 : 0,
-            backgroundColor: hovered ? HOVER_COLOR : "transparent",
+            backgroundColor: hovered ? HOVER_COLOR : TRANSPARENT,
             borderWidth: hovered ? 0 : RING_THICKNESS,
           }}
           transition={RING_TRANSITION}

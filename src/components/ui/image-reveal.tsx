@@ -87,29 +87,35 @@ export function ImageReveal({
   );
 
   return (
-    <div ref={ref} className={cn("relative overflow-hidden", className)}>
-      <div
-        ref={wrapRef}
-        className={cn(
-          "absolute inset-x-0 top-0",
-          parallax > 0 && "will-change-transform",
-          parallax === 0 && "inset-0"
-        )}
-        style={parallax > 0 ? { height: "135%" } : undefined}
-      >
-        <Image
-          ref={imgRef}
-          src={src}
-          alt={alt}
-          fill
-          sizes="(max-width: 768px) 100vw, 50vw"
+    <div
+      ref={ref}
+      data-image-reveal
+      className={cn("relative overflow-hidden", className)}
+    >
+      <div data-image-fade className="image-white-fade absolute inset-0 overflow-hidden">
+        <div
+          ref={wrapRef}
           className={cn(
-            "object-cover grayscale",
-            colorOnHover &&
-              "transition-[filter] duration-700 ease-out group-hover:grayscale-0"
+            "absolute inset-x-0 top-0",
+            parallax > 0 && "will-change-transform",
+            parallax === 0 && "inset-0"
           )}
-          {...rest}
-        />
+          style={parallax > 0 ? { height: "135%" } : undefined}
+        >
+          <Image
+            ref={imgRef}
+            src={src}
+            alt={alt}
+            fill
+            sizes="(max-width: 768px) 100vw, 50vw"
+            className={cn(
+              "object-cover grayscale",
+              colorOnHover &&
+                "transition-[filter] duration-700 ease-out group-hover:grayscale-0"
+            )}
+            {...rest}
+          />
+        </div>
       </div>
     </div>
   );

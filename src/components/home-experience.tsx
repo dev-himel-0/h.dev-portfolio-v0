@@ -6,6 +6,7 @@ import { Hero } from "@/components/sections/hero";
 import { HowIWork } from "@/components/sections/how-i-work";
 import { Preloader } from "@/components/sections/preloader";
 import { Services } from "@/components/sections/services";
+import { SiteFooter } from "@/components/sections/site-footer";
 import { Stack } from "@/components/sections/stack";
 import { Work } from "@/components/sections/work";
 import { isSoftNavigation } from "@/lib/navigation";
@@ -29,6 +30,7 @@ export function HomeExperience() {
       <Services />
       <Stack />
       <HowIWork />
+      <SiteFooter />
       {softNavigation ? null : <Preloader onFinished={revealHero} />}
     </main>
   );

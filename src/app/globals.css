@@ -175,6 +175,55 @@
   paint-order: stroke fill;
 }
 
+/* Let the white page surface lift the bottom edge of editorial imagery. */
+.image-white-fade {
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    #000 45%,
+    rgb(0 0 0 / 0.9) 55%,
+    rgb(0 0 0 / 0.24) 70%,
+    rgb(0 0 0 / 0.04) 85%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    #000 45%,
+    rgb(0 0 0 / 0.9) 55%,
+    rgb(0 0 0 / 0.24) 70%,
+    rgb(0 0 0 / 0.04) 85%,
+    transparent 100%
+  );
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+}
+
+/* Alpha-only fade for the oversized footer word. The page stays monochrome;
+   only the lower edge of the glyphs dissolves into the white surface. */
+.footer-brand-fade {
+  -webkit-mask-image: linear-gradient(
+    to top,
+    transparent 0%,
+    transparent 14%,
+    rgb(0 0 0 / 0.6) 50%,
+    #000 100%
+  );
+  mask-image: linear-gradient(
+    to top,
+    transparent 0%,
+    transparent 14%,
+    rgb(0 0 0 / 0.6) 50%,
+    #000 100%
+  );
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+}
+
 @media (forced-colors: active) {
   .hero-outline-text {
     color: CanvasText;

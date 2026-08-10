@@ -186,7 +186,7 @@ export function HoverServiceList({ services }: HoverServiceListProps) {
           style={{ x: followX, y: followY }}
         >
           <motion.div
-            className="relative -ml-[95px] -mt-[119px] h-[238px] w-[190px] overflow-hidden bg-black/10"
+            className="image-white-fade relative -ml-[95px] -mt-[119px] h-[238px] w-[190px] overflow-hidden bg-black/10"
             style={{ rotate: cardRotation }}
             initial={false}
             animate={{

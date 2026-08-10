@@ -894,6 +894,47 @@ test.describe("home", () => {
     }
   });
 
+  test("applies the white image fade to editorial imagery", async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+
+    const maskValue = (locator: ReturnType<typeof page.locator>) =>
+      locator.first().evaluate((element) => {
+        const styles = getComputedStyle(element);
+        return styles.maskImage || styles.webkitMaskImage;
+      });
+
+    await expect(page.locator("#work [data-image-reveal]")).toHaveCount(
+      projects.length
+    );
+    await expect(page.locator("#work [data-image-fade]")).toHaveCount(projects.length);
+    await expect(
+      page.locator("[data-process-media] [data-image-reveal]")
+    ).toHaveCount(processSteps.length);
+    await expect(
+      page.locator("[data-process-media] [data-image-fade]")
+    ).toHaveCount(processSteps.length);
+    await expect(
+      page.locator("[data-service-pointer-card] .image-white-fade")
+    ).toHaveCount(1);
+
+    await expect
+      .poll(() => maskValue(page.locator("#work [data-image-fade]")))
+      .toContain("linear-gradient");
+    await expect
+      .poll(() => maskValue(page.locator("[data-process-media] [data-image-fade]")))
+      .toContain("linear-gradient");
+    await expect
+      .poll(() => maskValue(page.locator("[data-service-pointer-card] .image-white-fade")))
+      .toContain("linear-gradient");
+
+    await expect
+      .poll(() => maskValue(page.locator("#work [data-image-reveal]")))
+      .toBe("none");
+  });
+
   test("scales the previous work card as the next card reaches the sticky rail", async ({
     page,
   }) => {
@@ -1142,6 +1183,73 @@ test.describe("home", () => {
       await avatar.hover();
       await expect(avatar.locator("[data-tech-label]")).toBeVisible();
     }
+  });
+
+  test("renders the contact footer with the H.dev brand reveal", async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+
+    const footer = page.locator("#contact");
+    const brand = footer.locator("[data-footer-brand]");
+
+    await expect(footer).toBeAttached();
+    await expect(footer).toContainText(profile.email);
+    await expect(brand).toHaveText(profile.brand);
+    await expect(footer.locator("[data-footer-nav] a")).toHaveCount(
+      navigation.length
+    );
+
+    await expect
+      .poll(() =>
+        brand.evaluate((element) => {
+          const styles = getComputedStyle(element);
+          return styles.maskImage || styles.webkitMaskImage;
+        })
+      )
+      .toContain("linear-gradient");
+
+    await expect
+      .poll(() => brand.evaluate((element) => getComputedStyle(element).opacity))
+      .toBe("1");
+
+    const hasOverflow = await page.evaluate(
+      () => document.documentElement.scrollWidth > window.innerWidth
+    );
+    expect(hasOverflow).toBe(false);
+  });
+
+  test("slides the footer brand up into view", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.goto("/");
+    await expect(page.locator("[data-curtain-content]")).toBeHidden({
+      timeout: 15_000,
+    });
+
+    const brand = page.locator("#contact [data-footer-brand]");
+    const initialState = () =>
+      brand.evaluate((element) => ({
+        opacity: getComputedStyle(element).opacity,
+        transform: getComputedStyle(element).transform,
+      }));
+
+    await expect
+      .poll(() => initialState().then((state) => state.opacity))
+      .toBe("0");
+
+    await brand.scrollIntoViewIfNeeded();
+
+    await expect
+      .poll(() => initialState().then((state) => state.opacity), {
+        timeout: 5_000,
+      })
+      .toBe("1");
+    await expect
+      .poll(() => initialState().then((state) => state.transform), {
+        timeout: 5_000,
+      })
+      .toMatch(/^(none|matrix\(1, 0, 0, 1, 0, 0\))$/);
   });
 });
 
