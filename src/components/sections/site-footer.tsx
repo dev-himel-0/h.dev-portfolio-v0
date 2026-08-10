@@ -5,7 +5,6 @@ import { ArrowUpRight } from "@phosphor-icons/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import { SectionRail } from "@/components/ui/section-rail";
 import { navigation, profile, socials } from "@/lib/data";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
@@ -17,7 +16,6 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
  */
 export function SiteFooter() {
   const rootRef = useRef<HTMLElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
   const brandStageRef = useRef<HTMLDivElement>(null);
   const brandRef = useRef<HTMLSpanElement>(null);
 
@@ -61,18 +59,8 @@ export function SiteFooter() {
       aria-labelledby="footer-heading"
       className="relative overflow-clip bg-white pt-[clamp(4.5rem,10vw,8.75rem)] text-black"
     >
-      <SectionRail
-        sectionRef={rootRef}
-        contentRef={contentRef}
-        index="06"
-        side="right"
-      />
-
-      <div
-        ref={contentRef}
-        className="mx-auto w-full max-w-[100rem] px-5 sm:px-8 lg:px-10"
-      >
-        <div className="grid gap-12 border-t border-black/10 py-[clamp(2.5rem,6vw,5.5rem)] lg:grid-cols-[minmax(0,1.1fr)_minmax(22rem,0.9fr)] lg:gap-20">
+      <div className="mx-auto w-full max-w-[100rem] px-5 sm:px-8 lg:px-10">
+        <div className="mx-auto grid gap-12 py-[clamp(2.5rem,6vw,5.5rem)] lg:max-w-[76rem] lg:grid-cols-[minmax(0,1.1fr)_minmax(22rem,0.9fr)] lg:gap-20">
           <div>
             <p className="font-sans text-[0.625rem] font-medium uppercase tracking-[0.24em] text-black/45">
               Contact
@@ -95,7 +83,7 @@ export function SiteFooter() {
             </a>
           </div>
 
-          <div className="grid grid-cols-2 gap-x-8 gap-y-10 self-end sm:gap-x-12">
+          <div className="grid grid-cols-2 gap-y-10 self-end lg:justify-items-end lg:text-right">
             <FooterColumn label="Based in">
               <p>{profile.location}</p>
               <p className="mt-1 text-black/45">{profile.availability}</p>
@@ -123,9 +111,9 @@ export function SiteFooter() {
             </FooterColumn>
 
             <FooterColumn label="Elsewhere" className="col-span-2 sm:col-span-1">
-              <ul className="flex flex-wrap gap-x-5 gap-y-2">
+              <ul data-footer-socials className="flex flex-nowrap justify-end gap-x-4">
                 {socials.map((social) => (
-                  <li key={social.label}>
+                  <li key={social.label} className="whitespace-nowrap">
                     {social.href ? (
                       <a
                         href={social.href}
@@ -146,7 +134,8 @@ export function SiteFooter() {
 
       <div
         ref={brandStageRef}
-        className="relative overflow-hidden border-y border-black/10 px-2 pt-[clamp(1rem,2vw,2rem)] sm:px-4"
+        data-footer-stage
+        className="relative overflow-hidden border-t border-black/10 px-2 pt-[clamp(1rem,2vw,2rem)] sm:px-4"
       >
         <span
           ref={brandRef}

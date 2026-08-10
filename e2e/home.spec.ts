@@ -1200,6 +1200,34 @@ test.describe("home", () => {
     await expect(footer.locator("[data-footer-nav] a")).toHaveCount(
       navigation.length
     );
+    const socialItems = footer.locator("[data-footer-socials] > li");
+    await expect(socialItems).toHaveCount(socials.length);
+    await expect
+      .poll(() =>
+        socialItems.evaluateAll((elements) =>
+          elements.every(
+            (element) => getComputedStyle(element).whiteSpace === "nowrap"
+          )
+        )
+      )
+      .toBe(true);
+    await expect
+      .poll(() =>
+        socialItems.evaluateAll((elements) => {
+          const tops = elements.map((element) => Math.round(element.getBoundingClientRect().top));
+          return new Set(tops).size;
+        })
+      )
+      .toBe(1);
+
+    await expect(footer.locator("[data-rail]")).toHaveCount(0);
+    await expect(
+      footer.locator(":scope > div:first-child > div:first-child")
+    ).toHaveCSS("border-top-width", "0px");
+    await expect(footer.locator("[data-footer-stage]")).toHaveCSS(
+      "border-bottom-width",
+      "0px"
+    );
 
     await expect
       .poll(() =>
