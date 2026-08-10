@@ -20,6 +20,7 @@ test.describe("circle cursor", () => {
     const ring = page.locator("[data-circle-cursor-ring]");
     const dot = page.locator("[data-circle-cursor-dot]");
     const focusHalo = page.locator("[data-circle-cursor-focus]");
+    const pointer = page.locator("[data-circle-cursor-pointer]");
     const spark = page.locator("[data-circle-cursor-spark]");
     await expect(cursor).toHaveAttribute("data-enabled", "true");
     await expect(cursor).toHaveCSS("z-index", "9999");
@@ -31,6 +32,11 @@ test.describe("circle cursor", () => {
     await expect(ring).toHaveCSS("height", "40px");
     await expect(dot).toHaveCSS("width", "8px");
     await expect(dot).toHaveCSS("height", "8px");
+    await expect(pointer).toHaveCSS("width", "36px");
+    await expect(pointer).toHaveCSS("height", "36px");
+    await expect(pointer).toHaveCSS("background-image", /pointer\.png/);
+    await expect(pointer).toHaveCSS("filter", "brightness(0) invert(1)");
+    await expect(pointer).toHaveCSS("opacity", "0");
     await expect(focusHalo).toHaveCSS("width", "76px");
     await expect(focusHalo).toHaveCSS("height", "76px");
 
@@ -62,9 +68,12 @@ test.describe("circle cursor", () => {
     await expect(cursor).toHaveAttribute("data-hovered", "true");
     await expect
       .poll(() => ring.evaluate((element) => element.getBoundingClientRect().width))
-      .toBeGreaterThan(50);
-    await expect(ring).toHaveCSS("background-color", "rgba(255, 255, 255, 0.2)");
-    await expect(ring).toHaveCSS("border-width", "0px");
+      .toBeGreaterThan(70);
+    await expect(ring).toHaveCSS("background-color", "rgba(255, 255, 255, 0)");
+    await expect
+      .poll(() => pointer.evaluate((element) => Number(getComputedStyle(element).opacity)))
+      .toBeGreaterThan(0.5);
+    await expect(ring).toHaveCSS("border-width", "1px");
     await expect
       .poll(async () =>
         Number(await dot.evaluate((element) => getComputedStyle(element).opacity))
@@ -78,7 +87,10 @@ test.describe("circle cursor", () => {
       .toBeGreaterThan(0.5);
     await expect
       .poll(() => ring.evaluate((element) => element.getBoundingClientRect().width))
-      .toBeGreaterThan(50);
+      .toBeGreaterThan(70);
+    await expect
+      .poll(() => pointer.evaluate((element) => Number(getComputedStyle(element).opacity)))
+      .toBeGreaterThan(0.5);
 
     const focusedButton = page.getByRole("button", { name: "Open menu" });
     await expect
@@ -103,6 +115,9 @@ test.describe("circle cursor", () => {
     await expect
       .poll(() => ring.evaluate((element) => element.getBoundingClientRect().width))
       .toBeLessThan(45);
+    await expect
+      .poll(() => pointer.evaluate((element) => Number(getComputedStyle(element).opacity)))
+      .toBeLessThan(0.05);
     await page.mouse.click(700, 300);
     await expect(spark).toHaveAttribute("data-active", "true");
     await expect(spark).toHaveAttribute("data-active", "false", {

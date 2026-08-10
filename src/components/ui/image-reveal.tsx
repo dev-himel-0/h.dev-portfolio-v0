@@ -92,7 +92,7 @@ export function ImageReveal({
       data-image-reveal
       className={cn("relative overflow-hidden", className)}
     >
-      <div data-image-fade className="image-white-fade absolute inset-0 overflow-hidden">
+      <div data-image-viewport className="absolute inset-0 overflow-hidden">
         <div
           ref={wrapRef}
           className={cn(
@@ -117,6 +117,11 @@ export function ImageReveal({
           />
         </div>
       </div>
+      <div
+        data-image-fade
+        aria-hidden="true"
+        className="image-white-fade pointer-events-none absolute inset-0 z-10"
+      />
     </div>
   );
 }

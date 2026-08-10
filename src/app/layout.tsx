@@ -26,6 +26,9 @@ export const metadata: Metadata = {
   title: "Himel — Frontend Engineer",
   description:
     "Himel is a frontend engineer with 4+ years of experience, open for freelance projects and remote roles.",
+  icons: {
+    icon: "/img/h.png",
+  },
 };
 
 export default function RootLayout({

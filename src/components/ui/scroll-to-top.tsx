@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowUp } from "@phosphor-icons/react";
 import { scrollToInstant, wipeCover } from "@/lib/wipe";
 
@@ -13,40 +13,46 @@ const SHOW_THRESHOLD = 0.2;
  * button appears after scrolling past 20% of the page; clicking it plays the
  * shared curtain wipe (see `WipeCurtain` / `src/lib/wipe.ts`), scrolls to the
  * hero while the viewport is covered, then wipes away to reveal the page.
- * Hidden when the staggered menu is open or while the preloader is active.
+  * Hidden when the staggered menu is open and inactive at the top of the page.
  */
 export function ScrollToTop() {
   const [progress, setProgress] = useState(0);
   const [shouldShow, setShouldShow] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const scrollFrameRef = useRef<number | null>(null);
 
-  // ── Scroll progress tracking ──────────────────────────────────────
+  // Coalesce Lenis' frequent scroll events into one state update per frame.
   useEffect(() => {
-    const onScroll = () => {
+    const update = () => {
+      scrollFrameRef.current = null;
       const maxScroll =
         document.documentElement.scrollHeight - window.innerHeight;
       if (maxScroll <= 0) {
         setProgress(0);
-        return;
+      } else {
+        setProgress(Math.min(window.scrollY / maxScroll, 1));
       }
-      setProgress(Math.min(window.scrollY / maxScroll, 1));
+    };
+
+    const onScroll = () => {
+      // This threshold controls interactivity, so update it synchronously even
+      // when reduced-motion browsers defer animation frames.
+      setShouldShow(window.scrollY > window.innerHeight * SHOW_THRESHOLD);
+      if (scrollFrameRef.current === null) {
+        scrollFrameRef.current = window.requestAnimationFrame(update);
+      }
     };
 
     window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
     onScroll();
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  // ── Visibility: show after 20% scroll, hide when menu is open ─────
-  useEffect(() => {
-    const threshold = window.innerHeight * SHOW_THRESHOLD;
-
-    const update = () => {
-      setShouldShow(window.scrollY > threshold);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (scrollFrameRef.current !== null) {
+        window.cancelAnimationFrame(scrollFrameRef.current);
+      }
     };
-    window.addEventListener("scroll", update, { passive: true });
-    update();
-    return () => window.removeEventListener("scroll", update);
   }, []);
 
   // ── Detect staggered menu open (DOM observation) ──────────────────
@@ -71,19 +77,6 @@ export function ScrollToTop() {
   const visible = shouldShow && !menuOpen;
 
   // ── Detect preloader active ───────────────────────────────────────
-  const [preloaderActive, setPreloaderActive] = useState(true);
-
-  useEffect(() => {
-    const check = () => {
-      const panels = document.querySelectorAll("[data-curtain-panel]");
-      setPreloaderActive(panels.length > 0);
-    };
-    check();
-    const observer = new MutationObserver(check);
-    observer.observe(document.body, { childList: true, subtree: true });
-    return () => observer.disconnect();
-  }, []);
-
   // ── Scroll to top through the shared curtain wipe ──────────────────
   const handleClick = useCallback(() => {
     wipeCover(() => {
@@ -91,7 +84,7 @@ export function ScrollToTop() {
     });
   }, []);
 
-  const shouldHide = menuOpen || preloaderActive;
+  const shouldHide = menuOpen;
 
   return (
     <>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef } from "react";
+import Image from "next/image";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -168,6 +169,12 @@ export function HowIWork() {
 
       <div className="mx-auto w-full max-w-[75rem] px-[1.875rem]">
         <header className="mb-[3.75rem] flex w-full flex-col items-end gap-7 text-right sm:mb-[5rem] lg:mb-[6.25rem]">
+          <p
+            data-process-label
+            className="font-sans text-[0.625rem] font-medium uppercase tracking-[0.22em] text-black/45"
+          >
+            {processSection.index} / PROCESS
+          </p>
           <h2
             id="how-i-work-heading"
             className="whitespace-nowrap font-heading text-[clamp(2.5rem,7vw,5.5rem)] font-semibold leading-[0.88] tracking-[-0.045em]"
@@ -348,11 +355,14 @@ function ProcessStep({
           data-process-copy
           className="mt-9 flex items-center gap-4"
         >
-          <img
+          <Image
             data-process-icon
             src={icon.src}
+            data-image-source={icon.src}
             alt=""
             aria-hidden="true"
+            width={44}
+            height={44}
             draggable={false}
             className="size-10 object-contain grayscale sm:size-11"
           />

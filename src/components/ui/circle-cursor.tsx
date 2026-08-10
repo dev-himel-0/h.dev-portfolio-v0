@@ -15,11 +15,11 @@ const RING_SIZE = 40;
 const RING_THICKNESS = 1;
 const DOT_SIZE = 8;
 const SMOOTHNESS = 5;
-const HOVER_SIZE = 60;
-const HOVER_COLOR = "rgba(255, 255, 255, 0.2)";
+const HOVER_SIZE = 72;
 const TRANSPARENT = "rgba(255, 255, 255, 0)";
 const FOCUS_HALO_SIZE = 76;
 const FOCUS_HALO_COLOR = "rgba(255, 255, 255, 0.42)";
+const POINTER_SIZE = 36;
 const SPARK_COUNT = 8;
 const SPARK_DURATION = 450;
 const SPARK_RADIUS = 24;
@@ -43,6 +43,22 @@ const FOLLOWER_STYLE = {
   pointerEvents: "none" as const,
   translateX: "-50%",
   translateY: "-50%",
+};
+
+const POINTER_STYLE = {
+  position: "fixed" as const,
+  top: 0,
+  left: 0,
+  width: POINTER_SIZE,
+  height: POINTER_SIZE,
+  pointerEvents: "none" as const,
+  translateX: "-30%",
+  translateY: "-5%",
+  backgroundImage: "url('/img/pointer.png')",
+  backgroundPosition: "center",
+  backgroundRepeat: "no-repeat",
+  backgroundSize: "contain",
+  filter: "brightness(0) invert(1)",
 };
 
 function useCursorSpring(value: MotionValue<number>, smoothness: number) {
@@ -332,8 +348,8 @@ export function CircleCursor() {
             width: hovered ? HOVER_SIZE : RING_SIZE,
             height: hovered ? HOVER_SIZE : RING_SIZE,
             opacity: visible ? 1 : 0,
-            backgroundColor: hovered ? HOVER_COLOR : TRANSPARENT,
-            borderWidth: hovered ? 0 : RING_THICKNESS,
+            backgroundColor: TRANSPARENT,
+            borderWidth: RING_THICKNESS,
           }}
           transition={RING_TRANSITION}
         />
@@ -381,6 +397,26 @@ export function CircleCursor() {
           transition={{
             opacity: { duration: 0.2 },
             scale: { type: "spring", damping: 30, stiffness: 200 },
+          }}
+        />
+        <motion.div
+          data-circle-cursor-pointer
+          aria-hidden="true"
+          className="circle-cursor-element circle-cursor-pointer"
+          style={{
+            ...POINTER_STYLE,
+            x: dotSpringX,
+            y: dotSpringY,
+            willChange: "transform, opacity",
+          }}
+          initial={{ opacity: 0, scale: 0.92 }}
+          animate={{
+            opacity: visible && (hovered || focused) ? 1 : 0,
+            scale: hovered || focused ? 1 : 0.92,
+          }}
+          transition={{
+            opacity: { duration: 0.14 },
+            scale: { type: "spring", damping: 30, stiffness: 240 },
           }}
         />
       </div>

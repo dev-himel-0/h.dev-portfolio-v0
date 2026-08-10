@@ -211,7 +211,7 @@ export function Navbar() {
           onClick={toggleMenu}
           aria-label={open ? "Close menu" : "Open menu"}
           aria-expanded={open}
-          aria-haspopup="menu"
+           aria-haspopup="dialog"
           aria-controls="staggered-menu-panel"
           className="smg-toggle relative"
         >

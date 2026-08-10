@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, type PointerEvent } from "react";
+import Image from "next/image";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import {
@@ -186,7 +187,7 @@ export function HoverServiceList({ services }: HoverServiceListProps) {
           style={{ x: followX, y: followY }}
         >
           <motion.div
-            className="image-white-fade relative -ml-[95px] -mt-[119px] h-[238px] w-[190px] overflow-hidden bg-black/10"
+            className="relative -ml-[95px] -mt-[119px] h-[238px] w-[190px] overflow-hidden bg-black/10"
             style={{ rotate: cardRotation }}
             initial={false}
             animate={{
@@ -196,19 +197,30 @@ export function HoverServiceList({ services }: HoverServiceListProps) {
             transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
           >
             <AnimatePresence initial={false} mode="wait">
-              <motion.img
+              <motion.div
                 key={activeService.title}
-                data-service-pointer-image
-                src={activeService.image}
-                alt={`${activeService.title} preview`}
-                draggable={false}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.32, ease: "easeOut" }}
-                className="absolute inset-0 size-full object-cover grayscale contrast-105"
-              />
+                className="absolute inset-0 z-0"
+              >
+                <Image
+                  src={activeService.image}
+                  alt={`${activeService.title} preview`}
+                  fill
+                  sizes="190px"
+                  data-service-pointer-image
+                  data-image-source={activeService.image}
+                  draggable={false}
+                  className="object-cover grayscale contrast-105"
+                />
+              </motion.div>
             </AnimatePresence>
+            <div
+              aria-hidden="true"
+              className="image-white-fade pointer-events-none absolute inset-0 z-10"
+            />
           </motion.div>
         </motion.div>
 
@@ -227,7 +239,7 @@ export function HoverServiceList({ services }: HoverServiceListProps) {
                 onFocus={() => selectService(index)}
                 onPointerEnter={() => selectService(index)}
                 className={cn(
-                  "group grid h-20 w-full grid-cols-[2.125rem_minmax(0,1fr)_auto] items-center gap-4 border-0 bg-transparent p-0 text-left outline-none lg:h-24",
+                  "group grid h-20 w-full grid-cols-[2.125rem_minmax(0,1fr)_auto] items-center gap-4 border-0 bg-transparent p-0 text-left outline-none max-[319px]:gap-3 lg:h-24",
                   "focus-visible:outline focus-visible:outline-2 focus-visible:outline-black focus-visible:outline-offset-4"
                 )}
               >
@@ -257,7 +269,7 @@ export function HoverServiceList({ services }: HoverServiceListProps) {
                 <span
                   data-service-title
                   className={cn(
-                    "block font-heading text-[clamp(1.45rem,3.25vw,2.5rem)] font-medium leading-[1.1] tracking-[-0.03em] text-black transition-colors duration-300 motion-reduce:transition-none",
+                    "block min-w-0 font-heading text-[clamp(1.45rem,3.25vw,2.5rem)] font-medium leading-[1.1] tracking-[-0.03em] text-black transition-colors duration-300 motion-reduce:transition-none max-[319px]:text-[clamp(1.2rem,7vw,1.45rem)]",
                     !active && "text-black/85"
                   )}
                 >
@@ -270,10 +282,13 @@ export function HoverServiceList({ services }: HoverServiceListProps) {
                     active && "text-black"
                   )}
                 >
-                  <img
+                  <Image
                     data-service-icon
+                    data-image-source={icon.src}
                     src={icon.src}
                     alt={icon.alt}
+                    width={40}
+                    height={40}
                     draggable={false}
                     className="size-8 object-contain sm:size-9 lg:size-10"
                   />

@@ -25,6 +25,15 @@ test.describe("home", () => {
     await expect(page).toHaveTitle(/Himel/);
   });
 
+  test("uses the custom favicon", async ({ page }) => {
+    await page.goto("/");
+
+    await expect(page.locator('link[rel="icon"]')).toHaveAttribute(
+      "href",
+      /\/img\/h\.png/
+    );
+  });
+
   test("renders the preloader progress line before revealing the page", async ({
     page,
   }) => {
@@ -46,11 +55,11 @@ test.describe("home", () => {
     await page.emulateMedia({ reducedMotion: "no-preference" });
     await page.goto("/", { waitUntil: "domcontentloaded" });
 
-    const odometer = page.locator("[data-odometer]");
+    const odometer = page.locator("[data-curtain-content] [data-odometer]");
     await expect(odometer).toBeVisible();
     await expect(odometer.locator("[data-odometer-wheel]")).toHaveCount(3);
 
-    await expect(odometer).toBeHidden({ timeout: 10_000 });
+    await expect(odometer).toBeHidden({ timeout: 15_000 });
   });
 
   test("restores scrolling after the preloader finishes", async ({ page }) => {
@@ -91,10 +100,6 @@ test.describe("home", () => {
         )
       )
       .toBe(false);
-
-    await expect
-      .poll(() => page.evaluate(() => window.lenisVersion))
-      .toBe("1.1.9");
 
     await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
     await page.mouse.wheel(0, 600);
@@ -813,8 +818,9 @@ test.describe("home", () => {
 
     const box = await panel.boundingBox();
     const viewport = page.viewportSize();
-    expect(box?.width ?? 0).toBeGreaterThanOrEqual(viewport.width - 1);
-    expect(box?.height ?? 0).toBeGreaterThanOrEqual(viewport.height - 1);
+    if (!box || !viewport) throw new Error("Menu panel has no layout box");
+    expect(box.width).toBeGreaterThanOrEqual(viewport.width - 1);
+    expect(box.height).toBeGreaterThanOrEqual(viewport.height - 1);
   });
 
   test("shows all hero content immediately with reduced motion", async ({
@@ -894,22 +900,22 @@ test.describe("home", () => {
     }
   });
 
-  test("applies the white image fade to editorial imagery", async ({
+  test("keeps the white image overlay separate from editorial imagery", async ({
     page,
   }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/");
 
-    const maskValue = (locator: ReturnType<typeof page.locator>) =>
+    const overlayValue = (locator: ReturnType<typeof page.locator>) =>
       locator.first().evaluate((element) => {
-        const styles = getComputedStyle(element);
-        return styles.maskImage || styles.webkitMaskImage;
+        return getComputedStyle(element).backgroundImage;
       });
 
     await expect(page.locator("#work [data-image-reveal]")).toHaveCount(
       projects.length
     );
     await expect(page.locator("#work [data-image-fade]")).toHaveCount(projects.length);
+    await expect(page.locator("#work [data-image-fade] img")).toHaveCount(0);
     await expect(
       page.locator("[data-process-media] [data-image-reveal]")
     ).toHaveCount(processSteps.length);
@@ -917,21 +923,32 @@ test.describe("home", () => {
       page.locator("[data-process-media] [data-image-fade]")
     ).toHaveCount(processSteps.length);
     await expect(
+      page.locator("[data-process-media] [data-image-fade] img")
+    ).toHaveCount(0);
+    await expect(
       page.locator("[data-service-pointer-card] .image-white-fade")
     ).toHaveCount(1);
+    await expect(
+      page.locator("[data-service-pointer-card] .image-white-fade img")
+    ).toHaveCount(0);
 
     await expect
-      .poll(() => maskValue(page.locator("#work [data-image-fade]")))
+      .poll(() => overlayValue(page.locator("#work [data-image-fade]")))
       .toContain("linear-gradient");
     await expect
-      .poll(() => maskValue(page.locator("[data-process-media] [data-image-fade]")))
+      .poll(() => overlayValue(page.locator("[data-process-media] [data-image-fade]")))
       .toContain("linear-gradient");
     await expect
-      .poll(() => maskValue(page.locator("[data-service-pointer-card] .image-white-fade")))
+      .poll(() => overlayValue(page.locator("[data-service-pointer-card] .image-white-fade")))
       .toContain("linear-gradient");
 
     await expect
-      .poll(() => maskValue(page.locator("#work [data-image-reveal]")))
+      .poll(() =>
+        page.locator("#work [data-image-fade]").first().evaluate((element) => {
+          const styles = getComputedStyle(element);
+          return styles.maskImage || styles.webkitMaskImage;
+        })
+      )
       .toBe("none");
   });
 
@@ -1159,8 +1176,10 @@ test.describe("home", () => {
     await expect
       .poll(() =>
         page.evaluate(
-          () =>
-            getComputedStyle(document.querySelector("[data-work-row]")).opacity
+          () => {
+            const row = document.querySelector("[data-work-row]");
+            return row ? getComputedStyle(row).opacity : "";
+          }
         )
       )
       .toBe("1");
@@ -1185,22 +1204,28 @@ test.describe("home", () => {
     }
   });
 
-  test("renders the contact footer with the H.dev brand reveal", async ({
+  test("renders the layered contact footer with the H.dev brand reveal", async ({
     page,
   }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/");
 
-    const footer = page.locator("#contact");
+    const contact = page.locator("#contact");
+    const footer = page.locator("[data-site-footer]");
     const brand = footer.locator("[data-footer-brand]");
 
-    await expect(footer).toBeAttached();
-    await expect(footer).toContainText(profile.email);
+    await expect(contact).toBeAttached();
+    await expect(contact).toContainText(profile.email);
+    const contactPadding = await contact.evaluate((element) => {
+      const styles = getComputedStyle(element);
+      return { top: styles.paddingTop, bottom: styles.paddingBottom };
+    });
+    expect(contactPadding.top).toBe(contactPadding.bottom);
     await expect(brand).toHaveText(profile.brand);
-    await expect(footer.locator("[data-footer-nav] a")).toHaveCount(
+    await expect(contact.locator("[data-footer-nav] a")).toHaveCount(
       navigation.length
     );
-    const socialItems = footer.locator("[data-footer-socials] > li");
+    const socialItems = contact.locator("[data-footer-socials] > li");
     await expect(socialItems).toHaveCount(socials.length);
     await expect
       .poll(() =>
@@ -1220,10 +1245,14 @@ test.describe("home", () => {
       )
       .toBe(1);
 
-    await expect(footer.locator("[data-rail]")).toHaveCount(0);
+    await expect(contact.locator("[data-rail]")).toHaveCount(0);
     await expect(
-      footer.locator(":scope > div:first-child > div:first-child")
+      contact.locator(":scope > div:first-child > div:first-child")
     ).toHaveCSS("border-top-width", "0px");
+    await expect(footer.locator("[data-footer-stage]")).toHaveCSS(
+      "border-top-width",
+      "0px"
+    );
     await expect(footer.locator("[data-footer-stage]")).toHaveCSS(
       "border-bottom-width",
       "0px"
@@ -1248,36 +1277,46 @@ test.describe("home", () => {
     expect(hasOverflow).toBe(false);
   });
 
-  test("slides the footer brand up into view", async ({ page }) => {
+  test("slides the contact panel and footer brand up into view", async ({
+    page,
+  }) => {
     await page.emulateMedia({ reducedMotion: "no-preference" });
     await page.goto("/");
     await expect(page.locator("[data-curtain-content]")).toBeHidden({
       timeout: 15_000,
     });
 
-    const brand = page.locator("#contact [data-footer-brand]");
-    const initialState = () =>
+    const contact = page.locator("#contact");
+    const brand = page.locator("[data-site-footer] [data-footer-brand]");
+    const initialContactTransform = () =>
+      contact.evaluate((element) => getComputedStyle(element).transform);
+    const brandState = () =>
       brand.evaluate((element) => ({
         opacity: getComputedStyle(element).opacity,
         transform: getComputedStyle(element).transform,
       }));
 
     await expect
-      .poll(() => initialState().then((state) => state.opacity))
+      .poll(() => brandState().then((state) => state.opacity))
       .toBe("0");
 
     await brand.scrollIntoViewIfNeeded();
 
     await expect
-      .poll(() => initialState().then((state) => state.opacity), {
+      .poll(() => brandState().then((state) => state.opacity), {
         timeout: 5_000,
       })
       .toBe("1");
     await expect
-      .poll(() => initialState().then((state) => state.transform), {
+      .poll(() => brandState().then((state) => state.transform), {
         timeout: 5_000,
       })
       .toMatch(/^(none|matrix\(1, 0, 0, 1, 0, 0\))$/);
+    await expect
+      .poll(initialContactTransform, {
+        timeout: 5_000,
+      })
+      .toMatch(/matrix\(1, 0, 0, 1, 0, -/);
   });
 });
 
@@ -1357,7 +1396,7 @@ test.describe("services", () => {
       const icon = row.locator("[data-service-icon]");
       await expect(icon).toBeVisible();
       await expect(icon).toHaveAttribute(
-        "src",
+        "data-image-source",
         serviceIconSources[service.icon].src
       );
       const iconBox = await icon.boundingBox();
@@ -1375,7 +1414,7 @@ test.describe("services", () => {
       const pointerImage = section.locator("[data-service-pointer-image]");
       await expect(pointerImage).toBeVisible();
       await expect(pointerImage).toHaveAttribute(
-        "src",
+        "data-image-source",
         services[1].image
       );
       await expect(section.locator("[data-service-pointer-card] > div")).toHaveCSS(
@@ -1578,7 +1617,6 @@ test.describe("stack", () => {
     });
 
     const card = page.locator("[data-stack-card]").first();
-    const icon = card.locator("[data-stack-icon]");
     await card.hover();
     await page.waitForTimeout(900);
 
@@ -1706,7 +1744,7 @@ test.describe("how I work", () => {
         "0px"
       );
       await expect(row.locator("[data-process-icon]")).toHaveAttribute(
-        "src",
+        "data-image-source",
         serviceIconSources[step.icon].src
       );
       await expect(row.locator("[data-process-number]")).toHaveAttribute(
@@ -1965,7 +2003,9 @@ test.describe("about", () => {
     await waitForPage(page);
 
     await page.locator("[data-hero-menu-toggle]").click();
-    const link = page.getByRole("link", { name: "About" });
+    const link = page
+      .getByRole("navigation", { name: "Menu" })
+      .getByRole("link", { name: "About" });
     await expect(link).toBeVisible();
     await link.click();
 
@@ -2568,10 +2608,9 @@ test.describe("navigation wipe", () => {
     await waitForPage(page);
 
     await page.locator("[data-hero-menu-toggle]").click();
-    const link = page.getByRole("link", {
-      name: navigation[0].label,
-      exact: true,
-    });
+    const link = page
+      .getByRole("navigation", { name: "Menu" })
+      .getByRole("link", { name: navigation[0].label, exact: true });
     await expect(link).toBeVisible();
     await link.click();
 

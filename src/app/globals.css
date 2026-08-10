@@ -147,21 +147,6 @@
   html.lenis.lenis-scrolling iframe {
     pointer-events: none;
   }
-  /* No visible scrollbars anywhere — page and panels still scroll. */
-  html {
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-  html::-webkit-scrollbar {
-    display: none;
-  }
-  * {
-    scrollbar-width: none;
-  }
-  *::-webkit-scrollbar {
-    display: none;
-  }
-
   [data-circle-cursor-active="true"],
   [data-circle-cursor-active="true"] * {
     cursor: none !important;
@@ -175,30 +160,17 @@
   paint-order: stroke fill;
 }
 
-/* Let the white page surface lift the bottom edge of editorial imagery. */
+/* Keep the fade in its own layer so transformed images cannot move its edge. */
 .image-white-fade {
-  -webkit-mask-image: linear-gradient(
+  background: linear-gradient(
     to bottom,
-    #000 0%,
-    #000 45%,
-    rgb(0 0 0 / 0.9) 55%,
-    rgb(0 0 0 / 0.24) 70%,
-    rgb(0 0 0 / 0.04) 85%,
-    transparent 100%
+    transparent 0%,
+    transparent 45%,
+    rgb(255 255 255 / 0.1) 55%,
+    rgb(255 255 255 / 0.76) 70%,
+    rgb(255 255 255 / 0.96) 85%,
+    #fff 100%
   );
-  mask-image: linear-gradient(
-    to bottom,
-    #000 0%,
-    #000 45%,
-    rgb(0 0 0 / 0.9) 55%,
-    rgb(0 0 0 / 0.24) 70%,
-    rgb(0 0 0 / 0.04) 85%,
-    transparent 100%
-  );
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  -webkit-mask-size: 100% 100%;
-  mask-size: 100% 100%;
 }
 
 /* Alpha-only fade for the oversized footer word. The page stays monochrome;
@@ -312,6 +284,11 @@
   color: oklch(0.985 0 0);
   pointer-events: auto;
   will-change: transform, opacity;
+  scrollbar-width: none;
+}
+
+.smg-panel::-webkit-scrollbar {
+  display: none;
 }
 
 .smg-panel:focus-visible {
@@ -587,6 +564,73 @@
   }
 }
 
+/* Keep the menu content inside short landscape viewports instead of making
+   the footer depend on a small internal scroll. */
+@media (max-height: 480px) and (orientation: landscape) {
+  .smg-inner {
+    gap: 1rem;
+    padding-top: max(2rem, calc(env(safe-area-inset-top) + 0.75rem));
+    padding-bottom: max(1rem, calc(env(safe-area-inset-bottom) + 0.75rem));
+  }
+
+  .smg-list {
+    gap: 0.2rem;
+  }
+
+  .smg-item-wrap {
+    padding-block: 0.1rem;
+  }
+
+  .smg-item {
+    font-size: min(1.75rem, 7vh);
+  }
+
+  .smg-footer {
+    gap: 0.5rem;
+    padding-top: 0.75rem;
+  }
+
+  .smg-socials {
+    gap: 0.5rem 1rem;
+  }
+
+  .smg-socials-list {
+    gap: 0.75rem 1.25rem;
+  }
+
+  .smg-social {
+    font-size: 0.9375rem;
+  }
+}
+
+/* The desktop menu is still scrollable by design, but avoid a tiny clipped
+   tail on short desktop windows where the full footer almost fits. */
+@media (min-width: 768px) and (max-height: 920px) and (min-height: 481px) {
+  .smg-inner {
+    gap: 2rem;
+    padding-bottom: max(
+      clamp(1rem, 3vh, 2rem),
+      calc(env(safe-area-inset-bottom) + 0.75rem)
+    );
+  }
+
+  .smg-item {
+    font-size: min(
+      clamp(1.5rem, 5vw, 3.75rem),
+      clamp(2rem, 8vh, 3.75rem)
+    );
+  }
+
+  .smg-item-wrap {
+    padding-block: 0.35rem;
+  }
+
+  .smg-footer {
+    gap: 1rem;
+    padding-top: 1.25rem;
+  }
+}
+
 /* ---- Navbar full-bleed background ----
    The frosted backdrop-filter lives on the inline style (see navbar.tsx)
    so Tailwind's Lightning CSS pass can't strip the unprefixed property. */
@@ -824,6 +868,10 @@ header[data-open="true"] .navbar-bg {
 
 .circle-cursor-element {
   pointer-events: none;
+}
+
+.circle-cursor-pointer {
+  z-index: 1;
 }
 
 .circle-cursor-spark {

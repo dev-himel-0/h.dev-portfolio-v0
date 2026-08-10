@@ -73,6 +73,8 @@ export function StaggeredMenu({
   const openTimelineRef = useRef<gsap.core.Timeline | null>(null);
   const closeTweenRef = useRef<gsap.core.Tween | null>(null);
   const hasInteractedRef = useRef(false);
+  const firstMenuLinkRef = useRef<HTMLAnchorElement>(null);
+  const restoreFocusRef = useRef<HTMLElement | null>(null);
   const lenis = useLenis();
 
   useLayoutEffect(() => {
@@ -344,6 +346,49 @@ export function StaggeredMenu({
 
   useEffect(() => {
     if (!open) return;
+
+    restoreFocusRef.current =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const focusFrame = window.requestAnimationFrame(() => {
+      firstMenuLinkRef.current?.focus();
+    });
+
+    const handleTab = (event: KeyboardEvent) => {
+      if (event.key !== "Tab") return;
+
+      const focusable = Array.from(
+        panelRef.current?.querySelectorAll<HTMLElement>(
+          "a[href], button:not([disabled]), [tabindex]:not([tabindex='-1'])"
+        ) ?? []
+      ).filter((element) => !element.hidden && element.getClientRects().length > 0);
+
+      if (!focusable.length) {
+        event.preventDefault();
+        return;
+      }
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener("keydown", handleTab);
+    return () => {
+      window.cancelAnimationFrame(focusFrame);
+      document.removeEventListener("keydown", handleTab);
+      restoreFocusRef.current?.focus();
+      restoreFocusRef.current = null;
+    };
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
     const handlePointerDown = (event: PointerEvent) => {
       const target = event.target as Node | null;
       if (!(target instanceof Element)) return;
@@ -447,23 +492,26 @@ export function StaggeredMenu({
       <aside
         ref={panelRef}
         id="staggered-menu-panel"
+        role="dialog"
         className="smg-panel"
         data-lenis-prevent
         aria-label="Menu"
+        aria-modal="true"
         aria-hidden={!open}
         inert={!open}
       >
         <div className="smg-inner">
           <nav aria-label="Menu">
             <ul className="smg-list" role="list">
-              {navigation.map((item) => (
+              {navigation.map((item, index) => (
                 <li key={item.href} data-menu-item className="smg-item-wrap">
                   <a
-                        href={item.href}
-                        className="smg-item"
-                        onClick={close}
-                        aria-label={item.label}
-                      >
+                    ref={index === 0 ? firstMenuLinkRef : undefined}
+                    href={item.href}
+                    className="smg-item"
+                    onClick={close}
+                    aria-label={item.label}
+                  >
                     <span data-menu-item-label className="smg-item-mask">
                       <span className="smg-word">
                         {item.label.split("").map((char, index) => (
