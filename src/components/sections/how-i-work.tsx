@@ -168,12 +168,6 @@ export function HowIWork() {
 
       <div className="mx-auto w-full max-w-[75rem] px-[1.875rem]">
         <header className="mb-[3.75rem] flex w-full flex-col items-end gap-7 text-right sm:mb-[5rem] lg:mb-[6.25rem]">
-          <p
-            data-process-label
-            className="w-fit rounded-full bg-black/[0.08] px-3 py-[0.3125rem] font-sans text-[0.625rem] font-medium uppercase tracking-[0.22em] text-black/60"
-          >
-            {processSection.index} / PROCESS
-          </p>
           <h2
             id="how-i-work-heading"
             className="whitespace-nowrap font-heading text-[clamp(2.5rem,7vw,5.5rem)] font-semibold leading-[0.88] tracking-[-0.045em]"
@@ -237,8 +231,7 @@ function ProcessStep({
         className={cn(
             "pointer-events-none absolute bottom-0 top-0 hidden w-1.5 bg-black/10 min-[810px]:block",
           railOnLeft ? "left-0" : "left-1/2 -translate-x-1/2",
-          index === 0 && "top-[0.9375rem]",
-          last && "bottom-[0.9375rem]"
+          index === 0 && "top-[0.9375rem]"
         )}
       >
         <span
@@ -285,7 +278,7 @@ function ProcessStep({
         data-process-node
         className={cn(
           "pointer-events-none absolute bottom-[-0.6875rem] z-[2] hidden size-8 rounded-full border-[0.3125rem] border-black/10 bg-white min-[810px]:block",
-          railOnLeft
+          last || railOnLeft
             ? "left-[-0.6875rem]"
             : "left-1/2 -translate-x-1/2"
         )}
