@@ -157,11 +157,7 @@ export function SiteFooter() {
         </span>
       </div>
 
-      <div className="mx-auto flex w-full max-w-[100rem] flex-col gap-2 px-5 py-5 font-sans text-[0.625rem] uppercase tracking-[0.16em] text-black/45 sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-10">
-        <span>© {new Date().getFullYear()} {profile.brand}</span>
-        <span>{profile.role}</span>
-        <span>{profile.location}</span>
-      </div>
+
     </footer>
   );
 }
