@@ -46,12 +46,16 @@ export function PageTransition({ children }: { children: ReactNode }) {
     markSoftNavigation();
   }
 
-  // Back/forward only — `popstate` never fires for router.push or Link. The
-  // cover goes up the moment `popstate` fires, i.e. BEFORE the incoming
-  // route commits, so every paint of the new page happens underneath it.
+  // Back/forward only — `popstate` never fires for router.push or Link. Some
+  // browsers also emit it for hash-only navigation, so ignore events where
+  // the pathname is unchanged; menu anchors should close and scroll directly.
+  // The cover goes up the moment a route-changing `popstate` fires, i.e.
+  // BEFORE the incoming route commits, so every paint of the new page happens
+  // underneath it.
   // `completeWipe` below lifts the curtain once the commit has landed.
   useEffect(() => {
     const onPopState = () => {
+      if (window.location.pathname === lastPathnameRef.current) return;
       wipeCoverDeferred(() => {});
     };
     window.addEventListener("popstate", onPopState);

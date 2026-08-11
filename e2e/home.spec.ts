@@ -425,6 +425,33 @@ test.describe("home", () => {
     }
   });
 
+  test("menu navigation skips the shared curtain wipe", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.goto("/");
+    await expect(page.locator("[data-curtain-content]")).toBeHidden({
+      timeout: 15_000,
+    });
+
+    const firstItem = navigation[0];
+    const curtain = page.locator("[data-wipe-curtain]");
+    await page.locator("[data-hero-menu-toggle]").click();
+
+    const menuLink = page
+      .locator("#staggered-menu-panel")
+      .getByRole("link", { name: firstItem.label });
+    await expect(menuLink).toBeVisible({ timeout: 2_000 });
+    await menuLink.click();
+
+    await expect(curtain).toBeHidden();
+    await expect
+      .poll(() => page.evaluate(() => window.location.hash))
+      .toBe(firstItem.href);
+    await expect(page.locator(firstItem.href)).toBeInViewport();
+    await expect(page.locator("#staggered-menu-panel")).toBeHidden({
+      timeout: 2_500,
+    });
+  });
+
   test("uses a three-fold right-to-left reveal and Yunox-style menu icon", async ({
     page,
   }) => {
@@ -498,6 +525,49 @@ test.describe("home", () => {
     await expect
       .poll(() => iconState(secondBar).then((state) => state.rotation))
       .toBe(0);
+  });
+
+  test("reverse-staggers the three folds while closing", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.goto("/");
+    await expect(page.locator("[data-curtain-content]")).toBeHidden({
+      timeout: 15_000,
+    });
+
+    const toggle = page.locator("[data-hero-menu-toggle]");
+    const folds = page.locator("[data-menu-prelayer]");
+    const panel = page.locator("#staggered-menu-panel");
+
+    await toggle.click();
+    await expect(panel).toBeVisible();
+    await expect
+      .poll(
+        () =>
+          folds.evaluateAll((elements) =>
+            elements.every(
+              (element) =>
+                new DOMMatrixReadOnly(getComputedStyle(element).transform).e === 0
+            )
+          ),
+        { timeout: 2_500 }
+      )
+      .toBe(true);
+
+    await toggle.click();
+    await expect
+      .poll(
+        () =>
+          folds.evaluateAll((elements) => {
+            const offsets = elements.map(
+              (element) => new DOMMatrixReadOnly(getComputedStyle(element).transform).e
+            );
+            return offsets[0] < offsets[1] && offsets[1] < offsets[2];
+          }),
+        { timeout: 500 }
+      )
+      .toBe(true);
+
+    await expect(panel).toBeHidden({ timeout: 2_500 });
   });
 
   test("menu links are split into masked character pairs", async ({ page }) => {

@@ -23,9 +23,10 @@ const PANELS = 5;
  * It also intercepts link clicks in the capture phase, before Next's Link
  * handler or any React onClick can react:
  *
- * - `a[href^="#"]` — in-page anchors (menu items, hero CTAs, monogram):
+ * - `a[href^="#"]` — in-page anchors (hero CTAs, monogram, footer links):
  *   default prevented, then the wipe plays and the target section scrolls
- *   into view while the screen is covered.
+ *   into view while the screen is covered. Staggered-menu links pass through
+ *   so the menu can close without replaying the page curtain.
  * - `a[href^="/"]` — internal route links (e.g. the 404 "Back home"): default
  *   prevented (Next Link bails on `defaultPrevented`), the curtain drops in
  *   instantly, `router.push` commits underneath, and the reveal is deferred
@@ -62,6 +63,7 @@ export function WipeCurtain() {
       if (!(target instanceof Element)) return;
       const anchor = target.closest("a");
       if (!anchor) return;
+      if (anchor.closest("#staggered-menu-panel")) return;
       if (anchor.target === "_blank") return;
       if (anchor.hasAttribute("download")) return;
 

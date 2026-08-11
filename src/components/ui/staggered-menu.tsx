@@ -17,11 +17,11 @@ import type { SocialIcon } from "@/lib/data";
 gsap.registerPlugin(CustomEase);
 
 /**
- * Fullscreen b/w menu, adapted from React Bits' StaggeredMenu. Three black
- * curtain folds sweep in from the right using the measured Yunox timing, then a
- * fullscreen black panel and its content settle over them with numbered General
- * Sans items, a Montserrat email/availability footer and a socials row. All
- * entrance/exit choreography is a single GSAP timeline.
+ * Fullscreen b/w menu, adapted from React Bits' StaggeredMenu and Yunox. Three
+ * dark curtain folds sweep in from the right, then the transparent menu surface
+ * and its content fade over them with numbered General Sans items, a Montserrat
+ * email/availability footer and a socials row. All entrance/exit choreography
+ * is a single GSAP timeline.
  *
  * The toggle button lives in the Navbar (this component only holds the overlay),
  * so state is controlled via `open` / `onOpenChange`.
@@ -33,28 +33,26 @@ const YUNOX_MENU_EASE = CustomEase.create(
 );
 
 /**
- * Entrance/exit choreography timings (s). The first three values mirror the
- * Yunox preview: 0.8s movement, 0.2s fold offset, and a cubic-bezier-like
- * ease. The panel begins at 0.5s and menu content begins at 0.75s while the
- * final fold is still settling.
+ * Entrance/exit choreography timings (s). The fold cadence and overlap mirror
+ * Yunox while the content remains a separate, stationary fade layer.
  */
 const MENU_TIMING = {
-  curtainDuration: 0.8,
-  curtainStagger: 0.2,
-  panelDelay: 0.5,
+  curtainDuration: 0.6,
+  curtainStagger: 0.25,
   panelDuration: 0.8,
   contentDelay: 0.75,
-  itemDuration: 0.8,
-  itemStagger: 0.08,
-  numberDuration: 0.8,
-  numberDelay: 0.05,
+  itemDelay: 0.6,
+  itemDuration: 0.4,
+  itemStagger: 0.2,
+  numberDuration: 0.4,
+  numberDelay: 0,
   numberHoverDuration: 0.5,
   numberHoverScale: 1.3,
   footerLeadGap: 0.35,
   footerDuration: 0.45,
   socialStagger: 0.08,
   socialDelay: 0.04,
-  closeDuration: 0.4,
+  closeDuration: 0.3,
   itemHoverDuration: 0.65,
   itemHoverStagger: 0.03,
 } as const;
@@ -70,7 +68,7 @@ export function StaggeredMenu({
   const panelRef = useRef<HTMLElement>(null);
   const openRef = useRef(open);
   const openTimelineRef = useRef<gsap.core.Timeline | null>(null);
-  const closeTweenRef = useRef<gsap.core.Tween | null>(null);
+  const closeTweenRef = useRef<gsap.core.Timeline | null>(null);
   const hasInteractedRef = useRef(false);
   const firstMenuLinkRef = useRef<HTMLAnchorElement>(null);
   const restoreFocusRef = useRef<HTMLElement | null>(null);
@@ -81,17 +79,17 @@ export function StaggeredMenu({
   }, [open]);
 
   /**
-   * Initial closed item states — before opening, after closing, on mount.
-   * The masks retain the existing editorial rise while the curtain timing
-   * follows the Yunox reveal.
+  * Initial closed item states — before opening, after closing, on mount.
+  * The masks use Yunox's compact 30px rise while the curtain timing follows
+  * the horizontal layered reveal.
    */
   const resetClosed = useCallback(() => {
     const root = rootRef.current;
     const panel = panelRef.current;
     if (!root || !panel) return;
     gsap.set(panel.querySelectorAll("[data-menu-item-label]"), {
-      yPercent: 140,
-      rotate: 10,
+      y: 30,
+      rotate: 0,
       opacity: 0,
     });
     gsap.set(panel.querySelectorAll<HTMLElement>(".smg-item"), {
@@ -113,50 +111,6 @@ export function StaggeredMenu({
     gsap.set(panel.querySelectorAll(".smg-char-b"), { yPercent: 100 });
   }, []);
 
-  /** Sets the fully-open state for initialization and interruption recovery. */
-  const finishOpen = useCallback(() => {
-    const root = rootRef.current;
-    const panel = panelRef.current;
-    if (!root || !panel) return;
-    gsap.set(root.querySelectorAll("[data-menu-prelayer]"), { xPercent: 0, autoAlpha: 1 });
-    gsap.set(panel, { xPercent: 0, autoAlpha: 1 });
-    gsap.set(panel.querySelectorAll("[data-menu-item-label]"), {
-      yPercent: 0,
-      rotate: 0,
-      opacity: 1,
-    });
-    gsap.set(panel.querySelectorAll("[data-menu-item-label]"), {
-      clearProps: "transform,opacity",
-    });
-    gsap.set(panel.querySelectorAll<HTMLElement>(".smg-item"), {
-      "--sm-num-rise": "0%",
-      "--sm-num-rot": "0deg",
-      "--sm-num-scale": 1,
-      "--sm-num-opacity": 1,
-    });
-    gsap.set(
-      [
-        ...Array.from(panel.querySelectorAll("[data-menu-footer-lead]")),
-        ...Array.from(panel.querySelectorAll("[data-menu-socials-title]")),
-        ...Array.from(panel.querySelectorAll("[data-menu-footer-note]")),
-      ],
-      { opacity: 1 }
-    );
-    gsap.set(panel.querySelectorAll("[data-menu-social-link]"), { y: 0, opacity: 1 });
-  }, []);
-
-  /** Sets the fully-closed state for initialization and interruption recovery. */
-  const finishClose = useCallback(() => {
-    const root = rootRef.current;
-    const panel = panelRef.current;
-    if (!root || !panel) return;
-    gsap.set(
-      [...Array.from(root.querySelectorAll("[data-menu-prelayer]")), panel],
-      { xPercent: 100, autoAlpha: 0 }
-    );
-    resetClosed();
-  }, [resetClosed]);
-
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
       const root = rootRef.current;
@@ -167,7 +121,7 @@ export function StaggeredMenu({
         xPercent: 100,
         autoAlpha: 1,
       });
-      gsap.set(panel, { xPercent: 100, autoAlpha: 0 });
+      gsap.set(panel, { xPercent: 0, autoAlpha: 0 });
       resetClosed();
     }, rootRef);
     return () => ctx.revert();
@@ -190,12 +144,13 @@ export function StaggeredMenu({
     const footerNote = panel.querySelector("[data-menu-footer-note]");
     const links = Array.from(panel.querySelectorAll("[data-menu-social-link]"));
 
-    gsap.set(panel, { autoAlpha: 1 });
+    gsap.set(panel, { xPercent: 0, visibility: "visible", opacity: 0 });
     resetClosed();
 
     const tl = gsap.timeline({ paused: true });
 
-    // Curtain sweep — three folds enter from right to left, 0.2s apart.
+    // Yunox-style layered sweep — three folds enter from right to left while
+    // overlapping by 250ms, leaving the menu surface stationary underneath.
     prelayers.forEach((el, i) => {
       tl.fromTo(
         el,
@@ -209,19 +164,17 @@ export function StaggeredMenu({
       );
     });
 
-    // Panel insertion overlaps the folds, matching the reference's layered
-    // reveal rather than waiting for the last curtain to finish.
-    const panelInsertTime = prelayers.length ? MENU_TIMING.panelDelay : 0;
-    const panelDuration = MENU_TIMING.panelDuration;
-    tl.fromTo(
+    // The surface does not travel horizontally. It fades over the folds once
+    // the reference reveal has established its layered depth.
+    tl.to(
       panel,
-      { xPercent: 100 },
-      { xPercent: 0, duration: panelDuration, ease: YUNOX_MENU_EASE },
-      panelInsertTime
+      { opacity: 1, duration: MENU_TIMING.panelDuration, ease: YUNOX_MENU_EASE },
+      MENU_TIMING.contentDelay
     );
 
-    // Items — begin at the reference's 0.75s content reveal point.
-    const itemsStart = MENU_TIMING.contentDelay;
+    // Links begin just before the surface fade, matching the reference's
+    // overlapping content reveal rather than waiting for the folds to finish.
+    const itemsStart = MENU_TIMING.itemDelay;
     const cascadeEnd =
       itemsStart + MENU_TIMING.itemDuration + (labels.length - 1) * MENU_TIMING.itemStagger;
 
@@ -229,7 +182,7 @@ export function StaggeredMenu({
       tl.to(
         labels,
         {
-          yPercent: 0,
+          y: 0,
           rotate: 0,
           opacity: 1,
           duration: MENU_TIMING.itemDuration,
@@ -259,7 +212,7 @@ export function StaggeredMenu({
     // final link lands (panel-fraction fallback if no nav items exist).
     const socialsStart = labels.length
       ? cascadeEnd - MENU_TIMING.footerLeadGap
-      : panelInsertTime + panelDuration * 0.28;
+      : MENU_TIMING.contentDelay + MENU_TIMING.panelDuration * 0.28;
     const footerStatic = [footerLead, socialsTitle, footerNote].filter(Boolean);
     if (footerStatic.length) {
       tl.to(
@@ -287,7 +240,7 @@ export function StaggeredMenu({
 
     openTimelineRef.current = tl;
     tl.play(0);
-  }, [finishOpen, resetClosed]);
+  }, [resetClosed]);
 
   const playClose = useCallback(() => {
     const root = rootRef.current;
@@ -298,18 +251,37 @@ export function StaggeredMenu({
     openTimelineRef.current = null;
     closeTweenRef.current?.kill();
 
-    const prelayers = Array.from(root.querySelectorAll("[data-menu-prelayer]"));
-    closeTweenRef.current = gsap.to([...prelayers, panel], {
-      xPercent: 100,
-      duration: MENU_TIMING.closeDuration,
-      ease: YUNOX_MENU_EASE,
-      overwrite: "auto",
+    const prelayers = Array.from(root.querySelectorAll<HTMLElement>("[data-menu-prelayer]"));
+    const closeTimeline = gsap.timeline({
       onComplete: () => {
         gsap.set(panel, { autoAlpha: 0 });
         resetClosed();
       },
     });
-  }, [finishClose, resetClosed]);
+
+    // The surface clears first, then the folds peel away from front to back.
+    // A reverse stagger preserves the three-layer read on the way out.
+    closeTimeline.to(panel, {
+      opacity: 0,
+      duration: MENU_TIMING.closeDuration,
+      ease: "power3.in",
+      overwrite: "auto",
+    });
+    if (prelayers.length) {
+      closeTimeline.to(
+        prelayers,
+        {
+          xPercent: 100,
+          duration: MENU_TIMING.curtainDuration,
+          ease: YUNOX_MENU_EASE,
+          stagger: { each: MENU_TIMING.curtainStagger, from: "end" },
+          overwrite: "auto",
+        },
+        0
+      );
+    }
+    closeTweenRef.current = closeTimeline;
+  }, [resetClosed]);
 
   useEffect(() => {
     if (open) {

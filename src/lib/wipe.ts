@@ -3,7 +3,7 @@ import type Lenis from "lenis";
 
 /**
  * Shared cinematic curtain wipe for the whole app — the staggered black
- * bands that the scroll-to-top button, nav-link clicks and back/forward page
+ * bands that the scroll-to-top button, in-page links and back/forward page
  * transitions all run through. One overlay is mounted by `WipeCurtain` in the
  * root layout and registered here, so every caller gets the identical
  * choreography from a single source of truth. Three modes exist:

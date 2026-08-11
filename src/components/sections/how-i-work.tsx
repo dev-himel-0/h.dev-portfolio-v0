@@ -1,18 +1,14 @@
 "use client";
 
-import { useRef } from "react";
-import Image from "next/image";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
 import { ImageReveal } from "@/components/ui/image-reveal";
 import { SectionRail } from "@/components/ui/section-rail";
-import {
-  processSection,
-  processSteps,
-  serviceIconSources,
-} from "@/lib/data";
+import { processSection, processSteps, serviceIconSources } from "@/lib/data";
 import { cn } from "@/lib/utils";
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Image from "next/image";
+import { useRef } from "react";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -32,24 +28,29 @@ export function HowIWork() {
         const media = step.querySelector<HTMLElement>("[data-process-media]");
         const image = media?.querySelector<HTMLImageElement>("img");
         const copy = gsap.utils.toArray<HTMLElement>(
-          step.querySelectorAll("[data-process-copy]")
+          step.querySelectorAll("[data-process-copy]"),
         );
         const numberStrip = step.querySelector<HTMLElement>(
-          "[data-process-number-strip]"
+          "[data-process-number-strip]",
         );
         const verticalFills = gsap.utils.toArray<HTMLElement>(
           step.querySelectorAll(
-            "[data-process-vertical-fill], [data-process-mobile-fill]"
-          )
+            "[data-process-vertical-fill], [data-process-mobile-fill]",
+          ),
         );
         const horizontalFill = step.querySelector<HTMLElement>(
-          "[data-process-horizontal-fill]"
+          "[data-process-horizontal-fill]",
         );
         const nodes = gsap.utils.toArray<HTMLElement>(
-          step.querySelectorAll("[data-process-node-fill]")
+          step.querySelectorAll("[data-process-node-fill]"),
         );
 
-        if (!media || !numberStrip || !verticalFills.length || !horizontalFill) {
+        if (
+          !media ||
+          !numberStrip ||
+          !verticalFills.length ||
+          !horizontalFill
+        ) {
           return;
         }
 
@@ -90,7 +91,11 @@ export function HowIWork() {
 
             timeline
               .to(media, { autoAlpha: 1, y: 0, duration: 0.85 }, 0)
-              .to(copy, { autoAlpha: 1, y: 0, duration: 0.7, stagger: 0.06 }, 0.1);
+              .to(
+                copy,
+                { autoAlpha: 1, y: 0, duration: 0.7, stagger: 0.06 },
+                0.1,
+              );
           },
         });
 
@@ -141,7 +146,7 @@ export function HowIWork() {
 
       return () => cleanups.forEach((cleanup) => cleanup());
     },
-    { scope: rootRef }
+    { scope: rootRef },
   );
 
   return (
@@ -160,17 +165,13 @@ export function HowIWork() {
 
       <div className="mx-auto w-full max-w-[75rem] px-[1.875rem]">
         <header className="mb-[3.75rem] flex w-full flex-col items-end gap-7 text-right sm:mb-[5rem] lg:mb-[6.25rem]">
-          <p
-            data-process-label
-            className="font-sans text-[0.625rem] font-medium uppercase tracking-[0.22em] text-black/45"
-          >
-            {processSection.index} / PROCESS
-          </p>
           <h2
             id="how-i-work-heading"
             className="whitespace-nowrap font-heading text-[clamp(2.5rem,7vw,5.5rem)] font-semibold leading-[0.88] tracking-[-0.045em]"
           >
-            <span className="inline-block pb-[0.03em]">{processSection.filledTitle}</span>{" "}
+            <span className="inline-block pb-[0.03em]">
+              {processSection.filledTitle}
+            </span>{" "}
             <span className="hero-outline-text inline-block pb-[0.2em] tracking-[-0.035em]">
               {processSection.outlinedTitle}
             </span>
@@ -220,16 +221,16 @@ function ProcessStep({
       data-process-step
       className={cn(
         "group relative max-[809px]:py-6 min-[810px]:grid min-[810px]:grid-cols-2 min-[810px]:items-center min-[810px]:gap-x-20 min-[810px]:py-[3.125rem] min-[810px]:pb-[3.75rem]",
-        last && "min-[810px]:pb-[3.125rem]"
+        last && "min-[810px]:pb-[3.125rem]",
       )}
     >
       <div
         aria-hidden="true"
         data-process-desktop-track
         className={cn(
-            "pointer-events-none absolute bottom-0 top-0 hidden w-1.5 bg-black/10 min-[810px]:block",
+          "pointer-events-none absolute bottom-0 top-0 hidden w-1.5 bg-black/10 min-[810px]:block",
           railOnLeft ? "left-0" : "left-1/2 -translate-x-1/2",
-          index === 0 && "top-[0.9375rem]"
+          index === 0 && "top-[0.9375rem]",
         )}
       >
         <span
@@ -250,7 +251,7 @@ function ProcessStep({
           data-process-horizontal-fill
           className={cn(
             "absolute inset-y-0 left-0 w-full origin-left scale-x-0 bg-black",
-            !railOnLeft && "origin-right"
+            !railOnLeft && "origin-right",
           )}
         />
       </div>
@@ -260,10 +261,8 @@ function ProcessStep({
         data-process-node
         className={cn(
           "pointer-events-none absolute z-[2] hidden size-8 rounded-full border-[0.3125rem] border-black/10 bg-white min-[810px]:block",
-          railOnLeft
-            ? "left-[-0.6875rem]"
-            : "left-1/2 -translate-x-1/2",
-          index === 0 ? "top-[-0.0625rem]" : "top-[-0.625rem]"
+          railOnLeft ? "left-[-0.6875rem]" : "left-1/2 -translate-x-1/2",
+          index === 0 ? "top-[-0.0625rem]" : "top-[-0.625rem]",
         )}
       >
         <span
@@ -278,7 +277,7 @@ function ProcessStep({
           "pointer-events-none absolute bottom-[-0.6875rem] z-[2] hidden size-8 rounded-full border-[0.3125rem] border-black/10 bg-white min-[810px]:block",
           last || railOnLeft
             ? "left-[-0.6875rem]"
-            : "left-1/2 -translate-x-1/2"
+            : "left-1/2 -translate-x-1/2",
         )}
       >
         <span
@@ -297,7 +296,7 @@ function ProcessStep({
         data-process-media
         className={cn(
           "relative z-[1] order-1 aspect-[1619/971] w-full overflow-hidden bg-black/[0.04] max-[809px]:mb-5 min-[810px]:row-start-1",
-          railOnLeft ? "min-[810px]:col-start-2" : "min-[810px]:col-start-1"
+          railOnLeft ? "min-[810px]:col-start-2" : "min-[810px]:col-start-1",
         )}
       >
         <ImageReveal
@@ -316,7 +315,7 @@ function ProcessStep({
           "relative z-[1] order-2 max-[809px]:pl-0 min-[810px]:row-start-1",
           railOnLeft
             ? "min-[810px]:col-start-1 min-[810px]:pl-[3.125rem]"
-            : "min-[810px]:col-start-2 min-[810px]:pr-[3.125rem]"
+            : "min-[810px]:col-start-2 min-[810px]:pr-[3.125rem]",
         )}
       >
         <div
@@ -325,7 +324,10 @@ function ProcessStep({
           className="hero-outline-text relative flex h-[clamp(4rem,7vw,5.5625rem)] max-w-full items-start overflow-hidden font-heading text-[clamp(4rem,7vw,6rem)] font-semibold leading-[0.93] tracking-[-0.08em] opacity-20"
         >
           <span className="sr-only">Step {number}</span>
-          <span aria-hidden="true" className="absolute left-0 top-0 flex">
+          <span
+            aria-hidden="true"
+            className="absolute left-0 top-0 flex"
+          >
             <span>0</span>
             <span
               data-process-number-strip
@@ -334,7 +336,10 @@ function ProcessStep({
               style={{ transform: "translateY(0%)" }}
             >
               {Array.from({ length: 10 }, (_, value) => (
-                <span key={value} className="flex h-[1em] items-center leading-none">
+                <span
+                  key={value}
+                  className="flex h-[1em] items-center leading-none"
+                >
                   {value}
                 </span>
               ))}
