@@ -44,7 +44,7 @@ export function ImageReveal({
     () => {
       const scope = ref.current;
       const img = imgRef.current;
-      if (!scope || !img || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+       if (!scope || !img) {
         return;
       }
 
@@ -117,11 +117,6 @@ export function ImageReveal({
           />
         </div>
       </div>
-      <div
-        data-image-fade
-        aria-hidden="true"
-        className="image-white-fade pointer-events-none absolute inset-0 z-10"
-      />
-    </div>
+      </div>
   );
 }

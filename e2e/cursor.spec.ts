@@ -125,7 +125,7 @@ test.describe("circle cursor", () => {
     });
   });
 
-  test("stays disabled for reduced motion", async ({ page }, testInfo) => {
+  test("forces the custom cursor when reduced motion is requested", async ({ page }, testInfo) => {
     test.skip(
       testInfo.project.name === "Mobile Chrome",
       "The custom cursor is desktop-only."
@@ -136,25 +136,29 @@ test.describe("circle cursor", () => {
 
     await expect(page.locator("[data-circle-cursor]")).toHaveAttribute(
       "data-enabled",
-      "false"
+      "true"
     );
-    await expect(page.locator("html")).not.toHaveAttribute(
-      "data-circle-cursor-active"
-    );
+    await expect(page.locator("html")).toHaveAttribute("data-circle-cursor-active");
     await expect
       .poll(() => page.evaluate(() => getComputedStyle(document.body).cursor))
-      .toBe("auto");
+      .toBe("none");
   });
 
-  test("stays disabled on touch layouts", async ({ page }) => {
+  test("only enables the cursor for fine pointers", async ({ page }) => {
     await page.goto("/");
+
+    const finePointer = await page.evaluate(() =>
+      window.matchMedia("(hover: hover) and (pointer: fine)").matches
+    );
 
     await expect(page.locator("[data-circle-cursor]")).toHaveAttribute(
       "data-enabled",
-      "false"
+      String(finePointer)
     );
-    await expect(page.locator("html")).not.toHaveAttribute(
-      "data-circle-cursor-active"
-    );
+    if (finePointer) {
+      await expect(page.locator("html")).toHaveAttribute("data-circle-cursor-active");
+    } else {
+      await expect(page.locator("html")).not.toHaveAttribute("data-circle-cursor-active");
+    }
   });
 });

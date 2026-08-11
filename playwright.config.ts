@@ -39,9 +39,9 @@ export default defineConfig({
     // Retry a test if its failing with enabled tracing. This allows you to analyze the DOM, console logs, network traffic etc.
     trace: "retain-on-failure",
 
-    // Skip the ~9s GSAP preloader and heavy reveals in tests.
+    // Exercise the same full-motion behavior as the shipped site.
     contextOptions: {
-      reducedMotion: "reduce",
+      reducedMotion: "no-preference",
     },
 
     // Only capture screenshots on failure.

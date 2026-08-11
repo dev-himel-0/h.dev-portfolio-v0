@@ -27,7 +27,7 @@ export function PinnedSection({ children, className, end = "+=100%" }: PinnedSec
   useGSAP(
     () => {
       const scope = ref.current;
-      if (!scope || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+       if (!scope) {
         return;
       }
 

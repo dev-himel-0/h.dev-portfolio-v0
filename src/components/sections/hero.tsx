@@ -36,10 +36,6 @@ export function Hero({
     () => {
       if (!isRevealed) return;
 
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        return;
-      }
-
       gsap.set("[data-hero-line]", { willChange: "transform" });
       gsap.set(
         ["[data-hero-rail-content]", "[data-hero-rail-line]", "[data-scroll-arrow]"],

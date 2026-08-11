@@ -59,9 +59,7 @@ export function Work() {
       const rows = gsap.utils.toArray<HTMLElement>("[data-work-row]");
       const media = gsap.matchMedia();
 
-      media.add(
-        "(min-width: 810px) and (prefers-reduced-motion: no-preference)",
-        () => {
+      media.add("(min-width: 810px)", () => {
           rows.slice(0, -1).forEach((row, index) => {
             const nextRow = rows[index + 1];
 
@@ -81,7 +79,7 @@ export function Work() {
               }
             );
           });
-        });
+      });
 
       return () => media.revert();
     },
@@ -210,8 +208,7 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
 /**
  * Project image with cinematic hover: a slow zoom and a gentle
  * mouse-following drift (desktop only), plus the scroll-scrubbed drift
- * and grayscale -> color reveal from ImageReveal. Skipped under
- * `prefers-reduced-motion` and on touch devices.
+ * and grayscale -> color reveal from ImageReveal. Skipped on touch devices.
  */
 function ProjectFigure({
   project,
@@ -229,7 +226,6 @@ function ProjectFigure({
       if (
         !figure ||
         !img ||
-        window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
         !window.matchMedia("(pointer: fine)").matches
       ) {
         return;

@@ -1,6 +1,5 @@
 import gsap from "gsap";
 import type Lenis from "lenis";
-import { prefersReducedMotion } from "@/lib/utils";
 
 /**
  * Shared cinematic curtain wipe for the whole app — the staggered black
@@ -157,8 +156,8 @@ export function wipeCover(action: () => void): Promise<void> {
     }
     busy = true;
 
-    // Reduced motion or an unregistered overlay: act instantly, no curtain.
-    if (prefersReducedMotion() || !overlayEl || panelEls.length === 0) {
+    // An unregistered overlay degrades to an instant action.
+    if (!overlayEl || panelEls.length === 0) {
       runAction(action);
       finish();
       return;
@@ -211,8 +210,8 @@ export function wipeCoverDeferred(action: () => void): Promise<void> {
     }
     busy = true;
 
-    // Reduced motion or an unregistered overlay: act instantly, no curtain.
-    if (prefersReducedMotion() || !overlayEl || panelEls.length === 0) {
+    // An unregistered overlay degrades to an instant action.
+    if (!overlayEl || panelEls.length === 0) {
       runAction(action);
       finish();
       return;
@@ -287,7 +286,7 @@ export function wipeReveal(): Promise<void> {
     }
     busy = true;
 
-    if (prefersReducedMotion() || !overlayEl || panelEls.length === 0) {
+    if (!overlayEl || panelEls.length === 0) {
       finish();
       return;
     }

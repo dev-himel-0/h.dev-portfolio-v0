@@ -21,18 +21,12 @@ const PROGRESS_MS =
  * Full-screen preloader: white words cycling on a black five-band curtain at
  * cinematic pacing, a white progress hairline filling across the bottom edge,
  * then the words fade and the bands wipe upward to reveal the page.
- * Skipped entirely under `prefers-reduced-motion`.
  */
 export function Preloader({ onFinished }: { onFinished?: () => void }) {
   const [done, setDone] = useState(false);
   const lenis = useLenis();
 
   useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      const t = window.setTimeout(() => setDone(true), 0);
-      return () => window.clearTimeout(t);
-    }
-
     if (done) {
       lenis?.start();
       return;

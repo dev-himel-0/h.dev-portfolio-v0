@@ -39,7 +39,7 @@ export function SectionReveal({
   useGSAP(
     () => {
       const scope = ref.current;
-      if (!scope || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+       if (!scope) {
         return;
       }
 

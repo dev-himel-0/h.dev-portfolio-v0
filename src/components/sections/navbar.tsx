@@ -6,7 +6,6 @@ import { CustomEase } from "gsap/CustomEase";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { profile } from "@/lib/data";
-import { prefersReducedMotion } from "@/lib/utils";
 import { StaggeredMenu } from "@/components/ui/staggered-menu";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP, CustomEase);
@@ -80,26 +79,6 @@ export function Navbar() {
       return;
     }
 
-    if (prefersReducedMotion()) {
-      gsap.set(inner, {
-        yPercent: -(((lines.length - 1) / lines.length) * 100),
-      });
-      iconTimelineRef.current?.kill();
-      gsap.set(first, {
-        xPercent: -50,
-        yPercent: -50,
-        y: open ? 0 : -ICON_OFFSET,
-        rotate: open ? 45 : 0,
-      });
-      gsap.set(second, {
-        xPercent: -50,
-        yPercent: -50,
-        y: open ? 0 : ICON_OFFSET,
-        rotate: open ? -45 : 0,
-      });
-      return;
-    }
-
     gsap.set(inner, { yPercent: 0 });
     gsap.to(inner, {
       yPercent: -(((lines.length - 1) / lines.length) * 100),
@@ -155,10 +134,6 @@ export function Navbar() {
         end: "max",
         onToggle: (self) => {
           const visible = self.isActive;
-          if (prefersReducedMotion()) {
-            gsap.set(bg, { autoAlpha: visible ? 1 : 0, y: visible ? 0 : -8 });
-            return;
-          }
           gsap.to(bg, {
             autoAlpha: visible ? 1 : 0,
             y: visible ? 0 : -8,

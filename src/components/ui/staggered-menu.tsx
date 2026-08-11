@@ -13,7 +13,6 @@ import {
 import type { Icon } from "@phosphor-icons/react";
 import { navigation, profile, socials } from "@/lib/data";
 import type { SocialIcon } from "@/lib/data";
-import { prefersReducedMotion } from "@/lib/utils";
 
 gsap.registerPlugin(CustomEase);
 
@@ -114,7 +113,7 @@ export function StaggeredMenu({
     gsap.set(panel.querySelectorAll(".smg-char-b"), { yPercent: 100 });
   }, []);
 
-  /** Instant open (prefers-reduced-motion): everything visible, no tween. */
+  /** Sets the fully-open state for initialization and interruption recovery. */
   const finishOpen = useCallback(() => {
     const root = rootRef.current;
     const panel = panelRef.current;
@@ -146,7 +145,7 @@ export function StaggeredMenu({
     gsap.set(panel.querySelectorAll("[data-menu-social-link]"), { y: 0, opacity: 1 });
   }, []);
 
-  /** Instant close (prefers-reduced-motion): everything offscreen. */
+  /** Sets the fully-closed state for initialization and interruption recovery. */
   const finishClose = useCallback(() => {
     const root = rootRef.current;
     const panel = panelRef.current;
@@ -178,11 +177,6 @@ export function StaggeredMenu({
     const root = rootRef.current;
     const panel = panelRef.current;
     if (!root || !panel) return;
-
-    if (prefersReducedMotion()) {
-      finishOpen();
-      return;
-    }
 
     openTimelineRef.current?.kill();
     closeTweenRef.current?.kill();
@@ -299,11 +293,6 @@ export function StaggeredMenu({
     const root = rootRef.current;
     const panel = panelRef.current;
     if (!root || !panel) return;
-
-    if (prefersReducedMotion()) {
-      finishClose();
-      return;
-    }
 
     openTimelineRef.current?.kill();
     openTimelineRef.current = null;
@@ -425,7 +414,6 @@ export function StaggeredMenu({
     };
 
     const wave = (row: HTMLElement, on: boolean) => {
-      if (prefersReducedMotion()) return;
       const anchor = row.querySelector<HTMLElement>(".smg-item");
       if (anchor) {
         gsap.to(anchor, {

@@ -8,7 +8,6 @@ import {
   AnimatePresence,
   motion,
   useMotionValue,
-  useReducedMotion,
   useSpring,
   useTransform,
   useVelocity,
@@ -35,7 +34,6 @@ export function HoverServiceList({ services }: HoverServiceListProps) {
   const listRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [pointerVisible, setPointerVisible] = useState(false);
-  const reducedMotion = useReducedMotion();
   const pointerX = useMotionValue(0);
   const pointerY = useMotionValue(0);
   const followX = useSpring(pointerX, {
@@ -119,7 +117,6 @@ export function HoverServiceList({ services }: HoverServiceListProps) {
 
   const updatePointerPosition = (event: PointerEvent<HTMLDivElement>) => {
     if (
-      reducedMotion ||
       !window.matchMedia("(hover: hover) and (pointer: fine)").matches ||
       !listRef.current
     ) {
@@ -133,7 +130,6 @@ export function HoverServiceList({ services }: HoverServiceListProps) {
 
   const handlePointerEnter = (event: PointerEvent<HTMLDivElement>) => {
     if (
-      reducedMotion ||
       !window.matchMedia("(hover: hover) and (pointer: fine)").matches ||
       !listRef.current
     ) {
@@ -191,8 +187,8 @@ export function HoverServiceList({ services }: HoverServiceListProps) {
             style={{ rotate: cardRotation }}
             initial={false}
             animate={{
-              scale: pointerVisible && !reducedMotion ? 1 : 0.72,
-              opacity: pointerVisible && !reducedMotion ? 1 : 0,
+              scale: pointerVisible ? 1 : 0.72,
+              opacity: pointerVisible ? 1 : 0,
             }}
             transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
           >
@@ -217,11 +213,7 @@ export function HoverServiceList({ services }: HoverServiceListProps) {
                 />
               </motion.div>
             </AnimatePresence>
-            <div
-              aria-hidden="true"
-              className="image-white-fade pointer-events-none absolute inset-0 z-10"
-            />
-          </motion.div>
+            </motion.div>
         </motion.div>
 
         {services.map((service, index) => {
@@ -247,19 +239,19 @@ export function HoverServiceList({ services }: HoverServiceListProps) {
                   data-service-index
                   aria-hidden="true"
                   className={cn(
-                    "relative inline-flex h-4 items-center font-sans text-[0.6875rem] tracking-[0.06em] text-black/40 transition-colors duration-300 motion-reduce:transition-none",
+                     "relative inline-flex h-4 items-center font-sans text-[0.6875rem] tracking-[0.06em] text-black/40 transition-colors duration-300",
                     active && "text-black"
                   )}
                 >
                   <span
                     className={cn(
-                      "block size-2 bg-black opacity-0 transition-opacity duration-300 motion-reduce:transition-none",
+                       "block size-2 bg-black opacity-0 transition-opacity duration-300",
                       active && "opacity-100"
                     )}
                   />
                   <span
                     className={cn(
-                      "absolute left-0 transition-opacity duration-300 motion-reduce:transition-none",
+                       "absolute left-0 transition-opacity duration-300",
                       active && "opacity-0"
                     )}
                   >
@@ -269,7 +261,7 @@ export function HoverServiceList({ services }: HoverServiceListProps) {
                 <span
                   data-service-title
                   className={cn(
-                    "block min-w-0 font-heading text-[clamp(1.45rem,3.25vw,2.5rem)] font-medium leading-[1.1] tracking-[-0.03em] text-black transition-colors duration-300 motion-reduce:transition-none max-[319px]:text-[clamp(1.2rem,7vw,1.45rem)]",
+                     "block min-w-0 font-heading text-[clamp(1.45rem,3.25vw,2.5rem)] font-medium leading-[1.1] tracking-[-0.03em] text-black transition-colors duration-300 max-[319px]:text-[clamp(1.2rem,7vw,1.45rem)]",
                     !active && "text-black/85"
                   )}
                 >
@@ -278,7 +270,7 @@ export function HoverServiceList({ services }: HoverServiceListProps) {
                 <span
                   aria-hidden="true"
                   className={cn(
-                    "flex size-10 shrink-0 items-center justify-end text-black/40 transition-colors duration-300 motion-reduce:transition-none",
+                     "flex size-10 shrink-0 items-center justify-end text-black/40 transition-colors duration-300",
                     active && "text-black"
                   )}
                 >

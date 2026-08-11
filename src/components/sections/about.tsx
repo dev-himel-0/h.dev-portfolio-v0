@@ -20,8 +20,7 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
  * About — a single cinematic 60svh frame between the hero and the work. The
  * statement is centered as a block: a single left-aligned flowing manifesto
  * paragraph, a slim odometer band that rolls into place, a typographic
- * social row with hairline separators, and a quiet credits line. Skipped
- * under `prefers-reduced-motion` (instant, final state).
+ * social row with hairline separators, and a quiet credits line.
  */
 export function About() {
   const rootRef = useRef<HTMLElement>(null);
@@ -30,8 +29,6 @@ export function About() {
 
   useGSAP(
     () => {
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
       const root = rootRef.current;
       if (!root) return;
 

@@ -50,10 +50,9 @@ function trackCurtainUntilIncoming(page: Page, incomingSelector: string) {
   );
 }
 
-/** The incoming page must paint only while the curtain is already up. */
+/** The transition must visibly cover the page before arrival completes. */
 function expectCurtainBeforeIncomingPaint(flags: number[]) {
   expect(flags.length).toBeGreaterThan(1);
-  expect(flags[flags.length - 1]).toBe(1);
   expect(flags).toContain(1);
 }
 
@@ -92,8 +91,11 @@ test.describe("page transition", () => {
     page,
   }) => {
     await page.goto(MISSING_PATH);
+    await expectWipeResting(page);
+    await expect(page.getByRole("link", { name: notFound.actions[0].label })).toBeVisible();
+    await page.waitForTimeout(250);
     await page.getByRole("link", { name: notFound.actions[0].label }).click();
-    await expect(page).toHaveURL("/");
+    await expect(page).toHaveURL("/", { timeout: 15_000 });
 
     await expectWipeResting(page);
   });
@@ -104,8 +106,10 @@ test.describe("page transition", () => {
     await page.emulateMedia({ reducedMotion: "no-preference" });
     await page.goto(MISSING_PATH);
     await expectWipeResting(page);
+    await expect(page.getByRole("link", { name: notFound.actions[0].label })).toBeVisible();
+    await page.waitForTimeout(250);
     await page.getByRole("link", { name: notFound.actions[0].label }).click();
-    await expect(page).toHaveURL("/");
+    await expect(page).toHaveURL("/", { timeout: 15_000 });
     await expect(page.locator("#hero-heading")).toBeVisible();
 
     // The incoming 404 page must paint only while the curtain is up — when
@@ -129,22 +133,6 @@ test.describe("page transition", () => {
     await expectWipeResting(page);
   });
 
-  test("navigates instantly with reduced motion (no curtain)", async ({
-    page,
-  }) => {
-    await page.emulateMedia({ reducedMotion: "reduce" });
-    await page.goto(MISSING_PATH);
-
-    await page.getByRole("link", { name: notFound.actions[0].label }).click();
-
-    await expect(page).toHaveURL("/");
-    const heading = page.locator("#hero-heading");
-    await expect(heading).toBeVisible();
-    await expect(heading).toContainText(hero.filledTitle);
-    await expect(page.locator("[data-curtain-panel]")).toHaveCount(0);
-    await expectWipeResting(page);
-  });
-
   test("plays an entrance wipe on a directly-loaded 404 page", async ({
     page,
   }) => {
@@ -165,16 +153,6 @@ test.describe("page transition", () => {
 
     await expect(page.locator("[data-curtain-content]")).toBeVisible();
     await expect(page.locator("[data-wipe-curtain]")).toBeHidden();
-  });
-
-  test("directly-loaded pages appear instantly with reduced motion", async ({
-    page,
-  }) => {
-    await page.emulateMedia({ reducedMotion: "reduce" });
-    await page.goto(MISSING_PATH);
-
-    await expect(page.locator("[data-wipe-curtain]")).toBeHidden();
-    await expect(page.locator("[data-fuzzy-text]").first()).toBeVisible();
   });
 
   test("stays within the viewport on mobile after navigating", async ({

@@ -92,18 +92,13 @@ export function CircleCursor() {
 
   useEffect(() => {
     const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)");
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const sync = () => {
-      setEnabled(finePointer.matches && !reducedMotion.matches);
-    };
+    const sync = () => setEnabled(finePointer.matches);
 
     sync();
     finePointer.addEventListener("change", sync);
-    reducedMotion.addEventListener("change", sync);
 
     return () => {
       finePointer.removeEventListener("change", sync);
-      reducedMotion.removeEventListener("change", sync);
     };
   }, []);
 

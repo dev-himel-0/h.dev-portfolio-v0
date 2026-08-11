@@ -66,15 +66,6 @@ test.describe("not found", () => {
     await expect(homeLink).toHaveAttribute("href", "/");
   });
 
-  test("shows all content immediately with reduced motion", async ({ page }) => {
-    await page.emulateMedia({ reducedMotion: "reduce" });
-    await page.goto(MISSING_PATH);
-
-    await expect(page.locator("[data-fuzzy-text]").first()).toBeVisible();
-    await expect(page.getByText(notFound.message)).toBeVisible();
-    await expect(page.getByRole("link", { name: "Back home" })).toBeVisible();
-  });
-
   test("stays within the viewport on mobile", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(MISSING_PATH);

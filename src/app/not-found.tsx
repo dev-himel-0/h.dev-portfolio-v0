@@ -8,7 +8,6 @@ import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { FuzzyText } from "@/components/ui/fuzzy-text";
 import { notFound, profile } from "@/lib/data";
-import { prefersReducedMotion } from "@/lib/utils";
 
 gsap.registerPlugin(useGSAP);
 
@@ -35,8 +34,6 @@ export default function NotFound() {
   const wave = useCallback((on: boolean) => {
     const link = linkRef.current;
     if (!link) return;
-    if (prefersReducedMotion()) return;
-
     const rest = Array.from(link.querySelectorAll<HTMLElement>(".smg-char-a"));
     const clone = Array.from(link.querySelectorAll<HTMLElement>(".smg-char-b"));
     if (!rest.length || !clone.length) return;
@@ -61,8 +58,6 @@ export default function NotFound() {
     () => {
       const root = rootRef.current;
       if (!root) return;
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
       const animatedEls = [
         "[data-nf-top]",
         "[data-nf-status]",

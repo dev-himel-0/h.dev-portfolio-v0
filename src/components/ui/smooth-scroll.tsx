@@ -1,7 +1,7 @@
 "use client";
 
 import { ReactLenis } from "lenis/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import type { ComponentRef } from "react";
 
 /**
@@ -10,19 +10,8 @@ import type { ComponentRef } from "react";
  */
 export function SmoothScroll({ children }: { children: React.ReactNode }) {
   const lenisRef = useRef<ComponentRef<typeof ReactLenis>>(null);
-  const [reduced, setReduced] = useState(false);
 
   useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const update = () => setReduced(mq.matches);
-    update();
-    mq.addEventListener("change", update);
-    return () => mq.removeEventListener("change", update);
-  }, []);
-
-  useEffect(() => {
-    if (reduced) return;
-
     let rafId = 0;
     let pausedForVisibility = false;
 
@@ -53,9 +42,7 @@ export function SmoothScroll({ children }: { children: React.ReactNode }) {
       window.cancelAnimationFrame(rafId);
       document.removeEventListener("visibilitychange", onVisibilityChange);
     };
-  }, [reduced]);
-
-  if (reduced) return <>{children}</>;
+  }, []);
 
   return (
     <ReactLenis

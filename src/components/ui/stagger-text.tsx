@@ -46,7 +46,7 @@ export function StaggerText({
   useGSAP(
     () => {
       const el = ref.current;
-      if (!el || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+       if (!el) {
         return;
       }
 

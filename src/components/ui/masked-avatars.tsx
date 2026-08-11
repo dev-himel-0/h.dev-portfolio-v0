@@ -59,7 +59,7 @@ export function MaskedAvatars({
               onPointerLeave={() => setActiveIndex(null)}
               onFocus={() => setActiveIndex(index)}
               onBlur={() => setActiveIndex(null)}
-              className="group relative shrink-0 outline-none transition-transform duration-200 ease-out motion-reduce:transition-none"
+               className="group relative shrink-0 outline-none transition-transform duration-200 ease-out"
               style={
                 {
                   width: size,
@@ -111,7 +111,7 @@ export function MaskedAvatars({
                 aria-hidden="true"
                 className={cn(
                   "pointer-events-none absolute bottom-full left-1/2 mb-1 -translate-x-1/2 whitespace-nowrap font-sans text-[0.625rem] uppercase tracking-[0.08em] text-black",
-                  "motion-safe:transition-[opacity,transform,filter] motion-safe:duration-200",
+                   "transition-[opacity,transform,filter] duration-200",
                   isActive
                     ? "translate-y-0 opacity-100 blur-0"
                     : "translate-y-1 opacity-0 blur-[3px]",

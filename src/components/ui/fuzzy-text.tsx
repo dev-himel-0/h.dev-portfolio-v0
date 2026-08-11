@@ -27,7 +27,7 @@ interface FuzzyTextProps {
 /**
  * Canvas fuzzy text (ported 1:1 from reactbits FuzzyText, recolored to B/W).
  * The RAF loop pauses when the tab is hidden, hover/click are mouse-only, and
- * under `prefers-reduced-motion` the text draws once statically with no loop.
+ * the canvas pauses its RAF loop while the tab is hidden.
  * The canvas is aria-hidden; pair it with real text in the DOM.
  */
 export function FuzzyText({
@@ -164,10 +164,6 @@ export function FuzzyText({
       const interactiveRight = interactiveLeft + textBoundingWidth;
       const interactiveBottom = interactiveTop + tightHeight;
 
-      const reducedMotion = window.matchMedia(
-        "(prefers-reduced-motion: reduce)"
-      ).matches;
-
       let isHovering = false;
       let isClicking = false;
       let isGlitching = false;
@@ -218,12 +214,6 @@ export function FuzzyText({
           );
         }
       };
-
-      if (reducedMotion) {
-        currentIntensity = 0;
-        drawFrame();
-        return;
-      }
 
       observer = new IntersectionObserver(
         ([entry]) => {

@@ -8,6 +8,7 @@ import { ScrollToTop } from "@/components/ui/scroll-to-top";
 import { PageTransition } from "@/components/ui/page-transition";
 import { WipeCurtain } from "@/components/ui/wipe-curtain";
 import { CircleCursor } from "@/components/ui/circle-cursor";
+import { MotionProvider } from "@/components/ui/motion-provider";
 
 const generalSans = localFont({
   src: [
@@ -49,11 +50,13 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <SmoothScroll>
-          <PageTransition>
-            {children}
-            <ScrollToTop />
-          </PageTransition>
-          <WipeCurtain />
+          <MotionProvider>
+            <PageTransition>
+              {children}
+              <ScrollToTop />
+            </PageTransition>
+            <WipeCurtain />
+          </MotionProvider>
         </SmoothScroll>
         <CircleCursor />
       </body>

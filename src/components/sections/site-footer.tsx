@@ -26,12 +26,6 @@ export function SiteFooter() {
       const stage = brandStageRef.current;
       if (!contact || !brand || !stage) return;
 
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        gsap.set(contact, { clearProps: "transform,willChange" });
-        gsap.set(brand, { yPercent: 0, autoAlpha: 1, clearProps: "willChange" });
-        return;
-      }
-
       gsap.to(contact, {
         y: () => -(stage.offsetHeight * 0.25),
         ease: "none",

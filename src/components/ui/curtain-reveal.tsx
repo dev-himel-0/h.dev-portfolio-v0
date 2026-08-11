@@ -42,7 +42,7 @@ interface CurtainRevealProps {
  *   line as it passes — an expo glide with an overshoot snap and
  *   a light breath before children fade and the bands wipe (the line is the
  *   timer).
- * Under `prefers-reduced-motion` it completes instantly without animating.
+ * Always uses the full curtain choreography.
  */
 export function CurtainReveal({
   play = false,
@@ -85,12 +85,6 @@ export function CurtainReveal({
         );
         if (onComplete) tl.add(onComplete);
       };
-
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        onReveal?.();
-        onComplete?.();
-        return;
-      }
 
       if (progress !== undefined) {
         const fill = root.querySelector<HTMLElement>("[data-curtain-progress-fill]");

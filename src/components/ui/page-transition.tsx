@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
-import { prefersReducedMotion } from "@/lib/utils";
 import { markSoftNavigation } from "@/lib/navigation";
 import {
   completeWipe,
@@ -79,7 +78,6 @@ export function PageTransition({ children }: { children: ReactNode }) {
    */
   useEffect(() => {
     if (mountPathRef.current === "/") return;
-    if (prefersReducedMotion()) return;
 
     let cancelled = false;
     // Wait for the wipe overlay (mounted by `WipeCurtain`, a sibling) to

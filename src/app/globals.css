@@ -131,6 +131,14 @@
   html {
     @apply font-sans;
   }
+  /* Hide every scrollbar on the page; scrolling itself is unaffected. */
+  * {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  *::-webkit-scrollbar {
+    display: none;
+  }
   /* Lenis owns the native root scroll position while its RAF loop animates it. */
   html.lenis {
     height: auto;
@@ -158,19 +166,6 @@
   -webkit-text-stroke: 2px #000;
   text-stroke: 2px #000;
   paint-order: stroke fill;
-}
-
-/* Keep the fade in its own layer so transformed images cannot move its edge. */
-.image-white-fade {
-  background: linear-gradient(
-    to bottom,
-    transparent 0%,
-    transparent 45%,
-    rgb(255 255 255 / 0.1) 55%,
-    rgb(255 255 255 / 0.76) 70%,
-    rgb(255 255 255 / 0.96) 85%,
-    #fff 100%
-  );
 }
 
 /* Alpha-only fade for the oversized footer word. The page stays monochrome;
@@ -882,16 +877,4 @@ header[data-open="true"] .navbar-bg {
   width: 100vw;
   height: 100vh;
   pointer-events: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .stt-button {
-    transition: none;
-  }
-  .stt-progress {
-    transition: none;
-  }
-  .stt-arrow {
-    transition: none;
-  }
 }

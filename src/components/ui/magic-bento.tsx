@@ -59,8 +59,7 @@ export function MagicBentoCell({ children, className }: MagicBentoCellProps) {
       onPointerEnter={(event) => {
         if (
           event.pointerType !== "touch" &&
-          window.matchMedia("(hover: hover) and (pointer: fine)").matches &&
-          !window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          window.matchMedia("(hover: hover) and (pointer: fine)").matches
         ) {
           event.currentTarget.style.setProperty("--spot-opacity", "1");
           event.currentTarget.style.setProperty("--spot-scale", "1");
@@ -74,7 +73,7 @@ export function MagicBentoCell({ children, className }: MagicBentoCellProps) {
       <span
         aria-hidden="true"
         data-bento-spotlight
-        className="pointer-events-none absolute left-0 top-0 size-52 -translate-x-1/2 -translate-y-1/2 rounded-full bg-black/[0.07] opacity-[var(--spot-opacity)] blur-2xl transition-[opacity,transform] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:hidden"
+         className="pointer-events-none absolute left-0 top-0 size-52 -translate-x-1/2 -translate-y-1/2 rounded-full bg-black/[0.07] opacity-[var(--spot-opacity)] blur-2xl transition-[opacity,transform] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]"
         style={{
           left: "var(--spot-x)",
           top: "var(--spot-y)",

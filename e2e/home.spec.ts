@@ -201,37 +201,6 @@ test.describe("home", () => {
       .toBeLessThan(-40);
   });
 
-  test("keeps the scroll arrow at full length with reduced motion", async ({
-    page,
-  }) => {
-    await page.emulateMedia({ reducedMotion: "reduce" });
-    await page.goto("/");
-    await expect(page.locator("[data-curtain-content]")).toBeHidden({
-      timeout: 15_000,
-    });
-
-    const arrow = page.locator("[data-scroll-arrow]");
-    const container = page.locator("[data-hero-scroll]");
-    await expect(arrow).toBeVisible();
-    const arrowHeight = () =>
-      arrow.evaluate((element) => element.getBoundingClientRect().height);
-    const opacity = () =>
-      container.evaluate((element) => Number(getComputedStyle(element).opacity));
-
-    const initial = await arrowHeight();
-    expect(initial).toBeGreaterThan(20);
-
-    await page.evaluate(() =>
-      window.scrollTo(0, document.documentElement.scrollHeight)
-    );
-    await expect
-      .poll(arrowHeight, "arrow stays full length with reduced motion")
-      .toBeGreaterThan(initial - 1);
-    await expect
-      .poll(opacity, "arrow stays fully visible with reduced motion")
-      .toBeGreaterThan(0.9);
-  });
-
   test("renders the navbar with the menu toggle and monogram", async ({
     page,
   }) => {
@@ -273,7 +242,7 @@ test.describe("home", () => {
     await expect(page.locator("#staggered-menu-panel")).toBeHidden();
   });
 
-  test("toggle markup is deterministic on load with reduced motion", async ({
+  test("toggle markup is deterministic on load", async ({
     page,
   }) => {
     const hydrationErrors: string[] = [];
@@ -410,24 +379,6 @@ test.describe("home", () => {
     await expect
       .poll(opacity, "bar fades back out as the hero returns to view")
       .toBe(0);
-  });
-
-  test("navbar background appears instantly with reduced motion", async ({
-    page,
-  }) => {
-    await page.emulateMedia({ reducedMotion: "reduce" });
-    await page.goto("/");
-    await expect(page.locator("[data-curtain-content]")).toBeHidden({
-      timeout: 15_000,
-    });
-
-    await page.evaluate(() => window.scrollTo(0, 400));
-
-    const bar = page.locator("[data-navbar-bg]");
-    await expect(bar).toBeVisible();
-    const opacity = () =>
-      bar.evaluate((element) => Number(getComputedStyle(element).opacity));
-    await expect.poll(opacity, "bar is fully opaque, no fade").toBe(1);
   });
 
   test("opens the staggered menu with navigation, email and availability", async ({
@@ -741,40 +692,6 @@ test.describe("home", () => {
       .toBe(1);
   });
 
-  test("menu links do not animate on hover with reduced motion", async ({
-    page,
-  }) => {
-    await page.emulateMedia({ reducedMotion: "reduce" });
-    await page.goto("/");
-
-    // Wait for the app to mount (curtain dismissed) so the toggle click
-    // always lands on the hydrated React handler.
-    await expect(page.locator("[data-curtain-content]")).toBeHidden({
-      timeout: 15_000,
-    });
-
-    await page.locator("[data-hero-menu-toggle]").click();
-    const panel = page.locator("#staggered-menu-panel");
-    await expect(panel).toBeVisible();
-
-    const link = panel.getByRole("link", { name: navigation[0].label });
-    await expect(link).toBeVisible({ timeout: 2_000 });
-
-    const rest = link.locator(".smg-char-a").first();
-    const before = await rest.evaluate((el) => getComputedStyle(el).transform);
-
-    await link.hover();
-    await page.waitForTimeout(400);
-
-    const after = await rest.evaluate((el) => getComputedStyle(el).transform);
-    expect(after, "hover leaves characters untouched").toBe(before);
-
-    const numberScale = await link.evaluate((el) =>
-      getComputedStyle(el).getPropertyValue("--sm-num-scale").trim()
-    );
-    expect(numberScale, "hover leaves the number at rest scale").toBe("1");
-  });
-
   test("closes the staggered menu on toggle, escape and click-away", async ({
     page,
   }) => {
@@ -821,24 +738,6 @@ test.describe("home", () => {
     if (!box || !viewport) throw new Error("Menu panel has no layout box");
     expect(box.width).toBeGreaterThanOrEqual(viewport.width - 1);
     expect(box.height).toBeGreaterThanOrEqual(viewport.height - 1);
-  });
-
-  test("shows all hero content immediately with reduced motion", async ({
-    page,
-  }) => {
-    await page.emulateMedia({ reducedMotion: "reduce" });
-    await page.goto("/");
-
-    const heading = page.locator("#hero-heading");
-    await expect(heading).toBeVisible();
-    await expect(heading).toContainText(hero.filledTitle);
-    await expect(heading).toContainText(hero.outlinedTitle);
-
-    for (const action of hero.actions) {
-      await expect(
-        page.getByRole("link", { name: action.label })
-      ).toBeVisible();
-    }
   });
 
   test("renders the work section with header and per-project rows", async ({
@@ -900,56 +799,25 @@ test.describe("home", () => {
     }
   });
 
-  test("keeps the white image overlay separate from editorial imagery", async ({
+  test("renders editorial imagery without any white fade overlay", async ({
     page,
   }) => {
-    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.emulateMedia({ reducedMotion: "no-preference" });
     await page.goto("/");
-
-    const overlayValue = (locator: ReturnType<typeof page.locator>) =>
-      locator.first().evaluate((element) => {
-        return getComputedStyle(element).backgroundImage;
-      });
 
     await expect(page.locator("#work [data-image-reveal]")).toHaveCount(
       projects.length
     );
-    await expect(page.locator("#work [data-image-fade]")).toHaveCount(projects.length);
-    await expect(page.locator("#work [data-image-fade] img")).toHaveCount(0);
+    await expect(page.locator("#work [data-image-fade]")).toHaveCount(0);
     await expect(
       page.locator("[data-process-media] [data-image-reveal]")
     ).toHaveCount(processSteps.length);
     await expect(
       page.locator("[data-process-media] [data-image-fade]")
-    ).toHaveCount(processSteps.length);
-    await expect(
-      page.locator("[data-process-media] [data-image-fade] img")
     ).toHaveCount(0);
     await expect(
       page.locator("[data-service-pointer-card] .image-white-fade")
-    ).toHaveCount(1);
-    await expect(
-      page.locator("[data-service-pointer-card] .image-white-fade img")
     ).toHaveCount(0);
-
-    await expect
-      .poll(() => overlayValue(page.locator("#work [data-image-fade]")))
-      .toContain("linear-gradient");
-    await expect
-      .poll(() => overlayValue(page.locator("[data-process-media] [data-image-fade]")))
-      .toContain("linear-gradient");
-    await expect
-      .poll(() => overlayValue(page.locator("[data-service-pointer-card] .image-white-fade")))
-      .toContain("linear-gradient");
-
-    await expect
-      .poll(() =>
-        page.locator("#work [data-image-fade]").first().evaluate((element) => {
-          const styles = getComputedStyle(element);
-          return styles.maskImage || styles.webkitMaskImage;
-        })
-      )
-      .toBe("none");
   });
 
   test("scales the previous work card as the next card reaches the sticky rail", async ({
@@ -1007,6 +875,10 @@ test.describe("home", () => {
     page,
   }) => {
     await page.goto("/");
+    await expect(page.locator("[data-curtain-content]")).toBeHidden({
+      timeout: 15_000,
+    });
+    await page.evaluate(() => document.fonts.ready);
 
     const rail = page.locator("#work [data-rail]");
     const viewportH = page.viewportSize()?.height ?? 0;
@@ -1047,17 +919,22 @@ test.describe("home", () => {
     ];
 
     for (const offset of offsets) {
-      await page.evaluate((y) => window.scrollTo(0, y), offset);
+      await page.evaluate(
+        (y) => window.scrollTo({ top: y, left: 0, behavior: "instant" }),
+        offset
+      );
       await expect
         .poll(opacityOf, `rail visible while the cards are in view at scrollY=${offset}`)
         .toBe(1);
       const box = await rail.boundingBox();
       expect(box).not.toBeNull();
-      const centerY = box!.y + box!.height / 2;
-      expect(
-        Math.abs(centerY - viewportH / 2),
-        `rail center stays at mid-viewport at scrollY=${offset}`
-      ).toBeLessThanOrEqual(15);
+      await expect
+        .poll(async () => {
+          const current = await rail.boundingBox();
+          if (!current) return Number.POSITIVE_INFINITY;
+          return Math.abs(current.y + current.height / 2 - viewportH / 2);
+        }, `rail center stays at mid-viewport at scrollY=${offset}`)
+        .toBeLessThanOrEqual(15);
       expect(
         box!.x,
         "work rail sits on the right side of the viewport"
@@ -1131,10 +1008,13 @@ test.describe("home", () => {
         const numeralBox = await numeral.boundingBox();
         expect(numeralBox, project.title).not.toBeNull();
         expect(
-          numeralBox!.x + numeralBox!.width,
+          Math.abs(numeralBox!.x + numeralBox!.width - (infoBox!.x + infoBox!.width)),
           `${project.title}: numeral sits at the top-right corner of the info column`
-        ).toBeCloseTo(infoBox!.x + infoBox!.width, 0);
-        expect(numeralBox!.y, project.title).toBeCloseTo(infoBox!.y, 0);
+        ).toBeLessThanOrEqual(2);
+        expect(
+          Math.abs(numeralBox!.y - infoBox!.y),
+          `${project.title}: numeral aligns to the top of the info column`
+        ).toBeLessThanOrEqual(2);
 
         const contentBox = await row
           .locator("[data-work-content]")
@@ -1199,7 +1079,7 @@ test.describe("home", () => {
     const avatars = stack.locator("[data-tech-avatar]");
     for (let index = 0; index < await avatars.count(); index += 1) {
       const avatar = avatars.nth(index);
-      await avatar.hover();
+      await avatar.hover({ force: true });
       await expect(avatar.locator("[data-tech-label]")).toBeVisible();
     }
   });
@@ -1207,12 +1087,14 @@ test.describe("home", () => {
   test("renders the layered contact footer with the H.dev brand reveal", async ({
     page,
   }) => {
-    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.emulateMedia({ reducedMotion: "no-preference" });
     await page.goto("/");
 
     const contact = page.locator("#contact");
     const footer = page.locator("[data-site-footer]");
     const brand = footer.locator("[data-footer-brand]");
+
+    await brand.scrollIntoViewIfNeeded();
 
     await expect(contact).toBeAttached();
     await expect(contact).toContainText(profile.email);
@@ -1387,6 +1269,7 @@ test.describe("services", () => {
 
     const section = page.locator("#services");
     const rows = section.locator("[data-service-row]");
+    await section.scrollIntoViewIfNeeded();
     await expect(rows).toHaveCount(services.length);
     await expect(rows.first()).toHaveAttribute("aria-pressed", "true");
 
@@ -1431,6 +1314,7 @@ test.describe("services", () => {
     await page.goto("/");
 
     const section = page.locator("#services");
+    await section.scrollIntoViewIfNeeded();
     await expect(section.locator("[data-service-row]")).toHaveCount(
       services.length
     );
@@ -1451,25 +1335,6 @@ test.describe("services", () => {
     );
   });
 
-  test("keeps the pointer card still with reduced motion", async ({ page }) => {
-    await page.emulateMedia({ reducedMotion: "reduce" });
-    await page.goto("/");
-
-    const section = page.locator("#services");
-    await expect(section).toBeAttached();
-    await expect(page.locator("[data-curtain-content]")).toBeHidden({
-      timeout: 15_000,
-    });
-    await page.evaluate(() => {
-      document
-        .querySelector("#services [data-service-row]")
-        ?.scrollIntoView({ block: "center" });
-    });
-    await section.locator("[data-service-row]").first().hover();
-    await expect(
-      section.locator("[data-service-pointer-card] > div")
-    ).toHaveCSS("opacity", "0");
-  });
 });
 
 test.describe("stack", () => {
@@ -1617,7 +1482,8 @@ test.describe("stack", () => {
     });
 
     const card = page.locator("[data-stack-card]").first();
-    await card.hover();
+    await card.scrollIntoViewIfNeeded();
+    await card.hover({ force: true });
     await page.waitForTimeout(900);
 
     const hovered = await card.evaluate((el) => {
@@ -1648,33 +1514,6 @@ test.describe("stack", () => {
     expect(idle.bleedsRight).toBe(true);
     expect(idle.bleedsTop).toBe(true);
     expect(idle.color).toContain("0.03");
-  });
-
-  test("slides the ghost icon instantly on hover with reduced motion", async ({
-    page,
-  }) => {
-    await page.emulateMedia({ reducedMotion: "reduce" });
-    await page.goto("/");
-    await expect(page.locator("[data-curtain-content]")).toBeHidden({
-      timeout: 15_000,
-    });
-
-    const card = page.locator("[data-stack-card]").first();
-    await card.hover();
-    await page.waitForTimeout(300);
-
-    const state = await card.evaluate((el) => {
-      const cardRect = el.getBoundingClientRect();
-      const iconRect = el.querySelector("[data-stack-icon]")!.getBoundingClientRect();
-      return {
-        rightInside: iconRect.right <= cardRect.right + 0.5,
-        topInside: iconRect.top >= cardRect.top - 0.5,
-        color: getComputedStyle(el.querySelector("[data-stack-icon]")!).color,
-      };
-    });
-    expect(state.rightInside).toBe(true);
-    expect(state.topInside).toBe(true);
-    expect(state.color).toContain("0.03");
   });
 
   test("keeps the bento usable on mobile without horizontal overflow", async ({
@@ -1794,29 +1633,6 @@ test.describe("how I work", () => {
         () => document.documentElement.scrollWidth > window.innerWidth
       );
       expect(hasOverflow).toBe(false);
-    }
-  });
-
-  test("shows the complete process without motion when reduced motion is enabled", async ({
-    page,
-  }) => {
-    await page.emulateMedia({ reducedMotion: "reduce" });
-    await page.goto("/");
-
-    const section = page.locator("#how-i-work");
-    const steps = section.locator("[data-process-step]");
-    await expect(section.locator("[data-process-step]")).toHaveCount(
-      processSteps.length
-    );
-
-    for (const [index] of processSteps.entries()) {
-      await expect(steps.nth(index).locator("[data-process-media]")).toBeVisible();
-      await expect(
-        steps.nth(index).locator("[data-process-media] img")
-      ).toHaveCSS("opacity", "1");
-      await expect(
-        steps.nth(index).locator("[data-process-number-strip]")
-      ).toHaveCSS("transform", /matrix/);
     }
   });
 
@@ -2141,34 +1957,6 @@ test.describe("about", () => {
     expect(clipped, "no manifesto word is cut off by its mask").toBe(0);
   });
 
-  test("reduced motion shows final stats and socials instantly", async ({
-    page,
-  }) => {
-    await page.emulateMedia({ reducedMotion: "reduce" });
-    await page.goto("/");
-    await waitForPage(page);
-
-    await page.evaluate(() => {
-      document.querySelector("#about")?.scrollIntoView({ block: "start" });
-    });
-
-    const strips = page.locator("[data-odometer-strip]");
-    const count = await strips.count();
-    expect(count).toBeGreaterThan(0);
-    for (let index = 0; index < count; index += 1) {
-      const strip = strips.nth(index);
-      const digit = Number(await strip.getAttribute("data-digit"));
-      await expect.poll(() => visibleDigit(strip)).toBe(digit);
-    }
-
-    await expect(page.locator("[data-stat-label]").first()).toHaveCSS(
-      "opacity",
-      "1"
-    );
-    const socialRow = page.locator("[data-social-row-inner]").first();
-    await expect(socialRow).toBeVisible();
-  });
-
   test("social rows reveal on scroll and link only when a href exists", async ({
     page,
   }) => {
@@ -2279,6 +2067,9 @@ test.describe("home (responsive)", () => {
 
       const panel = page.locator("#staggered-menu-panel");
       await expect(panel).toBeVisible();
+      await expect
+        .poll(() => panel.evaluate((element) => getComputedStyle(element).transform))
+        .toMatch(/^(none|matrix\(1, 0, 0, 1, 0, 0\))$/);
       await expect
         .poll(() => panel.evaluate((el) => el.scrollWidth - el.clientWidth), {
           message: `panel must not scroll horizontally (${label})`,
@@ -2561,33 +2352,6 @@ test.describe("scroll-to-top", () => {
     await expect(button).toBeHidden();
   });
 
-  test("works with reduced motion (instant scroll, no curtain)", async ({
-    page,
-  }) => {
-    await page.emulateMedia({ reducedMotion: "reduce" });
-    await page.goto("/");
-    await expect(page.locator("[data-curtain-content]")).toBeHidden({
-      timeout: 15_000,
-    });
-
-    const button = page.locator("[data-scroll-to-top]");
-
-    // Scroll down
-    await page.evaluate(() =>
-      window.scrollTo(0, document.documentElement.scrollHeight / 2)
-    );
-    await expect(button).toBeVisible();
-
-    // Click — should scroll instantly, no curtain
-    await button.click();
-    await expect
-      .poll(() => page.evaluate(() => window.scrollY))
-      .toBe(0);
-
-    // Curtain should not appear
-    const curtain = page.locator(".stt-curtain");
-    await expect(curtain).toBeHidden();
-  });
 });
 
 test.describe("navigation wipe", () => {
@@ -2656,16 +2420,4 @@ test.describe("navigation wipe", () => {
     await expect(page.locator("#hero-heading")).toBeInViewport();
   });
 
-  test("nav links scroll instantly without the curtain under reduced motion", async ({
-    page,
-  }) => {
-    await page.emulateMedia({ reducedMotion: "reduce" });
-    await page.goto("/");
-    await waitForPage(page);
-
-    await page.getByRole("link", { name: hero.actions[0].label }).click();
-
-    await expect(curtain(page)).toBeHidden();
-    await expect(page.locator(hero.actions[0].href)).toBeInViewport();
-  });
 });

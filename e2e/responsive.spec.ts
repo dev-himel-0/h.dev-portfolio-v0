@@ -15,13 +15,18 @@ test.describe("responsive layout", () => {
     test(`stays inside the viewport at ${viewport.name}`, async ({ page }) => {
       await page.setViewportSize(viewport);
       await page.goto("/");
+      await expect(page.locator("[data-curtain-content]")).toBeHidden({
+        timeout: 15_000,
+      });
 
       const layout = await page.evaluate(() => {
         const visibleOutliers = [...document.querySelectorAll("body *")]
           .filter((element) => {
             if (element.closest(".smg")) return false;
+            if (element.closest("[data-circle-cursor]")) return false;
             if (element.closest("[data-stack-icon]")) return false;
             if (element.closest("[data-service-pointer-card]")) return false;
+            if (element.closest("[data-image-reveal]")) return false;
             const style = getComputedStyle(element);
             return style.display !== "none" && style.visibility !== "hidden";
           })

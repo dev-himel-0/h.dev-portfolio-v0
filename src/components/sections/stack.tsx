@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
 import type { CSSProperties } from "react";
 import { useRef, useState } from "react";
 import type { IconType } from "react-icons";
@@ -72,8 +72,6 @@ export function Stack() {
 
   useGSAP(
     () => {
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
       gsap.from("[data-bento-cell]", {
         y: 34,
         autoAlpha: 0,
@@ -156,7 +154,6 @@ function CapabilityCell({
 
     const GhostIcon = ghostIconByCapability[capability.title];
 
-  const reducedMotion = useReducedMotion();
   const [hovered, setHovered] = useState(false);
 
   const cellWidth =
@@ -183,11 +180,7 @@ function CapabilityCell({
             x: hovered ? "-20%" : "0%",
             y: hovered ? "20%" : "0%",
           }}
-          transition={
-            reducedMotion
-              ? { type: "tween", duration: 0 }
-              : { type: "spring", stiffness: 80, damping: 17, mass: 0.9 }
-          }
+          transition={{ type: "spring", stiffness: 80, damping: 17, mass: 0.9 }}
         >
           {GhostIcon ? <GhostIcon /> : null}
         </motion.span>

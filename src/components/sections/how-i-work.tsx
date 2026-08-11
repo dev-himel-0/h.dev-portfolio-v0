@@ -26,9 +26,6 @@ export function HowIWork() {
       if (!flow) return;
 
       const steps = gsap.utils.toArray<HTMLElement>("[data-process-step]");
-      const reducedMotion = window.matchMedia(
-        "(prefers-reduced-motion: reduce)"
-      ).matches;
       const cleanups: Array<() => void> = [];
 
       steps.forEach((step, index) => {
@@ -67,12 +64,6 @@ export function HowIWork() {
             scale: 0.7 + value * 0.3,
           });
         };
-
-        if (reducedMotion) {
-          gsap.set([media, ...copy], { autoAlpha: 1, clearProps: "transform" });
-          applyProgress(1);
-          return;
-        }
 
         gsap.set(media, { autoAlpha: 0, y: 40 });
         gsap.set(copy, { autoAlpha: 0, y: 20 });
