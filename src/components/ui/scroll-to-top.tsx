@@ -17,29 +17,41 @@ const SHOW_THRESHOLD = 0.2;
   * Hidden when the staggered menu is open and inactive at the top of the page.
  */
 export function ScrollToTop() {
-  const [progress, setProgress] = useState(0);
   const [shouldShow, setShouldShow] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const scrollFrameRef = useRef<number | null>(null);
+  const progressRingRef = useRef<SVGCircleElement>(null);
+  const shouldShowRef = useRef(false);
   const lenis = useSmoothScroll();
 
-  // Coalesce Lenis' frequent scroll events into one state update per frame.
+  // Coalesce Lenis' frequent scroll events into one DOM update per frame. The
+  // ring does not need a React render while the page is gliding.
   useEffect(() => {
     const update = () => {
       scrollFrameRef.current = null;
       const maxScroll =
         document.documentElement.scrollHeight - window.innerHeight;
+      let nextProgress = 0;
       if (maxScroll <= 0) {
-        setProgress(0);
+        nextProgress = 0;
       } else {
-        setProgress(Math.min(window.scrollY / maxScroll, 1));
+        nextProgress = Math.min(window.scrollY / maxScroll, 1);
       }
+
+      progressRingRef.current?.setAttribute(
+        "stroke-dashoffset",
+        String(RING_CIRCUMFERENCE * (1 - nextProgress)),
+      );
     };
 
     const onScroll = () => {
       // This threshold controls interactivity, so update it synchronously even
       // when reduced-motion browsers defer animation frames.
-      setShouldShow(window.scrollY > window.innerHeight * SHOW_THRESHOLD);
+      const nextShouldShow = window.scrollY > window.innerHeight * SHOW_THRESHOLD;
+      if (nextShouldShow !== shouldShowRef.current) {
+        shouldShowRef.current = nextShouldShow;
+        setShouldShow(nextShouldShow);
+      }
       if (scrollFrameRef.current === null) {
         scrollFrameRef.current = window.requestAnimationFrame(update);
       }
@@ -124,6 +136,7 @@ export function ScrollToTop() {
           />
           {/* Progress */}
           <circle
+            ref={progressRingRef}
             cx="24"
             cy="24"
             r={RING_RADIUS}
@@ -132,7 +145,7 @@ export function ScrollToTop() {
             strokeWidth="1.5"
             strokeLinecap="round"
             strokeDasharray={RING_CIRCUMFERENCE}
-            strokeDashoffset={RING_CIRCUMFERENCE * (1 - progress)}
+            strokeDashoffset={RING_CIRCUMFERENCE}
             className="stt-progress"
           />
         </svg>

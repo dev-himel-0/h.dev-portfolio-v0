@@ -96,9 +96,10 @@ export function CurtainReveal({
           const settle = 0.42;
           const main = total - settle;
           const seg = main / 3;
+          const setFillProgress = gsap.quickSetter(fill, "scaleX");
 
           const write = () => {
-            gsap.set(fill, { scaleX: state.v });
+            setFillProgress(state.v);
             odometerRef.current?.set(Math.round(state.v * 100));
           };
 

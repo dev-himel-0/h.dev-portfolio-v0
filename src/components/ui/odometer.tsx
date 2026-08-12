@@ -41,7 +41,7 @@ export function Odometer({ ref, digits = 3, className }: OdometerProps) {
   const tapeRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const indexRefs = useRef<number[]>(Array.from({ length: digits }, () => 0));
   const stepRef = useRef(0);
-  const tweensRef = useRef<gsap.core.Tween[]>([]);
+  const quickToRefs = useRef<Array<((value: number) => void) | null>>([]);
 
   const tape = useMemo(
     () => Array.from({ length: TAPE_COPIES * 10 }, (_, i) => String(i % 10)),
@@ -78,16 +78,11 @@ export function Odometer({ ref, digits = 3, className }: OdometerProps) {
           indexRefs.current[p] = target;
           if (!tapeEl || target === prev) continue;
 
-          const tween = gsap.to(tapeEl, {
-            y: -target * stepRef.current,
+          quickToRefs.current[p] ??= gsap.quickTo(tapeEl, "y", {
             duration: ROLL_DURATION,
             ease: ROLL_EASE,
-            overwrite: "auto",
           });
-          tweensRef.current.push(tween);
-          tween.eventCallback("onComplete", () => {
-            tweensRef.current = tweensRef.current.filter((t) => t !== tween);
-          });
+          quickToRefs.current[p]?.(-target * stepRef.current);
         }
       },
     }),
@@ -95,9 +90,11 @@ export function Odometer({ ref, digits = 3, className }: OdometerProps) {
   );
 
   useEffect(() => {
-    const tweens = tweensRef.current;
+    const tapeElements = tapeRefs.current;
     return () => {
-      tweens.forEach((t) => t.kill());
+      tapeElements.forEach((tapeEl) => {
+        if (tapeEl) gsap.killTweensOf(tapeEl);
+      });
     };
   }, []);
 

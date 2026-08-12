@@ -63,7 +63,12 @@ export function HowIWork() {
           setVerticalFill(value);
           setHorizontalFill(value);
           setNumberPosition(finalNumber * value);
-          gsap.set(nodes, { autoAlpha: value, scale: 0.7 + value * 0.3 });
+          const scale = 0.7 + value * 0.3;
+          nodes.forEach((node) => {
+            node.style.opacity = String(value);
+            node.style.transform = `scale(${scale})`;
+            node.style.visibility = value > 0 ? "visible" : "hidden";
+          });
         };
 
         gsap.set(media, { autoAlpha: 0, y: 40 });

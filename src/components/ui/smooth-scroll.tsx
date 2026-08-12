@@ -1,6 +1,8 @@
 "use client";
 
 import Lenis from "lenis";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import {
   createContext,
   useContext,
@@ -9,14 +11,17 @@ import {
   type ReactNode,
 } from "react";
 
+gsap.registerPlugin(ScrollTrigger);
+
 const LENIS_OPTIONS = {
-  duration: 1.6,
-  easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+  duration: 1.3,
+  easing: (t: number) => 1 - Math.pow(1 - t, 3),
   orientation: "vertical" as const,
   gestureOrientation: "vertical" as const,
   smoothWheel: true,
   wheelMultiplier: 1,
   touchMultiplier: 2,
+  autoRaf: false,
 };
 
 const LenisContext = createContext<Lenis | null>(null);
@@ -39,12 +44,11 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
     const instance = new Lenis(LENIS_OPTIONS);
     const publishId = window.requestAnimationFrame(() => setLenis(instance));
 
-    function raf(time: number) {
-      instance.raf(time);
-      rafId = window.requestAnimationFrame(raf);
-    }
+    const update = (time: number) => instance.raf(time * 1000);
 
-    let rafId = window.requestAnimationFrame(raf);
+    instance.on("scroll", ScrollTrigger.update);
+    gsap.ticker.add(update);
+    gsap.ticker.lagSmoothing(0);
 
     function handleAnchorClick(event: MouseEvent) {
       if (event.defaultPrevented) return;
@@ -71,7 +75,8 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
     return () => {
       document.removeEventListener("click", handleAnchorClick);
       window.cancelAnimationFrame(publishId);
-      window.cancelAnimationFrame(rafId);
+      instance.off("scroll", ScrollTrigger.update);
+      gsap.ticker.remove(update);
       instance.destroy();
     };
   }, []);
