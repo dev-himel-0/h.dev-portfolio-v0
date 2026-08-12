@@ -58,15 +58,12 @@ export function HowIWork() {
         const setVerticalFill = gsap.quickSetter(verticalFills, "scaleY");
         const setHorizontalFill = gsap.quickSetter(horizontalFill, "scaleX");
         const setNumberPosition = gsap.quickSetter(numberStrip, "yPercent");
-        const setNodeOpacity = gsap.quickSetter(nodes, "autoAlpha");
-        const setNodeScale = gsap.quickSetter(nodes, "scale");
         const applyProgress = (progress: number) => {
           const value = gsap.utils.clamp(0, 1, progress);
           setVerticalFill(value);
           setHorizontalFill(value);
           setNumberPosition(finalNumber * value);
-          setNodeOpacity(value);
-          setNodeScale(0.7 + value * 0.3);
+          gsap.set(nodes, { autoAlpha: value, scale: 0.7 + value * 0.3 });
         };
 
         gsap.set(media, { autoAlpha: 0, y: 40 });

@@ -1739,6 +1739,13 @@ test.describe("how I work", () => {
       step
         .locator("[data-process-number-strip]")
         .evaluate((element) => new DOMMatrixReadOnly(getComputedStyle(element).transform).f);
+    const nodeDot = step.locator("[data-process-node-fill]").first();
+    const nodeDotOpacity = () =>
+      nodeDot.evaluate((element) => Number(getComputedStyle(element).opacity));
+    const nodeDotScale = () =>
+      nodeDot.evaluate(
+        (element) => new DOMMatrixReadOnly(getComputedStyle(element).transform).a
+      );
 
     await page.evaluate((y) => window.scrollTo(0, y), end + 80);
 
@@ -1752,6 +1759,10 @@ test.describe("how I work", () => {
     await expect
       .poll(() => scaleY())
       .toBeGreaterThan(0.9);
+    if ((page.viewportSize()?.width ?? 0) >= 810) {
+      await expect.poll(() => nodeDotOpacity()).toBeGreaterThan(0.9);
+      await expect.poll(() => nodeDotScale()).toBeGreaterThan(0.9);
+    }
     const fullNumberY = await numberY();
 
     await page.evaluate((y) => window.scrollTo(0, y), start + (end - start) * 0.45);
