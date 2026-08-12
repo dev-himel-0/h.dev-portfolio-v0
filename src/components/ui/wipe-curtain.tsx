@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { useLenis } from "lenis/react";
+import { useSmoothScroll } from "@/components/ui/smooth-scroll";
 import {
   completeWipe,
   registerWipeCurtain,
@@ -41,7 +41,7 @@ const PANELS = 5;
 export function WipeCurtain() {
   const overlayRef = useRef<HTMLDivElement>(null);
   const panelsRef = useRef<HTMLDivElement[]>([]);
-  const lenis = useLenis();
+  const lenis = useSmoothScroll();
   const router = useRouter();
   const pathname = usePathname();
 

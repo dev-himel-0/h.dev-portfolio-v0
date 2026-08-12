@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
-import { useLenis } from "lenis/react";
 import gsap from "gsap";
 import { CustomEase } from "gsap/CustomEase";
 import {
@@ -13,6 +12,7 @@ import {
 import type { Icon } from "@phosphor-icons/react";
 import { navigation, profile, socials } from "@/lib/data";
 import type { SocialIcon } from "@/lib/data";
+import { useSmoothScroll } from "@/components/ui/smooth-scroll";
 
 gsap.registerPlugin(CustomEase);
 
@@ -72,7 +72,7 @@ export function StaggeredMenu({
   const hasInteractedRef = useRef(false);
   const firstMenuLinkRef = useRef<HTMLAnchorElement>(null);
   const restoreFocusRef = useRef<HTMLElement | null>(null);
-  const lenis = useLenis();
+  const lenis = useSmoothScroll();
 
   useLayoutEffect(() => {
     openRef.current = open;

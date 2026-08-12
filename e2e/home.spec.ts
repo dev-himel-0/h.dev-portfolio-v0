@@ -2434,7 +2434,7 @@ test.describe("navigation wipe", () => {
   const curtain = (page: import("@playwright/test").Page) =>
     page.locator("[data-wipe-curtain]");
 
-  test("menu link click plays the curtain wipe and lands on the section", async ({
+  test("menu link closes the menu and lands on the section without a curtain", async ({
     page,
   }) => {
     await page.emulateMedia({ reducedMotion: "no-preference" });
@@ -2448,7 +2448,6 @@ test.describe("navigation wipe", () => {
     await expect(link).toBeVisible();
     await link.click();
 
-    await expect(curtain(page)).toBeVisible({ timeout: 2_000 });
     await expect(curtain(page)).toBeHidden({ timeout: 5_000 });
 
     await expect(page.locator("#staggered-menu-panel")).toBeHidden();

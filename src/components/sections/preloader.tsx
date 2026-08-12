@@ -2,8 +2,8 @@
 
 import { CurtainReveal } from "@/components/ui/curtain-reveal";
 import { FlipFadeText } from "@/components/ui/flip-fade-text";
+import { useSmoothScroll } from "@/components/ui/smooth-scroll";
 import { scrollToInstant } from "@/lib/wipe";
-import { useLenis } from "lenis/react";
 import { useEffect, useState } from "react";
 
 const WORDS = ["Idea", "Design & Build", "Ship"];
@@ -24,7 +24,7 @@ const PROGRESS_MS =
  */
 export function Preloader({ onFinished }: { onFinished?: () => void }) {
   const [done, setDone] = useState(false);
-  const lenis = useLenis();
+  const lenis = useSmoothScroll();
 
   useEffect(() => {
     if (done) {

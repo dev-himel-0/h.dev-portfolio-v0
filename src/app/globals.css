@@ -267,6 +267,9 @@
 .smg-prelayer {
   position: absolute;
   inset: 0;
+}
+
+header[data-open="true"] ~ .smg .smg-prelayer {
   will-change: transform;
 }
 
@@ -280,8 +283,11 @@
   background: transparent;
   color: oklch(0.985 0 0);
   pointer-events: auto;
-  will-change: opacity;
   scrollbar-width: none;
+}
+
+.smg[data-open] .smg-panel {
+  will-change: opacity;
 }
 
 .smg-panel::-webkit-scrollbar {
@@ -375,7 +381,6 @@
   position: relative;
   z-index: 1;
   display: inline-block;
-  will-change: transform;
 }
 
 .smg-word {
@@ -387,13 +392,11 @@
   position: relative;
   display: inline-block;
   overflow: hidden;
-  will-change: transform;
   vertical-align: top;
 }
 
 .smg-char {
   display: inline-block;
-  will-change: transform;
 }
 
 .smg-char-b {
@@ -633,7 +636,6 @@
    so Tailwind's Lightning CSS pass can't strip the unprefixed property. */
 .navbar-bg {
   background: rgba(255, 255, 255, 0.55);
-  will-change: transform, opacity;
 }
 
 header[data-open="true"] .navbar-bg {
@@ -683,7 +685,6 @@ header[data-open="true"] .navbar-bg {
   display: flex;
   flex-direction: column;
   line-height: 1;
-  will-change: transform;
 }
 
 .smg-toggle-line {
@@ -708,7 +709,6 @@ header[data-open="true"] .navbar-bg {
   height: 1px;
   border-radius: 0.5px;
   background: currentColor;
-  will-change: transform;
 }
 
 /* ---- Scroll-to-top button ---- */
@@ -748,7 +748,6 @@ header[data-open="true"] .navbar-bg {
     scale 0.5s cubic-bezier(0.22, 1, 0.36, 1),
     translate 0.5s cubic-bezier(0.22, 1, 0.36, 1),
     box-shadow 0.35s ease;
-  will-change: transform, opacity;
 }
 
 .stt-button[data-visible] {
@@ -792,7 +791,6 @@ header[data-open="true"] .navbar-bg {
   transform: rotate(-90deg);
   transform-origin: center;
   transition: stroke-dashoffset 0.3s cubic-bezier(0.22, 1, 0.36, 1);
-  will-change: stroke-dashoffset;
 }
 
 .stt-arrow {

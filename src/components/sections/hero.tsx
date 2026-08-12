@@ -170,7 +170,7 @@ export function Hero({
           <div className="overflow-hidden">
             <div
               data-hero-rail-content
-              className="flex flex-col items-center gap-4 will-change-transform"
+               className="flex flex-col items-center gap-4"
             >
               <span
                 data-hero-rail-dot

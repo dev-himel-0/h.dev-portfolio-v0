@@ -70,7 +70,7 @@ let pendingReveal = noop;
 export function registerWipeCurtain(
   overlay: HTMLElement,
   panels: HTMLElement[],
-  lenisInstance: Lenis | undefined
+  lenisInstance: Lenis | null
 ) {
   overlayEl = overlay;
   panelEls = panels;

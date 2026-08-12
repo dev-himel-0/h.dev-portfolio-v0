@@ -259,8 +259,8 @@ export function CircleCursor() {
       }
     };
 
-    const onClick = (event: MouseEvent) => {
-      const startedAt = performance.now();
+      const onClick = (event: MouseEvent) => {
+        const startedAt = performance.now();
       sparksRef.current.push(
         ...Array.from({ length: SPARK_COUNT }, (_, index) => ({
           x: event.clientX,

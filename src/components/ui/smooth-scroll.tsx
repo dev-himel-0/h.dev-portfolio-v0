@@ -1,64 +1,84 @@
 "use client";
 
-import { ReactLenis } from "lenis/react";
-import { useEffect, useRef } from "react";
-import type { ComponentRef } from "react";
+import Lenis from "lenis";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
+
+const LENIS_OPTIONS = {
+  duration: 1.6,
+  easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+  orientation: "vertical" as const,
+  gestureOrientation: "vertical" as const,
+  smoothWheel: true,
+  wheelMultiplier: 1,
+  touchMultiplier: 2,
+};
+
+const LenisContext = createContext<Lenis | null>(null);
+
+export function useSmoothScroll() {
+  return useContext(LenisContext);
+}
 
 /**
- * Satz-compatible global smooth-scroll provider. Satz uses Lenis 1.1.9 with
- * a 1.4-second duration and a standalone requestAnimationFrame loop.
+ * Global smooth-scroll provider matching the ReactBits portfolio template.
+ * Lenis owns interpolation while the browser retains the native document
+ * scroll container.
  */
-export function SmoothScroll({ children }: { children: React.ReactNode }) {
-  const lenisRef = useRef<ComponentRef<typeof ReactLenis>>(null);
+export function SmoothScroll({ children }: { children: ReactNode }) {
+  const [lenis, setLenis] = useState<Lenis | null>(null);
 
   useEffect(() => {
-    let rafId = 0;
-    let pausedForVisibility = false;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-    const loop = (time: number) => {
-      lenisRef.current?.lenis?.raf(time);
-      rafId = window.requestAnimationFrame(loop);
-    };
+    const instance = new Lenis(LENIS_OPTIONS);
+    const publishId = window.requestAnimationFrame(() => setLenis(instance));
 
-    const onVisibilityChange = () => {
-      const lenis = lenisRef.current?.lenis;
-      if (!lenis) return;
+    function raf(time: number) {
+      instance.raf(time);
+      rafId = window.requestAnimationFrame(raf);
+    }
 
-      if (document.visibilityState === "hidden") {
-        pausedForVisibility = true;
-        window.cancelAnimationFrame(rafId);
-      } else if (pausedForVisibility) {
-        pausedForVisibility = false;
-        // Reset Lenis' clock so a background-tab gap does not jump the scroll.
-        lenis.time = performance.now();
-        rafId = window.requestAnimationFrame(loop);
-      }
-    };
+    let rafId = window.requestAnimationFrame(raf);
 
-    rafId = window.requestAnimationFrame(loop);
-    document.addEventListener("visibilitychange", onVisibilityChange);
+    function handleAnchorClick(event: MouseEvent) {
+      if (event.defaultPrevented) return;
+
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) return;
+
+      const anchor = target.closest<HTMLAnchorElement>('a[href^="#"]');
+      if (!anchor) return;
+
+      const href = anchor.getAttribute("href");
+      if (!href || href === "#") return;
+
+      const element = document.querySelector(href);
+      if (!(element instanceof HTMLElement)) return;
+
+      event.preventDefault();
+      window.history.pushState(null, "", href);
+      instance.scrollTo(element, { offset: -100 });
+    }
+
+    document.addEventListener("click", handleAnchorClick);
 
     return () => {
+      document.removeEventListener("click", handleAnchorClick);
+      window.cancelAnimationFrame(publishId);
       window.cancelAnimationFrame(rafId);
-      document.removeEventListener("visibilitychange", onVisibilityChange);
+      instance.destroy();
     };
   }, []);
 
   return (
-    <ReactLenis
-      root
-      autoRaf={false}
-      options={{
-        duration: 1.4,
-        lerp: 0.1,
-        smoothWheel: true,
-        syncTouch: false,
-        touchMultiplier: 1,
-        wheelMultiplier: 1,
-      }}
-      ref={lenisRef}
-    >
+    <LenisContext.Provider value={lenis}>
       {children}
-    </ReactLenis>
+    </LenisContext.Provider>
   );
 }

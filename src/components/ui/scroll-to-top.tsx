@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowUp } from "@phosphor-icons/react";
 import { scrollToInstant, wipeCover } from "@/lib/wipe";
+import { useSmoothScroll } from "@/components/ui/smooth-scroll";
 
 const RING_RADIUS = 20;
 const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
@@ -20,6 +21,7 @@ export function ScrollToTop() {
   const [shouldShow, setShouldShow] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const scrollFrameRef = useRef<number | null>(null);
+  const lenis = useSmoothScroll();
 
   // Coalesce Lenis' frequent scroll events into one state update per frame.
   useEffect(() => {
@@ -43,17 +45,25 @@ export function ScrollToTop() {
       }
     };
 
-    window.addEventListener("scroll", onScroll, { passive: true });
+    if (lenis) {
+      lenis.on("scroll", onScroll);
+    } else {
+      window.addEventListener("scroll", onScroll, { passive: true });
+    }
     window.addEventListener("resize", onScroll);
     onScroll();
     return () => {
-      window.removeEventListener("scroll", onScroll);
+      if (lenis) {
+        lenis.off("scroll", onScroll);
+      } else {
+        window.removeEventListener("scroll", onScroll);
+      }
       window.removeEventListener("resize", onScroll);
       if (scrollFrameRef.current !== null) {
         window.cancelAnimationFrame(scrollFrameRef.current);
       }
     };
-  }, []);
+  }, [lenis]);
 
   // ── Detect staggered menu open (DOM observation) ──────────────────
   useEffect(() => {

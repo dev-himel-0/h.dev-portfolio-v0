@@ -97,8 +97,7 @@ export function ImageReveal({
           ref={wrapRef}
           className={cn(
             "absolute inset-x-0 top-0",
-            parallax > 0 && "will-change-transform",
-            parallax === 0 && "inset-0"
+             parallax === 0 && "inset-0"
           )}
           style={parallax > 0 ? { height: "135%" } : undefined}
         >

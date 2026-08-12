@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, type RefObject } from "react";
 import gsap from "gsap";
+import { useSmoothScroll } from "@/components/ui/smooth-scroll";
 
 const RAIL_CLAMP = "clamp(2.25rem,2.65vw,2.75rem)";
 
@@ -28,6 +29,7 @@ export function SectionRail({
   side,
 }: SectionRailProps) {
   const railRef = useRef<HTMLDivElement>(null);
+  const lenis = useSmoothScroll();
 
   useEffect(() => {
     const rail = railRef.current;
@@ -81,22 +83,30 @@ export function SectionRail({
       }
     };
 
-    const onScroll = () => apply();
     const onResize = () => {
       measure();
       apply();
     };
 
-    window.addEventListener("scroll", onScroll, { passive: true });
+    const onScroll = () => apply();
+    if (lenis) {
+      lenis.on("scroll", onScroll);
+    } else {
+      window.addEventListener("scroll", onScroll, { passive: true });
+    }
     window.addEventListener("resize", onResize);
     void document.fonts?.ready?.then(onResize);
     apply();
 
     return () => {
-      window.removeEventListener("scroll", onScroll);
+      if (lenis) {
+        lenis.off("scroll", onScroll);
+      } else {
+        window.removeEventListener("scroll", onScroll);
+      }
       window.removeEventListener("resize", onResize);
     };
-  }, [contentRef, sectionRef]);
+  }, [contentRef, sectionRef, lenis]);
 
   return (
     <div
@@ -113,7 +123,7 @@ export function SectionRail({
         className="sticky top-[50vh] self-start opacity-0"
       >
         <div className="overflow-hidden">
-          <div className="flex flex-col items-center gap-4 will-change-transform">
+             <div className="flex flex-col items-center gap-4">
             <span className="size-1.5 bg-black" />
             <span className="h-14 w-px origin-top bg-black/50" />
             <span

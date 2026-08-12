@@ -55,15 +55,18 @@ export function HowIWork() {
         }
 
         const finalNumber = -((index + 1) * 10);
+        const setVerticalFill = gsap.quickSetter(verticalFills, "scaleY");
+        const setHorizontalFill = gsap.quickSetter(horizontalFill, "scaleX");
+        const setNumberPosition = gsap.quickSetter(numberStrip, "yPercent");
+        const setNodeOpacity = gsap.quickSetter(nodes, "autoAlpha");
+        const setNodeScale = gsap.quickSetter(nodes, "scale");
         const applyProgress = (progress: number) => {
           const value = gsap.utils.clamp(0, 1, progress);
-          gsap.set(verticalFills, { scaleY: value });
-          gsap.set(horizontalFill, { scaleX: value });
-          gsap.set(numberStrip, { yPercent: finalNumber * value });
-          gsap.set(nodes, {
-            autoAlpha: value,
-            scale: 0.7 + value * 0.3,
-          });
+          setVerticalFill(value);
+          setHorizontalFill(value);
+          setNumberPosition(finalNumber * value);
+          setNodeOpacity(value);
+          setNodeScale(0.7 + value * 0.3);
         };
 
         gsap.set(media, { autoAlpha: 0, y: 40 });
@@ -165,6 +168,12 @@ export function HowIWork() {
 
       <div className="mx-auto w-full max-w-[75rem] px-[1.875rem]">
         <header className="mb-[3.75rem] flex w-full flex-col items-end gap-7 text-right sm:mb-[5rem] lg:mb-[6.25rem]">
+          <span
+            data-process-label
+            className="sr-only"
+          >
+            {processSection.index} / PROCESS
+          </span>
           <h2
             id="how-i-work-heading"
             className="whitespace-nowrap font-heading text-[clamp(2.5rem,7vw,5.5rem)] font-semibold leading-[0.88] tracking-[-0.045em]"

@@ -190,7 +190,7 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
   );
 
   const cardClass = cn(
-    "work-card group relative flex w-full flex-col gap-10 bg-white pt-10 sm:pt-12 min-[810px]:sticky min-[810px]:top-20 min-[810px]:z-[1] min-[810px]:will-change-transform lg:flex-row lg:gap-14 lg:pt-14",
+    "work-card group relative flex w-full flex-col gap-10 bg-white pt-10 sm:pt-12 min-[810px]:sticky min-[810px]:top-20 min-[810px]:z-[1] lg:flex-row lg:gap-14 lg:pt-14",
     flipped && "lg:flex-row-reverse"
   );
 
