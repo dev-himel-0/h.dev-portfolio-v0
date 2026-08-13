@@ -6,6 +6,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { StaggerText } from "@/components/ui/stagger-text";
+import { RollingNumber } from "@/components/ui/rolling-number";
 import {
   about,
   profile,
@@ -58,25 +59,6 @@ export function About() {
           start: "top 85%",
           once: true,
           onEnter: () => {
-            statCells.forEach((cell, cellIndex) => {
-              const strips = cell.querySelectorAll<HTMLElement>(
-                "[data-odometer-strip]"
-              );
-              gsap.set(strips, { yPercent: 0, y: 0, willChange: "transform" });
-              gsap.to(strips, {
-                yPercent: (index: number) => {
-                  const digit = Number(strips[index].dataset.digit ?? 0);
-                  return -(digit * 10);
-                },
-                y: 0,
-                duration: 1.8,
-                ease: "expo.out",
-                delay: cellIndex * 0.15,
-                onComplete: () =>
-                  gsap.set(strips, { clearProps: "willChange" }),
-              });
-            });
-
             gsap.from("[data-stat-divider]", {
               scaleY: 0,
               transformOrigin: "top center",
@@ -143,8 +125,8 @@ export function About() {
           className="relative mx-auto mt-[clamp(1.5rem,4vh,2.5rem)] max-w-[34rem] border-y border-black/10"
         >
           <div className="grid grid-cols-3">
-            {stats.map((stat) => (
-              <StatCell key={stat.label} stat={stat} />
+            {stats.map((stat, index) => (
+              <StatCell key={stat.label} stat={stat} index={index} />
             ))}
           </div>
           <span
@@ -185,33 +167,30 @@ export function About() {
 }
 
 /**
- * One stat cell: odometer digit columns that roll from 0 to the final
- * value when the band crosses mid-viewport, a static suffix, and an
- * uppercase label. The markup renders the final digits; the motion
- * branch rewinds and rolls.
+ * One stat cell: a rolling odometer number that counts up when the band
+ * crosses mid-viewport, a static suffix, and an uppercase label. The markup
+ * renders the final digits; the RollingNumber motion rewinds and rolls.
  */
-function StatCell({ stat }: { stat: (typeof stats)[number] }) {
-  const digits = String(stat.value).split("");
-
+function StatCell({
+  stat,
+  index,
+}: {
+  stat: (typeof stats)[number];
+  index: number;
+}) {
   return (
     <div
       data-about-stat
       className="flex flex-col items-center gap-1 py-[clamp(0.875rem,2.25vh,1.375rem)] sm:gap-1.5"
     >
       <div className="flex items-baseline tabular-nums">
-        <span className="sr-only">
-          {stat.value}
-          {stat.suffix} — {stat.label}
-        </span>
-        <span
-          aria-hidden="true"
-          className="flex items-center font-heading text-[clamp(1.75rem,4.5vw,2.5rem)] font-semibold leading-none tracking-[-0.03em]"
-        >
-          {digits.map((digit, digitIndex) => (
-            <OdometerDigit key={`${digit}-${digitIndex}`} digit={digit} />
-          ))}
-          <span className="ml-1 text-[0.45em] font-medium">{stat.suffix}</span>
-        </span>
+        <RollingNumber
+          value={String(stat.value)}
+          suffix={stat.suffix}
+          suffixClassName="text-[0.45em] font-medium"
+          delay={index * 0.15}
+          className="font-heading text-[clamp(1.75rem,4.5vw,2.5rem)] font-semibold leading-none tracking-[-0.03em]"
+        />
       </div>
       <span
         data-stat-label
@@ -220,35 +199,6 @@ function StatCell({ stat }: { stat: (typeof stats)[number] }) {
         {stat.label}
       </span>
     </div>
-  );
-}
-
-/**
- * A single odometer column: a vertical strip of 0–9 clipped to one digit.
- * The inline transform holds the final digit; GSAP rewinds to 0 and rolls.
- */
-function OdometerDigit({ digit }: { digit: string }) {
-  const target = Number(digit) * 10;
-
-  return (
-    <span className="relative inline-block h-[1em] overflow-hidden">
-      <span
-        aria-hidden="true"
-        data-odometer-strip
-        data-digit={digit}
-        className="flex flex-col"
-        style={{ transform: `translateY(-${target}%)` }}
-      >
-        {Array.from({ length: 10 }, (_, value) => (
-          <span
-            key={value}
-            className="flex h-[1em] items-center justify-center leading-none"
-          >
-            {value}
-          </span>
-        ))}
-      </span>
-    </span>
   );
 }
 

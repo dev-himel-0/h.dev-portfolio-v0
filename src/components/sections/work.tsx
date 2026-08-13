@@ -5,45 +5,14 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { ArrowUpRight } from "@phosphor-icons/react";
-import {
-  SiGsap,
-  SiJavascript,
-  SiNextdotjs,
-  SiNodedotjs,
-  SiNuxt,
-  SiReact,
-  SiRedux,
-  SiSass,
-  SiStyledcomponents,
-  SiTailwindcss,
-  SiTypescript,
-  SiVuedotjs,
-  SiWebflow,
-} from "react-icons/si";
 import { SectionReveal } from "@/components/ui/section-reveal";
 import { SectionRail } from "@/components/ui/section-rail";
 import { ImageReveal } from "@/components/ui/image-reveal";
-import { MaskedAvatars } from "@/components/ui/masked-avatars";
+import { RollingNumber } from "@/components/ui/rolling-number";
 import { projects, work, type Project } from "@/lib/data";
 import { cn } from "@/lib/utils";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
-
-const technologyIcons = {
-  GSAP: SiGsap,
-  JavaScript: SiJavascript,
-  "Next.js": SiNextdotjs,
-  "Node.js": SiNodedotjs,
-  Nuxt: SiNuxt,
-  React: SiReact,
-  Redux: SiRedux,
-  SCSS: SiSass,
-  "Styled Components": SiStyledcomponents,
-  "Tailwind CSS": SiTailwindcss,
-  TypeScript: SiTypescript,
-  Vue: SiVuedotjs,
-  Webflow: SiWebflow,
-};
 
 /**
  * Editorial project list: desktop cards stack at the top of the viewport,
@@ -143,13 +112,13 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
         data-work-info
         className="relative flex flex-1 flex-col justify-end pb-2"
       >
-        <span
-          aria-hidden="true"
-          data-work-index
+        <RollingNumber
+          value={numeral}
+          marker="work-index"
+          ariaHidden
+          delay={index * 0.08}
           className="hero-outline-text pointer-events-none absolute right-0 top-0 hidden select-none font-heading text-[clamp(8.5rem,13vw,11.5rem)] font-semibold leading-none opacity-[0.06] lg:block"
-        >
-          {numeral}
-        </span>
+        />
         <div data-work-content className="relative">
           <p
             data-work-meta
@@ -175,14 +144,26 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
           >
             {project.description}
           </p>
-          <div data-work-stack className="mt-5">
-            <MaskedAvatars
-              items={project.stack.map((name) => ({
-                name,
-                icon: technologyIcons[name as keyof typeof technologyIcons],
-              }))}
-              aria-label={`${project.title} technology stack`}
-            />
+          <div data-work-impact className="mt-6 grid max-w-[34rem] grid-cols-1 gap-x-10 sm:grid-cols-2 lg:mt-7">
+            {project.impact.map((stat) => (
+              <div
+                key={stat.label}
+                data-impact-stat
+                className="border-t border-black/10 pt-3"
+              >
+                <RollingNumber
+                  value={stat.value}
+                  marker="impact-value"
+                  className="font-heading text-2xl font-semibold leading-none tracking-[-0.02em] sm:text-3xl"
+                />
+                <p
+                  data-impact-label
+                  className="mt-1.5 font-sans text-[0.625rem] uppercase tracking-[0.22em] text-black/50"
+                >
+                  {stat.label}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </div>

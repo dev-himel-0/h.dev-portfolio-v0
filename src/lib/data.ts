@@ -4,12 +4,20 @@
  * Never invent projects, clients, or experience.
  */
 
+export interface ImpactStat {
+  /** The headline number, e.g. "35%", "6 wks". */
+  value: string;
+  /** Short label describing what the number means, e.g. "conversion lift". */
+  label: string;
+}
+
 export interface Project {
   title: string;
   year: string;
   role: string;
   description: string;
-  stack: string[];
+  /** Client-visible business outcomes. Placeholders until Himel provides real metrics. */
+  impact: ImpactStat[];
   href?: string;
   image?: string;
 }
@@ -157,7 +165,10 @@ export const projects: Project[] = [
     role: "Frontend Engineer",
     description:
       "Placeholder description. What the product was, the problem it solved, and the impact you delivered.",
-    stack: ["Next.js", "TypeScript", "Tailwind CSS"],
+    impact: [
+      { value: "35%", label: "conversion lift" },
+      { value: "6 wks", label: "MVP to launch" },
+    ],
     href: "",
     image: "/img/projects/project01.webp",
   },
@@ -167,7 +178,10 @@ export const projects: Project[] = [
     role: "Frontend Engineer",
     description:
       "Placeholder description. What the product was, the problem it solved, and the impact you delivered.",
-    stack: ["React", "Redux", "Styled Components"],
+    impact: [
+      { value: "2×", label: "faster page loads" },
+      { value: "1.4×", label: "signup growth" },
+    ],
     href: "",
     image: "/img/projects/project02.webp",
   },
@@ -177,7 +191,10 @@ export const projects: Project[] = [
     role: "Frontend Engineer",
     description:
       "Placeholder description. What the product was, the problem it solved, and the impact you delivered.",
-    stack: ["Vue", "Nuxt", "SCSS"],
+    impact: [
+      { value: "8 wks", label: "end-to-end rebuild" },
+      { value: "+28%", label: "retention" },
+    ],
     href: "",
     image: "/img/projects/project03.webp",
   },
@@ -187,7 +204,10 @@ export const projects: Project[] = [
     role: "Frontend Developer",
     description:
       "Placeholder description. What the product was, the problem it solved, and the impact you delivered.",
-    stack: ["JavaScript", "GSAP", "Webflow"],
+    impact: [
+      { value: "40%", label: "less dev time" },
+      { value: "12k", label: "users onboarded" },
+    ],
     href: "",
     image: "/img/projects/project04.webp",
   },

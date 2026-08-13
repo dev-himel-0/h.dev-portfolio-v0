@@ -18,6 +18,31 @@ import {
   work,
 } from "../src/lib/data";
 
+const stripY = (strip: import("@playwright/test").Locator) =>
+  strip.evaluate((el) => {
+    const element = el as HTMLElement;
+    const matrix = getComputedStyle(element).transform;
+    if (!matrix || matrix === "none") return 0;
+    return new DOMMatrixReadOnly(matrix).m42;
+  });
+
+const stripTarget = (strip: import("@playwright/test").Locator) =>
+  strip.evaluate((el) => {
+    const element = el as HTMLElement;
+    return -(Number(element.dataset.digit) * element.offsetHeight) / 10;
+  });
+
+const visibleDigit = (strip: import("@playwright/test").Locator) =>
+  strip.evaluate((el) => {
+    const element = el as HTMLElement;
+    const containerTop = element.parentElement!.getBoundingClientRect().top;
+    const children = Array.from(element.children);
+    return children.findIndex(
+      (child) =>
+        Math.abs(child.getBoundingClientRect().top - containerTop) < 2
+    );
+  });
+
 test.describe("home", () => {
   test("loads with a 200 response", async ({ page }) => {
     const response = await page.goto("/");
@@ -843,21 +868,17 @@ test.describe("home", () => {
       await expect(row).toBeVisible();
       await expect(row).toContainText(project.year);
       await expect(row).toContainText(project.description);
-      await expect(row).toContainText(project.stack[0]);
+      await expect(row).toContainText(project.impact[0].value);
 
-      const techStack = row.locator("[data-tech-stack]");
-      await expect(techStack).toHaveAttribute(
-        "aria-label",
-        `${project.title} technology stack`
-      );
-      await expect(techStack.locator("[data-tech-avatar]")).toHaveCount(
-        project.stack.length
+      const impact = row.locator("[data-work-impact]");
+      await expect(impact.locator("[data-impact-stat]")).toHaveCount(
+        project.impact.length
       );
 
-      for (const technology of project.stack) {
+      for (const stat of project.impact) {
         await expect(
-          techStack.locator(`[data-tech-avatar][aria-label="${technology}"]`)
-        ).toBeAttached();
+          impact.locator("[data-impact-stat]", { hasText: stat.value })
+        ).toContainText(stat.label);
       }
 
       const link = page.getByRole("link", { name: project.title });
@@ -1066,34 +1087,55 @@ test.describe("home", () => {
 
       const info = row.locator("[data-work-info]");
       await expect(info).toBeVisible();
-      const infoBox = await info.evaluate((element) => {
-        const rect = element.getBoundingClientRect();
-        return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
-      });
 
       const numeral = row.locator("[data-work-index]");
       if ((page.viewportSize()?.width ?? 0) >= 1024) {
         await expect(numeral).toBeVisible();
-        await expect(numeral).toHaveText(String(index + 1).padStart(2, "0"));
-        const numeralBox = await numeral.boundingBox();
-        expect(numeralBox, project.title).not.toBeNull();
+        await expect(numeral).toHaveAttribute(
+          "data-value",
+          String(index + 1).padStart(2, "0")
+        );
+        await expect(numeral.locator("[data-odometer-strip]")).toHaveCount(2);
+
+        const { infoBox, numeralBox, contentBox } = await row.evaluate(
+          (element) => {
+            const infoRect = element
+              .querySelector("[data-work-info]")!
+              .getBoundingClientRect();
+            const numeralRect = element
+              .querySelector("[data-work-index]")!
+              .getBoundingClientRect();
+            const contentRect = element
+              .querySelector("[data-work-content]")!
+              .getBoundingClientRect();
+            return {
+              infoBox: {
+                x: infoRect.x,
+                y: infoRect.y,
+                width: infoRect.width,
+                height: infoRect.height,
+              },
+              numeralBox: {
+                x: numeralRect.x,
+                y: numeralRect.y,
+                width: numeralRect.width,
+                height: numeralRect.height,
+              },
+              contentBox: { y: contentRect.y, height: contentRect.height },
+            };
+          }
+        );
+
         expect(
-          Math.abs(numeralBox!.x + numeralBox!.width - (infoBox!.x + infoBox!.width)),
+          Math.abs(numeralBox.x + numeralBox.width - (infoBox.x + infoBox.width)),
           `${project.title}: numeral sits at the top-right corner of the info column`
         ).toBeLessThanOrEqual(2);
         expect(
-          Math.abs(numeralBox!.y - infoBox!.y),
+          Math.abs(numeralBox.y - infoBox.y),
           `${project.title}: numeral aligns to the top of the info column`
         ).toBeLessThanOrEqual(2);
-
-        const contentBox = await row
-          .locator("[data-work-content]")
-          .evaluate((element) => {
-            const rect = element.getBoundingClientRect();
-            return { y: rect.y, height: rect.height };
-          });
         expect(
-          infoBox!.y + infoBox!.height - (contentBox!.y + contentBox!.height),
+          infoBox.y + infoBox.height - (contentBox.y + contentBox.height),
           `${project.title}: info content stays bottom-aligned (pb-2 padding only)`
         ).toBeLessThanOrEqual(10);
       } else {
@@ -1114,7 +1156,7 @@ test.describe("home", () => {
     }
   });
 
-  test("keeps technology icons black and reveals every label on hover", async ({
+  test("renders impact stats in black with hairline separators", async ({
     page,
   }) => {
     await page.goto("/");
@@ -1138,23 +1180,114 @@ test.describe("home", () => {
       )
       .toBe("1");
 
-    const stack = page.locator("[data-tech-stack]").first();
-    const icons = stack.locator("[data-tech-icon]");
-    const initialColors = await icons.evaluateAll((elements) =>
-      elements.map((element) => getComputedStyle(element).color)
+    const impact = page.locator("[data-work-impact]").first();
+    await expect(impact.locator("[data-impact-stat]")).toHaveCount(
+      projects[0].impact.length
     );
 
-    expect(new Set(initialColors).size).toBe(1);
+    const values = impact.locator("[data-impact-value]");
+    await expect(values).toHaveCount(projects[0].impact.length);
+    for (const stat of projects[0].impact) {
+      await expect(
+        impact.locator("[data-impact-value]", { hasText: stat.value })
+      ).toHaveCSS("color", "rgb(0, 0, 0)");
+    }
 
-    const iconBox = await icons.first().locator("svg").boundingBox();
-    expect(iconBox?.width ?? 0).toBeGreaterThan(20);
-    expect(iconBox?.width ?? 0).toBeLessThan(25);
+    const separators = await impact
+      .locator("[data-impact-stat]")
+      .evaluateAll((stats) =>
+        stats.map(
+          (stat) =>
+            getComputedStyle(stat).borderTopStyle +
+            " " +
+            getComputedStyle(stat).borderTopColor
+        )
+      );
+    expect(separators.every((value) => value.includes("solid"))).toBe(true);
+  });
 
-    const avatars = stack.locator("[data-tech-avatar]");
-    for (let index = 0; index < await avatars.count(); index += 1) {
-      const avatar = avatars.nth(index);
-      await avatar.hover({ force: true });
-      await expect(avatar.locator("[data-tech-label]")).toBeVisible();
+  test("rolls impact stats from zero on scroll entry", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.goto("/");
+    await expect(page.locator("[data-curtain-content]")).toBeHidden({
+      timeout: 15_000,
+    });
+
+    await page.evaluate(() => {
+      document
+        .querySelector("[data-work-row]")
+        ?.scrollIntoView({ block: "center" });
+    });
+
+    const firstValue = page
+      .locator("[data-work-impact]")
+      .first()
+      .locator("[data-impact-value]")
+      .first();
+    const core = projects[0].impact[0].value.match(/^[^\d]*([\d.]+)/)?.[1] ?? "";
+    const strips = firstValue.locator("[data-odometer-strip]");
+    await expect(strips).toHaveCount(core.length);
+
+    const firstStrip = strips.first();
+    await expect
+      .poll(() => stripY(firstStrip), "odometer catches the roll mid-flight")
+      .toBeGreaterThan((await stripTarget(firstStrip)) + 1);
+
+    const count = await strips.count();
+    for (let index = 0; index < count; index += 1) {
+      const strip = strips.nth(index);
+      const digit = Number(await strip.getAttribute("data-digit"));
+      await expect
+        .poll(() => visibleDigit(strip), `impact digit column ${index} settles`)
+        .toBe(digit);
+    }
+  });
+
+  test("rolls each card numeral from zero on scroll entry", async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.goto("/");
+    await expect(page.locator("[data-curtain-content]")).toBeHidden({
+      timeout: 15_000,
+    });
+
+    const rows = page.locator("[data-work-row]");
+    await expect(rows).toHaveCount(projects.length);
+
+    for (const [index, project] of projects.entries()) {
+      const numeral = rows
+        .filter({ hasText: project.title })
+        .first()
+        .locator("[data-work-index]");
+      await expect(numeral).toHaveCount(1);
+
+      await rows
+        .filter({ hasText: project.title })
+        .first()
+        .evaluate((element) =>
+          element.scrollIntoView({ block: "center" })
+        );
+
+      const strips = numeral.locator("[data-odometer-strip]");
+      await expect(strips).toHaveCount(2);
+
+      if (!(await numeral.isVisible())) {
+        await expect(numeral).toBeHidden();
+        continue;
+      }
+
+      const count = await strips.count();
+      for (let stripIndex = 0; stripIndex < count; stripIndex += 1) {
+        const strip = strips.nth(stripIndex);
+        const digit = Number(await strip.getAttribute("data-digit"));
+        await expect
+          .poll(
+            () => visibleDigit(strip),
+            `numeral column ${stripIndex} of card ${index} settles`
+          )
+          .toBe(digit);
+      }
     }
   });
 
@@ -1818,31 +1951,6 @@ test.describe("about", () => {
     });
   };
 
-  const stripY = (strip: import("@playwright/test").Locator) =>
-    strip.evaluate((el) => {
-      const element = el as HTMLElement;
-      const matrix = getComputedStyle(element).transform;
-      if (!matrix || matrix === "none") return 0;
-      return new DOMMatrixReadOnly(matrix).m42;
-    });
-
-  const stripTarget = (strip: import("@playwright/test").Locator) =>
-    strip.evaluate((el) => {
-      const element = el as HTMLElement;
-      return -(Number(element.dataset.digit) * element.offsetHeight) / 10;
-    });
-
-  const visibleDigit = (strip: import("@playwright/test").Locator) =>
-    strip.evaluate((el) => {
-      const element = el as HTMLElement;
-      const containerTop = element.parentElement!.getBoundingClientRect().top;
-      const children = Array.from(element.children);
-      return children.findIndex(
-        (child) =>
-          Math.abs(child.getBoundingClientRect().top - containerTop) < 2
-      );
-    });
-
   test("renders manifesto, stats, and socials without a title or rail", async ({
     page,
   }) => {
@@ -1931,12 +2039,12 @@ test.describe("about", () => {
         ?.scrollIntoView({ block: "center" });
     });
 
-    const firstStrip = page.locator("[data-odometer-strip]").first();
+    const firstStrip = page.locator("#about [data-odometer-strip]").first();
     await expect
       .poll(() => stripY(firstStrip), "odometer catches the roll mid-flight")
       .toBeGreaterThan((await stripTarget(firstStrip)) + 1);
 
-    const strips = page.locator("[data-odometer-strip]");
+    const strips = page.locator("#about [data-odometer-strip]");
     const count = await strips.count();
     for (let index = 0; index < count; index += 1) {
       const strip = strips.nth(index);
