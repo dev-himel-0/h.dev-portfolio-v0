@@ -15,6 +15,8 @@ interface ImageRevealProps extends Omit<ComponentProps<typeof Image>, "fill"> {
   className?: string;
   /** Parallax strength: the image drifts vertically while in view (0 = none). */
   parallax?: number;
+  /** How the image fits its frame: "cover" crops to fill, "contain" shows it whole. */
+  objectFit?: "cover" | "contain";
   start?: string;
   /** Lift the grayscale filter to full color when the parent `group` is hovered. */
   colorOnHover?: boolean;
@@ -32,6 +34,7 @@ export function ImageReveal({
   alt,
   className,
   parallax = 0,
+  objectFit = "cover",
   start = "top 85%",
   colorOnHover = false,
   ...rest
@@ -108,7 +111,7 @@ export function ImageReveal({
             fill
             sizes="(max-width: 768px) 100vw, 50vw"
             className={cn(
-              "object-cover grayscale",
+              `object-${objectFit} grayscale`,
               colorOnHover &&
                 "transition-[filter] duration-700 ease-out group-hover:grayscale-0"
             )}

@@ -159,8 +159,7 @@ export const projects: Project[] = [
       "Placeholder description. What the product was, the problem it solved, and the impact you delivered.",
     stack: ["Next.js", "TypeScript", "Tailwind CSS"],
     href: "",
-    image:
-      "https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1600&auto=format&fit=crop",
+    image: "/img/projects/project01.webp",
   },
   {
     title: "Project Two",
@@ -170,8 +169,7 @@ export const projects: Project[] = [
       "Placeholder description. What the product was, the problem it solved, and the impact you delivered.",
     stack: ["React", "Redux", "Styled Components"],
     href: "",
-    image:
-      "https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=1600&auto=format&fit=crop",
+    image: "/img/projects/project02.webp",
   },
   {
     title: "Project Three",
@@ -181,8 +179,7 @@ export const projects: Project[] = [
       "Placeholder description. What the product was, the problem it solved, and the impact you delivered.",
     stack: ["Vue", "Nuxt", "SCSS"],
     href: "",
-    image:
-      "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=1600&auto=format&fit=crop",
+    image: "/img/projects/project03.webp",
   },
   {
     title: "Project Four",
@@ -192,8 +189,7 @@ export const projects: Project[] = [
       "Placeholder description. What the product was, the problem it solved, and the impact you delivered.",
     stack: ["JavaScript", "GSAP", "Webflow"],
     href: "",
-    image:
-      "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?q=80&w=1600&auto=format&fit=crop",
+    image: "/img/projects/project04.webp",
   },
 ];
 

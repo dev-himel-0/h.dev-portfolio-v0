@@ -272,14 +272,14 @@ function ProjectFigure({
     <figure
       ref={ref}
       data-work-figure
-      className="relative aspect-[1.56] w-full flex-1 overflow-hidden bg-black/[0.04] lg:aspect-[1.529]"
+      className="relative aspect-video w-full flex-1 overflow-hidden bg-white"
     >
       {project.image ? (
         <ImageReveal
           src={project.image}
           alt={`${project.title} preview`}
           className="h-full w-full"
-          parallax={16}
+          objectFit="contain"
           colorOnHover
           loading={eager ? "eager" : undefined}
         />

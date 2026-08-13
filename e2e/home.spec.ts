@@ -1048,7 +1048,7 @@ test.describe("home", () => {
     await expect(page.locator("[data-work-underline]")).toHaveCount(0);
   });
 
-  test("shows faded outlined numerals inside the info column and Unsplash images", async ({
+  test("shows faded outlined numerals inside the info column and local project images", async ({
     page,
   }) => {
     await page.goto("/");
@@ -1102,11 +1102,15 @@ test.describe("home", () => {
 
       const img = row.locator("[data-work-figure] img");
       await expect(img).toHaveCount(1);
-      await expect(img).toHaveAttribute("src", /images\.unsplash\.com/);
+      await expect(img).toHaveAttribute(
+        "src",
+        new RegExp(project.image.split("/").pop()!.replace(/\./g, "\\."))
+      );
       await expect(img).toHaveAttribute(
         "loading",
         index === 0 ? "eager" : "lazy"
       );
+      await expect(img).toHaveCSS("object-fit", "contain");
     }
   });
 
