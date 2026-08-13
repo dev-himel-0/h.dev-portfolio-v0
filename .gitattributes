@@ -1,0 +1,11 @@
+# Normalize all text files to LF in the repo and on every checkout (any OS).
+* text=auto eol=lf
+
+# Binary assets must never be touched by line-ending conversion.
+*.png  -text
+*.webp -text
+*.jpg  -text
+*.jpeg -text
+*.gif  -text
+*.ico  -text
+*.avif -text

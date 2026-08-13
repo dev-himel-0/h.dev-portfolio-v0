@@ -1,20 +1,20 @@
-"use client";
+"use client"
 
-import { cn } from "@/lib/utils";
-import { useState, type CSSProperties } from "react";
-import type { IconType } from "react-icons";
+import { cn } from "@/lib/utils"
+import { useState, type CSSProperties } from "react"
+import type { IconType } from "react-icons"
 
 export interface MaskedAvatarItem {
-  name: string;
-  icon?: IconType;
+  name: string
+  icon?: IconType
 }
 
 interface MaskedAvatarsProps {
-  items: MaskedAvatarItem[];
-  size?: number;
-  overlap?: number;
-  className?: string;
-  "aria-label"?: string;
+  items: MaskedAvatarItem[]
+  size?: number
+  overlap?: number
+  className?: string
+  "aria-label"?: string
 }
 
 /**
@@ -28,7 +28,7 @@ export function MaskedAvatars({
   className,
   "aria-label": ariaLabel = "Technology stack",
 }: MaskedAvatarsProps) {
-  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const [activeIndex, setActiveIndex] = useState<number | null>(null)
 
   return (
     <div
@@ -37,16 +37,11 @@ export function MaskedAvatars({
       aria-label={ariaLabel}
       className={cn("relative flex items-end overflow-visible", className)}
     >
-      <ul
-        role="list"
-        className="m-0 flex list-none items-end p-0"
-        style={{ paddingTop: 0 }}
-      >
+      <ul role="list" className="m-0 flex list-none items-end p-0" style={{ paddingTop: 0 }}>
         {items.map((item, index) => {
-          const isActive = activeIndex === index;
-          const isNeighbor =
-            activeIndex !== null && Math.abs(activeIndex - index) === 1;
-          const Icon = item.icon;
+          const isActive = activeIndex === index
+          const isNeighbor = activeIndex !== null && Math.abs(activeIndex - index) === 1
+          const Icon = item.icon
 
           return (
             <li
@@ -59,7 +54,7 @@ export function MaskedAvatars({
               onPointerLeave={() => setActiveIndex(null)}
               onFocus={() => setActiveIndex(index)}
               onBlur={() => setActiveIndex(null)}
-               className="group relative shrink-0 outline-none transition-transform duration-200 ease-out"
+              className="group relative shrink-0 transition-transform duration-200 ease-out outline-none"
               style={
                 {
                   width: size,
@@ -88,20 +83,11 @@ export function MaskedAvatars({
                   } as CSSProperties
                 }
               >
-                <span
-                  data-tech-icon
-                  aria-hidden="true"
-                  className="text-black"
-                >
+                <span data-tech-icon aria-hidden="true" className="text-black">
                   {Icon ? (
-                    <Icon
-                      aria-hidden="true"
-                      size={size * 0.48}
-                    />
+                    <Icon aria-hidden="true" size={size * 0.48} />
                   ) : (
-                    <span className="font-sans text-sm font-medium">
-                      {item.name.slice(0, 1)}
-                    </span>
+                    <span className="font-sans text-sm font-medium">{item.name.slice(0, 1)}</span>
                   )}
                 </span>
               </div>
@@ -110,19 +96,19 @@ export function MaskedAvatars({
                 data-tech-label
                 aria-hidden="true"
                 className={cn(
-                  "pointer-events-none absolute bottom-full left-1/2 mb-1 -translate-x-1/2 whitespace-nowrap font-sans text-[0.625rem] uppercase tracking-[0.08em] text-black",
-                   "transition-[opacity,transform,filter] duration-200",
+                  "pointer-events-none absolute bottom-full left-1/2 mb-1 -translate-x-1/2 font-sans text-[0.625rem] tracking-[0.08em] whitespace-nowrap text-black uppercase",
+                  "transition-[opacity,transform,filter] duration-200",
                   isActive
-                    ? "translate-y-0 opacity-100 blur-0"
+                    ? "blur-0 translate-y-0 opacity-100"
                     : "translate-y-1 opacity-0 blur-[3px]",
                 )}
               >
                 {item.name}
               </span>
             </li>
-          );
+          )
         })}
       </ul>
     </div>
-  );
+  )
 }

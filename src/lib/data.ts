@@ -6,40 +6,34 @@
 
 export interface ImpactStat {
   /** The headline number, e.g. "35%", "6 wks". */
-  value: string;
+  value: string
   /** Short label describing what the number means, e.g. "conversion lift". */
-  label: string;
+  label: string
 }
 
 export interface Project {
-  title: string;
-  year: string;
-  role: string;
-  description: string;
+  title: string
+  year: string
+  role: string
+  description: string
   /** Client-visible business outcomes. Placeholders until Himel provides real metrics. */
-  impact: ImpactStat[];
-  href?: string;
-  image?: string;
+  impact: ImpactStat[]
+  href?: string
+  image?: string
 }
 
 export interface Service {
-  title: string;
-  description: string;
-  tags: string[];
-  icon: ServiceIcon;
-  image: string;
+  title: string
+  description: string
+  tags: string[]
+  icon: ServiceIcon
+  image: string
 }
 
 export type ServiceIcon =
-  | "product-design"
-  | "framer-development"
-  | "ui-ux-design"
-  | "creative-direction";
+  "product-design" | "framer-development" | "ui-ux-design" | "creative-direction"
 
-export const serviceIconSources: Record<
-  ServiceIcon,
-  { alt: string; src: string }
-> = {
+export const serviceIconSources: Record<ServiceIcon, { alt: string; src: string }> = {
   "product-design": {
     alt: "Product design icon",
     src: "https://framerusercontent.com/images/rA85Y0EWOdi7zZR56JJDPw4A.png?width=512&height=512",
@@ -56,45 +50,45 @@ export const serviceIconSources: Record<
     alt: "Creative direction icon",
     src: "https://framerusercontent.com/images/ktaqYAtXQMTeq7J0vNxH0Mkhoc.png?width=512&height=512",
   },
-};
+}
 
 export interface StackItem {
-  name: string;
+  name: string
   /** Brand color used for the grayscale → color hover effect. */
-  color: string;
+  color: string
 }
 
 export interface StackCapability {
-  title: string;
-  description: string;
-  tools: string[];
+  title: string
+  description: string
+  tools: string[]
 }
 
 export interface ProcessStep {
-  title: string;
-  description: string;
-  eyebrow: string;
-  icon: ServiceIcon;
-  image: string;
-  imageAlt: string;
+  title: string
+  description: string
+  eyebrow: string
+  icon: ServiceIcon
+  image: string
+  imageAlt: string
 }
 
-export type SocialIcon = "github" | "linkedin" | "x" | "email";
+export type SocialIcon = "github" | "linkedin" | "x" | "email"
 
 export interface SocialLink {
-  label: string;
-  href: string;
-  icon: SocialIcon;
+  label: string
+  href: string
+  icon: SocialIcon
 }
 
 export interface NavigationItem {
-  label: string;
-  href: `#${string}`;
+  label: string
+  href: `#${string}`
 }
 
 export interface HeroAction extends NavigationItem {
-  variant: "solid" | "outline";
-  icon?: "arrow-up-right";
+  variant: "solid" | "outline"
+  icon?: "arrow-up-right"
 }
 
 export const profile = {
@@ -106,7 +100,7 @@ export const profile = {
   location: "Dhaka, Bangladesh",
   email: "hello@himel.dev",
   experienceYears: 4,
-};
+}
 
 export const navigation: NavigationItem[] = [
   { label: "Work", href: "#work" },
@@ -114,7 +108,7 @@ export const navigation: NavigationItem[] = [
   { label: "What I Use", href: "#stack" },
   { label: "About", href: "#about" },
   { label: "Contact", href: "#contact" },
-];
+]
 
 export const hero = {
   filledTitle: "Frontend",
@@ -132,13 +126,13 @@ export const hero = {
       variant: "outline",
     },
   ] satisfies HeroAction[],
-};
+}
 
 export const work = {
   index: "02",
   filledTitle: "Selected",
   outlinedTitle: "Projects",
-};
+}
 
 /**
  * About section manifesto. Rendered as a single left-aligned paragraph
@@ -150,13 +144,13 @@ export const about = {
     "Crafting design that turns ambitious ideas into products people trust. " +
     "Turning complex experiences into interfaces that feel simple, intuitive, and human. " +
     "Bringing every detail together to create products that perform beautifully and endure.",
-};
+}
 
 export const stats = [
   { value: 4, suffix: "+", label: "Years of experience" },
   { value: 20, suffix: "+", label: "Projects shipped" },
   { value: 10, suffix: "+", label: "Clients" },
-];
+]
 
 export const projects: Project[] = [
   {
@@ -211,7 +205,7 @@ export const projects: Project[] = [
     href: "",
     image: "/img/projects/project04.webp",
   },
-];
+]
 
 export const services: Service[] = [
   {
@@ -250,14 +244,14 @@ export const services: Service[] = [
     image:
       "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=900&auto=format&fit=crop",
   },
-];
+]
 
 export const servicesSection = {
   index: "03",
   filledTitle: "What I",
   outlinedTitle: "Offer",
   label: "CAPABILITIES",
-};
+}
 
 export const stackCapabilities: StackCapability[] = [
   {
@@ -284,13 +278,13 @@ export const stackCapabilities: StackCapability[] = [
       "A performance-first workflow that keeps the experience quick from the first render through every interaction.",
     tools: ["Lighthouse", "Chrome DevTools", "Vercel", "Core Web Vitals"],
   },
-];
+]
 
 export const stackSection = {
   index: "04",
   filledTitle: "What I",
   outlinedTitle: "Use",
-};
+}
 
 export const processSteps: ProcessStep[] = [
   {
@@ -333,13 +327,13 @@ export const processSteps: ProcessStep[] = [
       "https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=1600&auto=format&fit=crop",
     imageAlt: "Placeholder image representing a shipped digital product",
   },
-];
+]
 
 export const processSection = {
   index: "05",
   filledTitle: "How I",
   outlinedTitle: "Work",
-};
+}
 
 export const stack: StackItem[] = [
   { name: "React", color: "#61DAFB" },
@@ -350,14 +344,14 @@ export const stack: StackItem[] = [
   { name: "Motion", color: "#0055FF" },
   { name: "Node.js", color: "#339933" },
   { name: "JavaScript", color: "#F7DF1E" },
-];
+]
 
 export const socials: SocialLink[] = [
   { label: "GitHub", href: "", icon: "github" },
   { label: "LinkedIn", href: "", icon: "linkedin" },
   { label: "X / Twitter", href: "", icon: "x" },
   { label: "Email", href: "", icon: "email" },
-];
+]
 
 /** 404 page copy. */
 export const notFound = {
@@ -368,4 +362,4 @@ export const notFound = {
     { label: "Back home", href: "/" },
     { label: "Say hello", href: `mailto:${profile.email}` },
   ],
-};
+}

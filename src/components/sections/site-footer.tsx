@@ -1,30 +1,30 @@
-"use client";
+"use client"
 
-import { useRef } from "react";
-import { ArrowUpRight } from "@phosphor-icons/react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
-import { navigation, profile, socials } from "@/lib/data";
+import { useRef } from "react"
+import { ArrowUpRight } from "@phosphor-icons/react"
+import gsap from "gsap"
+import { ScrollTrigger } from "gsap/ScrollTrigger"
+import { useGSAP } from "@gsap/react"
+import { navigation, profile, socials } from "@/lib/data"
 
-gsap.registerPlugin(ScrollTrigger, useGSAP);
+gsap.registerPlugin(ScrollTrigger, useGSAP)
 
 /**
  * The closing frame of the portfolio: the contact panel slides upward over a
  * footer layer, while the oversized brand keeps its own masked reveal.
  */
 export function SiteFooter() {
-  const rootRef = useRef<HTMLDivElement>(null);
-  const contactRef = useRef<HTMLElement>(null);
-  const brandStageRef = useRef<HTMLDivElement>(null);
-  const brandRef = useRef<HTMLSpanElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null)
+  const contactRef = useRef<HTMLElement>(null)
+  const brandStageRef = useRef<HTMLDivElement>(null)
+  const brandRef = useRef<HTMLSpanElement>(null)
 
   useGSAP(
     () => {
-      const contact = contactRef.current;
-      const brand = brandRef.current;
-      const stage = brandStageRef.current;
-      if (!contact || !brand || !stage) return;
+      const contact = contactRef.current
+      const brand = brandRef.current
+      const stage = brandStageRef.current
+      if (!contact || !brand || !stage) return
 
       gsap.to(contact, {
         y: () => -(stage.offsetHeight * 0.25),
@@ -39,13 +39,13 @@ export function SiteFooter() {
               willChange: self.isActive ? "transform" : "auto",
             }),
         },
-      });
+      })
 
       gsap.set(brand, {
         yPercent: 112,
         autoAlpha: 0,
         willChange: "transform, opacity",
-      });
+      })
 
       gsap.to(brand, {
         yPercent: 0,
@@ -58,10 +58,10 @@ export function SiteFooter() {
           once: true,
         },
         onComplete: () => gsap.set(brand, { clearProps: "willChange" }),
-      });
+      })
     },
-    { scope: rootRef }
-  );
+    { scope: rootRef },
+  )
 
   return (
     <div
@@ -79,18 +79,18 @@ export function SiteFooter() {
         <div className="mx-auto w-full max-w-[100rem] px-5 sm:px-8 lg:px-10">
           <div className="mx-auto grid gap-12 lg:max-w-[76rem] lg:grid-cols-[minmax(0,1.1fr)_minmax(22rem,0.9fr)] lg:gap-20">
             <div>
-              <p className="font-sans text-[0.625rem] font-medium uppercase tracking-[0.24em] text-black/45">
+              <p className="font-sans text-[0.625rem] font-medium tracking-[0.24em] text-black/45 uppercase">
                 Contact
               </p>
               <h2
                 id="contact-heading"
-                className="mt-6 max-w-[38rem] font-heading text-[clamp(2rem,4.6vw,4.5rem)] font-semibold leading-[0.95] tracking-[-0.055em]"
+                className="mt-6 max-w-[38rem] font-heading text-[clamp(2rem,4.6vw,4.5rem)] leading-[0.95] font-semibold tracking-[-0.055em]"
               >
                 {profile.tagline}
               </h2>
               <a
                 href={`mailto:${profile.email}`}
-                className="group mt-10 inline-flex items-center gap-3 border-b border-black/20 pb-2 font-heading text-[clamp(1.1rem,2vw,1.5rem)] font-medium tracking-[-0.02em] transition-colors duration-300 hover:border-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-4"
+                className="group mt-10 inline-flex items-center gap-3 border-b border-black/20 pb-2 font-heading text-[clamp(1.1rem,2vw,1.5rem)] font-medium tracking-[-0.02em] transition-colors duration-300 hover:border-black focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-4 focus-visible:outline-none"
               >
                 {profile.email}
                 <ArrowUpRight
@@ -113,7 +113,7 @@ export function SiteFooter() {
                       <li key={item.href}>
                         <a
                           href={item.href}
-                          className="group inline-flex items-center gap-2 text-black/60 transition-colors duration-300 hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2"
+                          className="group inline-flex items-center gap-2 text-black/60 transition-colors duration-300 hover:text-black focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:outline-none"
                         >
                           {item.label}
                           <ArrowUpRight
@@ -137,7 +137,7 @@ export function SiteFooter() {
                       {social.href ? (
                         <a
                           href={social.href}
-                          className="text-black/60 transition-colors duration-300 hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2"
+                          className="text-black/60 transition-colors duration-300 hover:text-black focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:outline-none"
                         >
                           {social.label}
                         </a>
@@ -166,14 +166,14 @@ export function SiteFooter() {
           <span
             ref={brandRef}
             data-footer-brand
-            className="footer-brand-fade block origin-bottom whitespace-nowrap text-center font-heading text-[clamp(6.5rem,27vw,27rem)] font-semibold leading-[0.76] tracking-[-0.095em]"
+            className="footer-brand-fade block origin-bottom text-center font-heading text-[clamp(6.5rem,27vw,27rem)] leading-[0.76] font-semibold tracking-[-0.095em] whitespace-nowrap"
           >
             {profile.brand}
           </span>
         </div>
       </footer>
     </div>
-  );
+  )
 }
 
 function FooterColumn({
@@ -181,16 +181,16 @@ function FooterColumn({
   children,
   className = "",
 }: {
-  label: string;
-  children: React.ReactNode;
-  className?: string;
+  label: string
+  children: React.ReactNode
+  className?: string
 }) {
   return (
     <div className={className}>
-      <p className="mb-4 font-sans text-[0.625rem] font-medium uppercase tracking-[0.2em] text-black/45">
+      <p className="mb-4 font-sans text-[0.625rem] font-medium tracking-[0.2em] text-black/45 uppercase">
         {label}
       </p>
       <div className="font-sans text-sm leading-[1.55]">{children}</div>
     </div>
-  );
+  )
 }

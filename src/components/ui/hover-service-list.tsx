@@ -1,9 +1,9 @@
-"use client";
+"use client"
 
-import { useRef, useState, type PointerEvent } from "react";
-import Image from "next/image";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
+import { useRef, useState, type PointerEvent } from "react"
+import Image from "next/image"
+import gsap from "gsap"
+import { useGSAP } from "@gsap/react"
 import {
   AnimatePresence,
   motion,
@@ -11,16 +11,12 @@ import {
   useSpring,
   useTransform,
   useVelocity,
-} from "motion/react";
-import {
-  serviceIconSources,
-  servicesSection,
-  type Service,
-} from "@/lib/data";
-import { cn } from "@/lib/utils";
+} from "motion/react"
+import { serviceIconSources, servicesSection, type Service } from "@/lib/data"
+import { cn } from "@/lib/utils"
 
 interface HoverServiceListProps {
-  services: Service[];
+  services: Service[]
 }
 
 /**
@@ -30,60 +26,54 @@ interface HoverServiceListProps {
  * never re-renders the section.
  */
 export function HoverServiceList({ services }: HoverServiceListProps) {
-  const rootRef = useRef<HTMLDivElement>(null);
-  const listRef = useRef<HTMLDivElement>(null);
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [pointerVisible, setPointerVisible] = useState(false);
-  const pointerX = useMotionValue(0);
-  const pointerY = useMotionValue(0);
+  const rootRef = useRef<HTMLDivElement>(null)
+  const listRef = useRef<HTMLDivElement>(null)
+  const [activeIndex, setActiveIndex] = useState(0)
+  const [pointerVisible, setPointerVisible] = useState(false)
+  const pointerX = useMotionValue(0)
+  const pointerY = useMotionValue(0)
   const followX = useSpring(pointerX, {
     stiffness: 120,
     damping: 18,
     mass: 0.7,
-  });
+  })
   const followY = useSpring(pointerY, {
     stiffness: 120,
     damping: 18,
     mass: 0.7,
-  });
-  const horizontalVelocity = useVelocity(followX);
+  })
+  const horizontalVelocity = useVelocity(followX)
   const tiltTarget = useTransform(horizontalVelocity, (value) =>
-    Math.max(-10, Math.min(10, value / 90))
-  );
+    Math.max(-10, Math.min(10, value / 90)),
+  )
   const cardRotation = useSpring(tiltTarget, {
     stiffness: 160,
     damping: 22,
     mass: 0.5,
-  });
-  const activeService = services[activeIndex] ?? services[0];
+  })
+  const activeService = services[activeIndex] ?? services[0]
 
   useGSAP(
     () => {
-      if (!rootRef.current) return;
+      if (!rootRef.current) return
 
-      const rows = rootRef.current.querySelectorAll<HTMLElement>(
-        "[data-service-row]"
-      );
-      const titles = rootRef.current.querySelectorAll<HTMLElement>(
-        "[data-service-title]"
-      );
-      const detail = rootRef.current.querySelector<HTMLElement>(
-        "[data-service-detail]"
-      );
+      const rows = rootRef.current.querySelectorAll<HTMLElement>("[data-service-row]")
+      const titles = rootRef.current.querySelectorAll<HTMLElement>("[data-service-title]")
+      const detail = rootRef.current.querySelector<HTMLElement>("[data-service-detail]")
 
       gsap.to(titles, {
         x: 0,
         duration: 0.42,
         ease: "power3.out",
         overwrite: "auto",
-      });
+      })
       if (titles[activeIndex]) {
         gsap.to(titles[activeIndex], {
           x: 16,
           duration: 0.42,
           ease: "power3.out",
           overwrite: "auto",
-        });
+        })
       }
 
       if (detail) {
@@ -96,55 +86,49 @@ export function HoverServiceList({ services }: HoverServiceListProps) {
             duration: 0.7,
             ease: "power3.out",
             overwrite: "auto",
-          }
-        );
+          },
+        )
       }
 
       rows.forEach((row, index) => {
-        row.setAttribute("aria-pressed", String(index === activeIndex));
-      });
+        row.setAttribute("aria-pressed", String(index === activeIndex))
+      })
     },
     {
       dependencies: [activeIndex],
       scope: rootRef,
       revertOnUpdate: false,
-    }
-  );
+    },
+  )
 
   const selectService = (index: number) => {
-    setActiveIndex(index);
-  };
+    setActiveIndex(index)
+  }
 
   const updatePointerPosition = (event: PointerEvent<HTMLDivElement>) => {
-    if (
-      !window.matchMedia("(hover: hover) and (pointer: fine)").matches ||
-      !listRef.current
-    ) {
-      return;
+    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches || !listRef.current) {
+      return
     }
 
-    const rect = listRef.current.getBoundingClientRect();
-    pointerX.set(event.clientX - rect.left);
-    pointerY.set(event.clientY - rect.top);
-  };
+    const rect = listRef.current.getBoundingClientRect()
+    pointerX.set(event.clientX - rect.left)
+    pointerY.set(event.clientY - rect.top)
+  }
 
   const handlePointerEnter = (event: PointerEvent<HTMLDivElement>) => {
-    if (
-      !window.matchMedia("(hover: hover) and (pointer: fine)").matches ||
-      !listRef.current
-    ) {
-      return;
+    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches || !listRef.current) {
+      return
     }
 
-    const rect = listRef.current.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
-    followX.jump?.(x);
-    followY.jump?.(y);
-    pointerX.set(x);
-    pointerY.set(y);
-    setPointerVisible(true);
-  };
+    const rect = listRef.current.getBoundingClientRect()
+    const x = event.clientX - rect.left
+    const y = event.clientY - rect.top
+    followX.jump?.(x)
+    followY.jump?.(y)
+    pointerX.set(x)
+    pointerY.set(y)
+    setPointerVisible(true)
+  }
 
   return (
     <div
@@ -154,18 +138,14 @@ export function HoverServiceList({ services }: HoverServiceListProps) {
     >
       <div className="col-span-full pt-3">
         <div className="flex items-baseline justify-between gap-4 pb-3">
-          <span className="font-sans text-[0.625rem] font-medium uppercase tracking-[0.2em] text-black/45">
+          <span className="font-sans text-[0.625rem] font-medium tracking-[0.2em] text-black/45 uppercase">
             {servicesSection.label}
           </span>
-          <span className="font-sans text-[0.625rem] font-medium uppercase tracking-[0.2em] text-black/45">
+          <span className="font-sans text-[0.625rem] font-medium tracking-[0.2em] text-black/45 uppercase">
             {String(services.length).padStart(2, "0")}
           </span>
         </div>
-        <div
-          aria-hidden="true"
-          data-service-header-divider
-          className="h-px bg-black/10"
-        />
+        <div aria-hidden="true" data-service-header-divider className="h-px bg-black/10" />
       </div>
 
       <div
@@ -179,11 +159,11 @@ export function HoverServiceList({ services }: HoverServiceListProps) {
         <motion.div
           data-service-pointer-card
           aria-hidden="true"
-          className="pointer-events-none absolute left-0 top-0 z-10 hidden will-change-transform lg:block"
+          className="pointer-events-none absolute top-0 left-0 z-10 hidden will-change-transform lg:block"
           style={{ x: followX, y: followY }}
         >
           <motion.div
-            className="relative -ml-[95px] -mt-[119px] h-[238px] w-[190px] overflow-hidden bg-black/10"
+            className="relative -mt-[119px] -ml-[95px] h-[238px] w-[190px] overflow-hidden bg-black/10"
             style={{ rotate: cardRotation }}
             initial={false}
             animate={{
@@ -209,16 +189,16 @@ export function HoverServiceList({ services }: HoverServiceListProps) {
                   data-service-pointer-image
                   data-image-source={activeService.image}
                   draggable={false}
-                  className="object-cover grayscale contrast-105"
+                  className="object-cover contrast-105 grayscale"
                 />
               </motion.div>
             </AnimatePresence>
-            </motion.div>
+          </motion.div>
         </motion.div>
 
         {services.map((service, index) => {
-          const active = index === activeIndex;
-          const icon = serviceIconSources[service.icon];
+          const active = index === activeIndex
+          const icon = serviceIconSources[service.icon]
 
           return (
             <div key={service.title}>
@@ -232,27 +212,27 @@ export function HoverServiceList({ services }: HoverServiceListProps) {
                 onPointerEnter={() => selectService(index)}
                 className={cn(
                   "group grid h-20 w-full grid-cols-[2.125rem_minmax(0,1fr)_auto] items-center gap-4 border-0 bg-transparent p-0 text-left outline-none max-[319px]:gap-3 lg:h-24",
-                  "focus-visible:outline focus-visible:outline-2 focus-visible:outline-black focus-visible:outline-offset-4"
+                  "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-black",
                 )}
               >
                 <span
                   data-service-index
                   aria-hidden="true"
                   className={cn(
-                     "relative inline-flex h-4 items-center font-sans text-[0.6875rem] tracking-[0.06em] text-black/40 transition-colors duration-300",
-                    active && "text-black"
+                    "relative inline-flex h-4 items-center font-sans text-[0.6875rem] tracking-[0.06em] text-black/40 transition-colors duration-300",
+                    active && "text-black",
                   )}
                 >
                   <span
                     className={cn(
-                       "block size-2 bg-black opacity-0 transition-opacity duration-300",
-                      active && "opacity-100"
+                      "block size-2 bg-black opacity-0 transition-opacity duration-300",
+                      active && "opacity-100",
                     )}
                   />
                   <span
                     className={cn(
-                       "absolute left-0 transition-opacity duration-300",
-                      active && "opacity-0"
+                      "absolute left-0 transition-opacity duration-300",
+                      active && "opacity-0",
                     )}
                   >
                     {String(index + 1).padStart(2, "0")}
@@ -261,8 +241,8 @@ export function HoverServiceList({ services }: HoverServiceListProps) {
                 <span
                   data-service-title
                   className={cn(
-                     "block min-w-0 font-heading text-[clamp(1.45rem,3.25vw,2.5rem)] font-medium leading-[1.1] tracking-[-0.03em] text-black transition-colors duration-300 max-[319px]:text-[clamp(1.2rem,7vw,1.45rem)]",
-                    !active && "text-black/85"
+                    "block min-w-0 font-heading text-[clamp(1.45rem,3.25vw,2.5rem)] leading-[1.1] font-medium tracking-[-0.03em] text-black transition-colors duration-300 max-[319px]:text-[clamp(1.2rem,7vw,1.45rem)]",
+                    !active && "text-black/85",
                   )}
                 >
                   {service.title}
@@ -270,8 +250,8 @@ export function HoverServiceList({ services }: HoverServiceListProps) {
                 <span
                   aria-hidden="true"
                   className={cn(
-                     "flex size-10 shrink-0 items-center justify-end text-black/40 transition-colors duration-300",
-                    active && "text-black"
+                    "flex size-10 shrink-0 items-center justify-end text-black/40 transition-colors duration-300",
+                    active && "text-black",
                   )}
                 >
                   <Image
@@ -288,7 +268,7 @@ export function HoverServiceList({ services }: HoverServiceListProps) {
               </button>
               <div aria-hidden="true" className="h-px bg-black/10" />
             </div>
-          );
+          )
         })}
       </div>
 
@@ -302,14 +282,11 @@ export function HoverServiceList({ services }: HoverServiceListProps) {
           <p className="max-w-[30rem] font-sans text-[clamp(1.05rem,1.7vw,1.5rem)] leading-[1.55] tracking-[-0.005em] text-black">
             {activeService.description}
           </p>
-          <div
-            aria-hidden="true"
-            className="my-7 h-0.5 w-8 bg-black lg:my-8"
-          />
+          <div aria-hidden="true" className="my-7 h-0.5 w-8 bg-black lg:my-8" />
           <p className="font-heading text-base font-medium tracking-[-0.01em] text-black">
             {activeService.title}
           </p>
-          <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 font-sans text-[0.625rem] uppercase tracking-[0.14em] text-black/45">
+          <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 font-sans text-[0.625rem] tracking-[0.14em] text-black/45 uppercase">
             {activeService.tags.map((tag) => (
               <span key={tag}>{tag}</span>
             ))}
@@ -317,5 +294,5 @@ export function HoverServiceList({ services }: HoverServiceListProps) {
         </div>
       </div>
     </div>
-  );
+  )
 }

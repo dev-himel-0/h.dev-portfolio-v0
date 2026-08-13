@@ -1,27 +1,27 @@
-"use client";
+"use client"
 
-import { useCallback, useEffect, useMemo, useState, memo } from "react";
-import { motion, AnimatePresence } from "motion/react";
-import { cn } from "@/lib/utils";
+import { useCallback, useEffect, useMemo, useState, memo } from "react"
+import { motion, AnimatePresence } from "motion/react"
+import { cn } from "@/lib/utils"
 
 interface FlipFadeTextProps {
-  words: string[];
-  interval?: number;
-  className?: string;
-  textClassName?: string;
-  letterDuration?: number;
-  staggerDelay?: number;
-  exitStaggerDelay?: number;
+  words: string[]
+  interval?: number
+  className?: string
+  textClassName?: string
+  letterDuration?: number
+  staggerDelay?: number
+  exitStaggerDelay?: number
   /** When false, cycling stops at the last word (it stays fully formed). */
-  repeat?: boolean;
+  repeat?: boolean
 }
 
 const Letter = memo(function Letter({
   char,
   letterDuration,
 }: {
-  char: string;
-  letterDuration: number;
+  char: string
+  letterDuration: number
 }) {
   return (
     <motion.span
@@ -58,8 +58,8 @@ const Letter = memo(function Letter({
     >
       {char}
     </motion.span>
-  );
-});
+  )
+})
 
 const Word = memo(function Word({
   text,
@@ -68,19 +68,19 @@ const Word = memo(function Word({
   letterDuration,
   textClassName,
 }: {
-  text: string;
-  staggerDelay: number;
-  exitStaggerDelay: number;
-  letterDuration: number;
-  textClassName?: string;
+  text: string
+  staggerDelay: number
+  exitStaggerDelay: number
+  letterDuration: number
+  textClassName?: string
 }) {
-  const letters = useMemo(() => text.split(""), [text]);
+  const letters = useMemo(() => text.split(""), [text])
 
   return (
     <motion.div
       className={cn(
-        "flex gap-[0.1em] font-heading font-bold uppercase tracking-wider",
-        textClassName
+        "flex gap-[0.1em] font-heading font-bold tracking-wider uppercase",
+        textClassName,
       )}
       initial="initial"
       animate="animate"
@@ -98,15 +98,11 @@ const Word = memo(function Word({
       }}
     >
       {letters.map((char, i) => (
-        <Letter
-          key={`${char}-${i}`}
-          char={char}
-          letterDuration={letterDuration}
-        />
+        <Letter key={`${char}-${i}`} char={char} letterDuration={letterDuration} />
       ))}
     </motion.div>
-  );
-});
+  )
+})
 
 /**
  * Cycling word flip-fade (adapted from vengenceui flip-fade-text, B/W).
@@ -123,29 +119,26 @@ export function FlipFadeText({
   exitStaggerDelay = 0.05,
   repeat = true,
 }: FlipFadeTextProps) {
-  const [index, setIndex] = useState(0);
+  const [index, setIndex] = useState(0)
 
   const updateIndex = useCallback(() => {
     setIndex((prev) => {
-      const next = prev + 1;
-      return next >= words.length ? (repeat ? 0 : prev) : next;
-    });
-  }, [words.length, repeat]);
+      const next = prev + 1
+      return next >= words.length ? (repeat ? 0 : prev) : next
+    })
+  }, [words.length, repeat])
 
   useEffect(() => {
-    if (!repeat && index >= words.length - 1) return;
-    const timer = setInterval(updateIndex, interval);
-    return () => clearInterval(timer);
-  }, [updateIndex, interval, repeat, index, words.length]);
+    if (!repeat && index >= words.length - 1) return
+    const timer = setInterval(updateIndex, interval)
+    return () => clearInterval(timer)
+  }, [updateIndex, interval, repeat, index, words.length])
 
-  const currentWord = useMemo(() => words[index], [words, index]);
+  const currentWord = useMemo(() => words[index], [words, index])
 
   return (
     <div className={cn("flex items-center justify-center", className)}>
-      <div
-        className="relative flex items-center justify-center"
-        style={{ perspective: "1000px" }}
-      >
+      <div className="relative flex items-center justify-center" style={{ perspective: "1000px" }}>
         <AnimatePresence mode="wait">
           <Word
             key={currentWord}
@@ -158,5 +151,5 @@ export function FlipFadeText({
         </AnimatePresence>
       </div>
     </div>
-  );
+  )
 }

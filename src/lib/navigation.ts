@@ -4,12 +4,12 @@
  * commits (pathname changed while the layout stayed mounted). A full page load
  * never calls it, so `isSoftNavigation()` stays `false` on first paint.
  */
-let softNavigation = false;
+let softNavigation = false
 
 export function markSoftNavigation() {
-  softNavigation = true;
+  softNavigation = true
 }
 
 export function isSoftNavigation() {
-  return softNavigation;
+  return softNavigation
 }

@@ -1,22 +1,22 @@
-"use client";
+"use client"
 
-import { useMemo, useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
-import { cn } from "@/lib/utils";
+import { useMemo, useRef } from "react"
+import gsap from "gsap"
+import { ScrollTrigger } from "gsap/ScrollTrigger"
+import { useGSAP } from "@gsap/react"
+import { cn } from "@/lib/utils"
 
-gsap.registerPlugin(ScrollTrigger, useGSAP);
+gsap.registerPlugin(ScrollTrigger, useGSAP)
 
 interface StaggerTextProps {
   /** Plain text; split and animated by word or by letter. */
-  children: string;
-  divideBy?: "word" | "letter";
+  children: string
+  divideBy?: "word" | "letter"
   /** Delay before the first unit starts moving, in seconds. */
-  delay?: number;
+  delay?: number
   /** Root element: block for a statement line, span for inline labels. */
-  as?: "p" | "span";
-  className?: string;
+  as?: "p" | "span"
+  className?: string
 }
 
 /**
@@ -32,26 +32,24 @@ export function StaggerText({
   as = "p",
   className,
 }: StaggerTextProps) {
-  const ref = useRef<HTMLElement | null>(null);
+  const ref = useRef<HTMLElement | null>(null)
 
   const parts = useMemo(() => {
     if (divideBy === "letter") {
-      return children
-        .split("")
-        .map((char) => (char === " " ? "\u00A0" : char));
+      return children.split("").map((char) => (char === " " ? "\u00A0" : char))
     }
-    return children.split(" ").map((word) => `${word}\u00A0`);
-  }, [children, divideBy]);
+    return children.split(" ").map((word) => `${word}\u00A0`)
+  }, [children, divideBy])
 
   useGSAP(
     () => {
-      const el = ref.current;
-       if (!el) {
-        return;
+      const el = ref.current
+      if (!el) {
+        return
       }
 
-      const units = el.querySelectorAll<HTMLElement>("[data-stagger-unit]");
-      if (!units.length) return;
+      const units = el.querySelectorAll<HTMLElement>("[data-stagger-unit]")
+      if (!units.length) return
 
       gsap.fromTo(
         units,
@@ -67,36 +65,33 @@ export function StaggerText({
             start: "top 88%",
             once: true,
           },
-        }
-      );
+        },
+      )
     },
-    { scope: ref }
-  );
+    { scope: ref },
+  )
 
   const content = parts.map((part, index) => (
-    <span
-      key={`${part}-${index}`}
-      className="relative inline-block overflow-hidden align-top"
-    >
+    <span key={`${part}-${index}`} className="relative inline-block overflow-hidden align-top">
       <span data-stagger-unit className="inline-block will-change-transform">
         {part}
       </span>
     </span>
-  ));
+  ))
 
-  const classes = cn(as === "span" && "inline-block", className);
+  const classes = cn(as === "span" && "inline-block", className)
 
   if (as === "p") {
     return (
       <p ref={ref as React.Ref<HTMLParagraphElement>} data-stagger-text className={classes}>
         {content}
       </p>
-    );
+    )
   }
 
   return (
     <span ref={ref as React.Ref<HTMLSpanElement>} data-stagger-text className={classes}>
       {content}
     </span>
-  );
+  )
 }

@@ -1,19 +1,19 @@
-"use client";
+"use client"
 
-import { useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
-import { SectionRail } from "@/components/ui/section-rail";
-import { SectionReveal } from "@/components/ui/section-reveal";
-import { HoverServiceList } from "@/components/ui/hover-service-list";
-import { services, servicesSection } from "@/lib/data";
+import { useRef } from "react"
+import gsap from "gsap"
+import { ScrollTrigger } from "gsap/ScrollTrigger"
+import { useGSAP } from "@gsap/react"
+import { SectionRail } from "@/components/ui/section-rail"
+import { SectionReveal } from "@/components/ui/section-reveal"
+import { HoverServiceList } from "@/components/ui/hover-service-list"
+import { services, servicesSection } from "@/lib/data"
 
-gsap.registerPlugin(ScrollTrigger, useGSAP);
+gsap.registerPlugin(ScrollTrigger, useGSAP)
 
 export function Services() {
-  const rootRef = useRef<HTMLElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
+  const rootRef = useRef<HTMLElement>(null)
+  const contentRef = useRef<HTMLDivElement>(null)
 
   useGSAP(
     () => {
@@ -28,10 +28,10 @@ export function Services() {
           start: "top 82%",
           once: true,
         },
-      });
+      })
     },
-    { scope: rootRef }
-  );
+    { scope: rootRef },
+  )
 
   return (
     <section
@@ -48,18 +48,12 @@ export function Services() {
       />
 
       <div className="mx-auto w-full max-w-[72rem] px-5 sm:px-8">
-        <SectionReveal
-          variant="fade"
-          distance={100}
-          className="mb-14 flex justify-end lg:mb-20"
-        >
+        <SectionReveal variant="fade" distance={100} className="mb-14 flex justify-end lg:mb-20">
           <h2
             id="services-heading"
-            className="max-w-full text-right font-heading text-[clamp(1.75rem,6.5vw,5.5rem)] font-semibold leading-[0.82] tracking-[-0.03em]"
+            className="max-w-full text-right font-heading text-[clamp(1.75rem,6.5vw,5.5rem)] leading-[0.82] font-semibold tracking-[-0.03em]"
           >
-            <span className="inline-block pb-[0.03em]">
-              {servicesSection.filledTitle}
-            </span>{" "}
+            <span className="inline-block pb-[0.03em]">{servicesSection.filledTitle}</span>{" "}
             <span className="hero-outline-text inline-block pb-[0.21em] tracking-[-0.025em]">
               {servicesSection.outlinedTitle}
             </span>
@@ -71,5 +65,5 @@ export function Services() {
         </div>
       </div>
     </section>
-  );
+  )
 }

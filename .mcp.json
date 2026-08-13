@@ -2,17 +2,11 @@
   "mcpServers": {
     "shadcn": {
       "command": "npx",
-      "args": [
-        "shadcn@latest",
-        "mcp"
-      ]
+      "args": ["shadcn@latest", "mcp"]
     },
     "next-devtools": {
       "command": "npx",
-      "args": [
-        "-y",
-        "next-devtools-mcp@latest"
-      ]
+      "args": ["-y", "next-devtools-mcp@latest"]
     },
     "context7": {
       "url": "https://mcp.context7.com/mcp",
@@ -22,11 +16,7 @@
     },
     "playwright": {
       "command": "npx",
-      "args": [
-        "-y",
-        "@playwright/mcp@latest",
-        "--headless"
-      ]
+      "args": ["-y", "@playwright/mcp@latest", "--headless"]
     }
   }
 }

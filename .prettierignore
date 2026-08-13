@@ -1,0 +1,27 @@
+# build & generated
+.next/
+out/
+build/
+node_modules/
+package-lock.json
+next-env.d.ts
+tsconfig.tsbuildinfo
+skills-lock.json
+
+# testing
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+.playwright-mcp/
+
+# agent tooling (not source)
+.agents/
+.claude/
+.codex/
+.gemini/
+.impeccable/
+.opencode/
+
+# misc
+ascii-probe.cjs

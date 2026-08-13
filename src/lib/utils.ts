@@ -6,8 +6,8 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /** The site intentionally runs its full motion system for every visitor. */
-export const FORCE_FULL_MOTION = true;
+export const FORCE_FULL_MOTION = true
 
 export function prefersReducedMotion() {
-  return !FORCE_FULL_MOTION;
+  return !FORCE_FULL_MOTION
 }

@@ -1,4 +1,5 @@
 <!-- BEGIN:nextjs-agent-rules -->
+
 # This is NOT the Next.js you know
 
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
@@ -30,19 +31,19 @@ Premium, awwwards-style portfolio for **Himel** (frontend engineer, 4+ years) to
 
 ## Reference map
 
-| Reference | Component | Adaptation notes |
-|---|---|---|
-| vengenceui flip-fade-text | Preloader words | Cycling B/W word flip |
-| framer curtain-reveal | Loader→hero wipe, section transitions | Black/white panels |
-| animate-ui flip button | CTAs | Hand-rolled, two-label flip |
-| animate-ui gravity-stars | Hero background | Subtle black dots, mouse-attract |
-| reactbits target-cursor | Custom cursor | Desktop-only, lock onto interactive elements |
-| reactbits glass-surface | Navbar background | B/W-adapted (grayscale map, neutral gradients) |
-| reactbits magic-bento | Services grid | Black spotlight, hairline borders, mobile-disabled |
-| reactbits staggered-menu | Fullscreen nav | B/W pre-layers, numbered items, socials |
-| vengenceui masked-avatars | Stack section | Tech logos in circles, grayscale→color on hover |
-| vengenceui animated-footer | Site footer | Typographic only: char-mask name reveal on scroll (NO canvas/ASCII) |
-| framer portrixe | Content structure | Editorial work rows, masked scroll reveals, calm pacing |
+| Reference                  | Component                             | Adaptation notes                                                    |
+| -------------------------- | ------------------------------------- | ------------------------------------------------------------------- |
+| vengenceui flip-fade-text  | Preloader words                       | Cycling B/W word flip                                               |
+| framer curtain-reveal      | Loader→hero wipe, section transitions | Black/white panels                                                  |
+| animate-ui flip button     | CTAs                                  | Hand-rolled, two-label flip                                         |
+| animate-ui gravity-stars   | Hero background                       | Subtle black dots, mouse-attract                                    |
+| reactbits target-cursor    | Custom cursor                         | Desktop-only, lock onto interactive elements                        |
+| reactbits glass-surface    | Navbar background                     | B/W-adapted (grayscale map, neutral gradients)                      |
+| reactbits magic-bento      | Services grid                         | Black spotlight, hairline borders, mobile-disabled                  |
+| reactbits staggered-menu   | Fullscreen nav                        | B/W pre-layers, numbered items, socials                             |
+| vengenceui masked-avatars  | Stack section                         | Tech logos in circles, grayscale→color on hover                     |
+| vengenceui animated-footer | Site footer                           | Typographic only: char-mask name reveal on scroll (NO canvas/ASCII) |
+| framer portrixe            | Content structure                     | Editorial work rows, masked scroll reveals, calm pacing             |
 
 ## Motion conventions
 
@@ -63,12 +64,14 @@ Premium, awwwards-style portfolio for **Himel** (frontend engineer, 4+ years) to
 Skills are installed in `.agents/skills/` (+ `.opencode/skills/`). When a task matches a category below, load the matching skill (Skill tool) BEFORE writing code. Use only the skill that fits the task — never stack unrelated skills.
 
 **Design direction & reference images**
+
 - `brandkit` — brand identity, logo systems, guideline boards
 - `imagegen-frontend-web` — per-section web design reference images
 - `imagegen-frontend-mobile` — mobile app screen concepts (not this project)
 - `image-to-code` — generate design images, then implement to match
 
 **Visual taste & style systems** (project language is B/W editorial)
+
 - `design-taste-frontend` — anti-slop landing page / portfolio / redesign work
 - `high-end-visual-design` — agency-grade polish, premium patterns
 - `minimalist-ui` — clean editorial minimalism (closest to this project)
@@ -78,12 +81,14 @@ Skills are installed in `.agents/skills/` (+ `.opencode/skills/`). When a task m
 - `redesign-existing-projects` — upgrade an existing site to premium quality
 
 **UI implementation**
+
 - `shadcn` — add/configure shadcn/ui components
 - `migrate-radix-to-base` — convert Radix → Base UI
 - `vercel-composition-patterns` — compound components, render props, context
 - `full-output-enforcement` — exhaustive, unabridged code output
 
 **GSAP & motion** (this project's animation stack)
+
 - `gsap-core` — tweens, easing, defaults, gsap.matchMedia()
 - `gsap-react` — useGSAP, refs, cleanup in React
 - `gsap-scrolltrigger` — scroll reveals, pinning, scrub
@@ -94,24 +99,29 @@ Skills are installed in `.agents/skills/` (+ `.opencode/skills/`). When a task m
 - `gsap-frameworks` — Vue/Svelte only (NOT this React project)
 
 **Design review & audits**
+
 - `impeccable` — critique, polish, or shape any interface
 - `web-design-guidelines` — accessibility & web standards compliance
 - `writing-guidelines` — copy/prose voice & tone check
 
 **Next.js runtime & caching**
+
 - `next-dev-loop` — verify a change in the running dev server
 - `next-cache-components-adoption` / `next-cache-components-optimizer` — Cache Components work
 - `next-partial-prefetching-adoption` — Partial Prefetching work
 
 **Testing**
+
 - `playwright-cli` — writing/debugging Playwright tests (pair with `npm run test:e2e`)
 
 **Deployment**
+
 - `deploy-to-vercel` — deploy and get a link
 - `vercel-cli-with-tokens` — token-based Vercel CLI operations
 - `vercel-optimize` — Vercel cost/performance tuning
 
 **Git & tooling**
+
 - `gh-stack` — stacked branches / dependent PRs
 - `context7-mcp` — library/framework docs lookup
 - `find-skills` — discover new installable skills
