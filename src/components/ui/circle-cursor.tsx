@@ -27,6 +27,14 @@ const SPARK_LENGTH = 10;
 const SPARK_COLOR = "#fff";
 const MAX_SPARKS = 64;
 
+/**
+ * Window (ms) after real pointer activity within which focus events are
+ * treated as mouse-driven. The focus halo only follows the focused element
+ * for pure keyboard navigation — never when the mouse is engaged, so it can't
+ * leave a stray circle on click-focused targets (like the menu's first link).
+ */
+const POINTER_ENGAGE_MS = 1200;
+
 const RING_TRANSITION = {
   opacity: { duration: 0.2 },
   width: { type: "spring" as const, damping: 30, stiffness: 200 },
@@ -74,21 +82,27 @@ function useCursorSpring(value: MotionValue<number>, smoothness: number) {
  * the page. Click sparks and focus positioning are local enhancements.
  */
 export function CircleCursor() {
-  const [enabled, setEnabled] = useState(false);
+const [enabled, setEnabled] = useState(false);
   const [hovered, setHovered] = useState(false);
   const [focused, setFocused] = useState(false);
   const [visible, setVisible] = useState(false);
+  const [keyboardFocus, setKeyboardFocus] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const sparksRef = useRef<Spark[]>([]);
   const frameRef = useRef<number | null>(null);
   const focusedElementRef = useRef<Element | null>(null);
   const lastPointerRef = useRef({ x: 0, y: 0 });
+  const lastPointerActivityRef = useRef(0);
   const x = useMotionValue(0);
   const y = useMotionValue(0);
   const ringSpringX = useCursorSpring(x, SMOOTHNESS);
   const ringSpringY = useCursorSpring(y, SMOOTHNESS);
   const dotSpringX = useSpring(x, { damping: 50, stiffness: 500 });
   const dotSpringY = useSpring(y, { damping: 50, stiffness: 500 });
+  const focusX = useMotionValue(0);
+  const focusY = useMotionValue(0);
+  const haloSpringX = useCursorSpring(focusX, SMOOTHNESS);
+  const haloSpringY = useCursorSpring(focusY, SMOOTHNESS);
 
   useEffect(() => {
     const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)");
@@ -113,6 +127,7 @@ export function CircleCursor() {
       x.set(event.clientX);
       y.set(event.clientY);
       lastPointerRef.current = { x: event.clientX, y: event.clientY };
+      lastPointerActivityRef.current = performance.now();
       setVisible(true);
     };
 
@@ -121,7 +136,7 @@ export function CircleCursor() {
         event.target instanceof Element
           ? event.target.closest(INTERACTIVE_SELECTOR)
           : null;
-      setHovered(Boolean(target) || focusedElementRef.current !== null);
+      setHovered(Boolean(target));
     };
 
     const onFocusIn = (event: FocusEvent) => {
@@ -133,11 +148,13 @@ export function CircleCursor() {
 
       focusedElementRef.current = target;
       const rect = target.getBoundingClientRect();
-      x.set(rect.left + rect.width / 2);
-      y.set(rect.top + rect.height / 2);
+      focusX.set(rect.left + rect.width / 2);
+      focusY.set(rect.top + rect.height / 2);
       setFocused(true);
-      setHovered(true);
       setVisible(true);
+      const mouseEngaged =
+        performance.now() - lastPointerActivityRef.current < POINTER_ENGAGE_MS;
+      setKeyboardFocus(!mouseEngaged);
     };
 
     const onFocusOut = (event: FocusEvent) => {
@@ -188,9 +205,10 @@ export function CircleCursor() {
       setVisible(false);
       setHovered(false);
       setFocused(false);
+      setKeyboardFocus(false);
       focusedElementRef.current = null;
     };
-  }, [enabled, x, y]);
+  }, [enabled, x, y, focusX, focusY]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -259,7 +277,8 @@ export function CircleCursor() {
       }
     };
 
-      const onClick = (event: MouseEvent) => {
+const onClick = (event: MouseEvent) => {
+        if (event.detail > 0) lastPointerActivityRef.current = performance.now();
         const startedAt = performance.now();
       sparksRef.current.push(
         ...Array.from({ length: SPARK_COUNT }, (_, index) => ({
@@ -370,8 +389,8 @@ export function CircleCursor() {
           className="circle-cursor-element"
           style={{
             ...FOLLOWER_STYLE,
-            x: ringSpringX,
-            y: ringSpringY,
+            x: haloSpringX,
+            y: haloSpringY,
             borderColor: FOCUS_HALO_COLOR,
             borderStyle: "solid",
             borderWidth: 1,
@@ -386,8 +405,8 @@ export function CircleCursor() {
           animate={{
             width: FOCUS_HALO_SIZE,
             height: FOCUS_HALO_SIZE,
-            opacity: focused && visible ? 1 : 0,
-            scale: focused && visible ? 1 : 0.72,
+            opacity: focused && visible && keyboardFocus ? 1 : 0,
+            scale: focused && keyboardFocus ? 1 : 0.72,
           }}
           transition={{
             opacity: { duration: 0.2 },
@@ -406,8 +425,8 @@ export function CircleCursor() {
           }}
           initial={{ opacity: 0, scale: 0.92 }}
           animate={{
-            opacity: visible && (hovered || focused) ? 1 : 0,
-            scale: hovered || focused ? 1 : 0.92,
+            opacity: visible && hovered ? 1 : 0,
+            scale: hovered ? 1 : 0.92,
           }}
           transition={{
             opacity: { duration: 0.14 },

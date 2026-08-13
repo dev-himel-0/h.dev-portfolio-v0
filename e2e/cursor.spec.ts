@@ -79,28 +79,62 @@ test.describe("circle cursor", () => {
         Number(await dot.evaluate((element) => getComputedStyle(element).opacity))
       )
       .toBeLessThan(0.05);
+    await page.mouse.move(700, 300);
     await page.getByRole("button", { name: "Open menu" }).focus();
     await expect(cursor).toHaveAttribute("data-focused", "true");
-    await expect(cursor).toHaveAttribute("data-hovered", "true");
+    await expect(cursor).toHaveAttribute("data-hovered", "false");
+    // With the mouse engaged, focus must not park any circle on the element.
+    await expect
+      .poll(() => focusHalo.evaluate((element) => Number(getComputedStyle(element).opacity)))
+      .toBeLessThan(0.05);
+    await expect
+      .poll(() => ring.evaluate((element) => element.getBoundingClientRect().width))
+      .toBeLessThan(45);
+    await expect
+      .poll(() => pointer.evaluate((element) => Number(getComputedStyle(element).opacity)))
+      .toBeLessThan(0.05);
+
+    // The ring and dot stay glued to the pointer during mouse-engaged focus.
+    await expect
+      .poll(() =>
+        ring.evaluate((element) => {
+          const rect = element.getBoundingClientRect();
+          return Math.hypot(
+            rect.left + rect.width / 2 - 700,
+            rect.top + rect.height / 2 - 300
+          );
+        })
+      )
+      .toBeLessThan(3);
+    await expect
+      .poll(() =>
+        dot.evaluate((element) => {
+          const rect = element.getBoundingClientRect();
+          return Math.hypot(
+            rect.left + rect.width / 2 - 700,
+            rect.top + rect.height / 2 - 300
+          );
+        })
+      )
+      .toBeLessThan(3);
+
+    // Pure keyboard focus (no pointer activity for a while) brings the halo.
+    const focusedButton = page.getByRole("button", { name: "Open menu" });
+    await focusedButton.blur();
+    await page.waitForTimeout(1_400);
+    await focusedButton.focus();
+    await expect(cursor).toHaveAttribute("data-focused", "true");
     await expect
       .poll(() => focusHalo.evaluate((element) => Number(getComputedStyle(element).opacity)))
       .toBeGreaterThan(0.5);
     await expect
-      .poll(() => ring.evaluate((element) => element.getBoundingClientRect().width))
-      .toBeGreaterThan(70);
-    await expect
-      .poll(() => pointer.evaluate((element) => Number(getComputedStyle(element).opacity)))
-      .toBeGreaterThan(0.5);
-
-    const focusedButton = page.getByRole("button", { name: "Open menu" });
-    await expect
       .poll(async () => {
         const button = await focusedButton.boundingBox();
-        const cursorRect = await ring.boundingBox();
-        if (!button || !cursorRect) return Number.POSITIVE_INFINITY;
+        const haloRect = await focusHalo.boundingBox();
+        if (!button || !haloRect) return Number.POSITIVE_INFINITY;
         return Math.hypot(
-          cursorRect.x + cursorRect.width / 2 - (button.x + button.width / 2),
-          cursorRect.y + cursorRect.height / 2 - (button.y + button.height / 2)
+          haloRect.x + haloRect.width / 2 - (button.x + button.width / 2),
+          haloRect.y + haloRect.height / 2 - (button.y + button.height / 2)
         );
       })
       .toBeLessThan(3);
@@ -123,6 +157,107 @@ test.describe("circle cursor", () => {
     await expect(spark).toHaveAttribute("data-active", "false", {
       timeout: 2_000,
     });
+  });
+
+  test("keeps the cursor on the pointer while the menu is open", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name === "Mobile Chrome",
+      "The custom cursor is desktop-only."
+    );
+
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.goto("/");
+    await expect(page.locator("[data-curtain-content]")).toBeHidden({
+      timeout: 15_000,
+    });
+
+    const cursor = page.locator("[data-circle-cursor]");
+    const ring = page.locator("[data-circle-cursor-ring]");
+    const dot = page.locator("[data-circle-cursor-dot]");
+    const focusHalo = page.locator("[data-circle-cursor-focus]");
+    const pointer = page.locator("[data-circle-cursor-pointer]");
+
+    const toggle = page.getByRole("button", { name: "Open menu" });
+    const toggleBox = (await toggle.boundingBox())!;
+    await toggle.click();
+
+    const firstLink = page
+      .getByRole("dialog")
+      .getByRole("link", { name: "Work", exact: true });
+    await expect(firstLink).toBeVisible();
+    await expect(cursor).toHaveAttribute("data-focused", "true");
+    // The mouse opened the menu, so no halo may park on the focused first link.
+    await expect
+      .poll(() => focusHalo.evaluate((element) => Number(getComputedStyle(element).opacity)))
+      .toBeLessThan(0.05);
+
+    // …while the ring and dot stay glued to the real pointer (on the toggle).
+    await expect
+      .poll(() =>
+        ring.evaluate((element, box) => {
+          const rect = element.getBoundingClientRect();
+          return Math.hypot(
+            rect.left + rect.width / 2 - (box.x + box.width / 2),
+            rect.top + rect.height / 2 - (box.y + box.height / 2)
+          );
+        }, toggleBox)
+      )
+      .toBeLessThan(3);
+    await expect
+      .poll(() =>
+        dot.evaluate((element, box) => {
+          const rect = element.getBoundingClientRect();
+          return Math.hypot(
+            rect.left + rect.width / 2 - (box.x + box.width / 2),
+            rect.top + rect.height / 2 - (box.y + box.height / 2)
+          );
+        }, toggleBox)
+      )
+      .toBeLessThan(3);
+
+    // The pointer is over the toggle (interactive), so the hand shows there.
+    await expect(cursor).toHaveAttribute("data-hovered", "true");
+    await expect
+      .poll(() => pointer.evaluate((element) => Number(getComputedStyle(element).opacity)))
+      .toBeGreaterThan(0.5);
+
+    // Over empty menu space the hand must not appear.
+    const viewport = page.viewportSize()!;
+    await page.mouse.move(viewport.width - 80, viewport.height / 2);
+    await expect(cursor).toHaveAttribute("data-hovered", "false");
+    await expect
+      .poll(() => pointer.evaluate((element) => Number(getComputedStyle(element).opacity)))
+      .toBeLessThan(0.05);
+
+    // Over a menu link the hand follows the pointer again.
+    await firstLink.hover();
+    await expect(cursor).toHaveAttribute("data-hovered", "true");
+    await expect
+      .poll(() => pointer.evaluate((element) => Number(getComputedStyle(element).opacity)))
+      .toBeGreaterThan(0.5);
+
+    // Closing returns focus to the toggle; the cursor stays put and no halo appears.
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("dialog")).toBeHidden();
+    await expect(cursor).toHaveAttribute("data-focused", "true");
+    await expect
+      .poll(() => focusHalo.evaluate((element) => Number(getComputedStyle(element).opacity)))
+      .toBeLessThan(0.05);
+    await page.mouse.move(700, 300);
+    await expect(cursor).toHaveAttribute("data-hovered", "false");
+    await expect
+      .poll(() =>
+        ring.evaluate((element) => {
+          const rect = element.getBoundingClientRect();
+          return Math.hypot(
+            rect.left + rect.width / 2 - 700,
+            rect.top + rect.height / 2 - 300
+          );
+        })
+      )
+      .toBeLessThan(3);
   });
 
   test("forces the custom cursor when reduced motion is requested", async ({ page }, testInfo) => {
