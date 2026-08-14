@@ -77,6 +77,7 @@ export interface ProcessStep {
   icon: ServiceIcon;
   image: string;
   imageAlt: string;
+  video: string;
 }
 
 export type SocialIcon = "github" | "linkedin" | "x" | "email";
@@ -299,9 +300,9 @@ export const processSteps: ProcessStep[] = [
     description:
       "We start by clarifying the problem, the audience, and the feeling the experience should leave behind. We align on direction before design begins.",
     icon: "product-design",
-    image:
-      "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1600&auto=format&fit=crop",
-    imageAlt: "Placeholder image of a workspace for the idea phase",
+    image: "/videos/idea.jpg",
+    imageAlt: "Hands writing notes beside a laptop",
+    video: "/videos/idea.mp4",
   },
   {
     title: "Design",
@@ -309,9 +310,9 @@ export const processSteps: ProcessStep[] = [
     description:
       "The direction takes shape through structure, typography, and interaction decisions that make the product feel intentional. We keep it clear and consistent.",
     icon: "ui-ux-design",
-    image:
-      "https://images.unsplash.com/photo-1558655146-d09347e92766?q=80&w=1600&auto=format&fit=crop",
-    imageAlt: "Placeholder image of interface design work",
+    image: "/videos/design.jpg",
+    imageAlt: "Code and interface work on a computer screen",
+    video: "/videos/design.mp4",
   },
   {
     title: "Build",
@@ -319,9 +320,9 @@ export const processSteps: ProcessStep[] = [
     description:
       "I translate the design into responsive, maintainable code while protecting the details that make the interface feel alive. The foundation stays flexible and fast.",
     icon: "framer-development",
-    image:
-      "https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=1600&auto=format&fit=crop",
-    imageAlt: "Placeholder image of a frontend development workspace",
+    image: "/videos/build.jpg",
+    imageAlt: "Software developer working at a computer",
+    video: "/videos/build.mp4",
   },
   {
     title: "Ship",
@@ -329,9 +330,9 @@ export const processSteps: ProcessStep[] = [
     description:
       "Before launch, I refine the final details, test the experience, and make sure it is fast, clear, and ready to perform. The release is ready for real users.",
     icon: "creative-direction",
-    image:
-      "https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=1600&auto=format&fit=crop",
-    imageAlt: "Placeholder image representing a shipped digital product",
+    image: "/videos/ship.jpg",
+    imageAlt: "Developer working on a laptop at a desk",
+    video: "/videos/ship.mp4",
   },
 ];
 

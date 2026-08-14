@@ -1,7 +1,7 @@
 "use client";
 
-import { ImageReveal } from "@/components/ui/image-reveal";
 import { SectionRail } from "@/components/ui/section-rail";
+import { VideoReveal } from "@/components/ui/video-reveal";
 import { processSection, processSteps, serviceIconSources } from "@/lib/data";
 import { cn } from "@/lib/utils";
 import { useGSAP } from "@gsap/react";
@@ -26,7 +26,9 @@ export function HowIWork() {
 
       steps.forEach((step, index) => {
         const media = step.querySelector<HTMLElement>("[data-process-media]");
-        const image = media?.querySelector<HTMLImageElement>("img");
+        const visuals = gsap.utils.toArray<HTMLElement>(
+          media?.querySelectorAll("img, [data-process-visual]") ?? [],
+        );
         const copy = gsap.utils.toArray<HTMLElement>(
           step.querySelectorAll("[data-process-copy]"),
         );
@@ -105,17 +107,17 @@ export function HowIWork() {
 
         trigger.update();
 
-        if (image && window.matchMedia("(pointer: fine)").matches) {
-          const xTo = gsap.quickTo(image, "x", {
+        if (visuals.length && window.matchMedia("(pointer: fine)").matches) {
+          const xTo = gsap.quickTo(visuals, "x", {
             duration: 0.7,
             ease: "power3",
           });
-          const yTo = gsap.quickTo(image, "y", {
+          const yTo = gsap.quickTo(visuals, "y", {
             duration: 0.7,
             ease: "power3",
           });
           const onEnter = () =>
-            gsap.to(image, {
+            gsap.to(visuals, {
               scale: 1.07,
               duration: 0.9,
               ease: "power3.out",
@@ -124,7 +126,7 @@ export function HowIWork() {
           const onLeave = () => {
             xTo(0);
             yTo(0);
-            gsap.to(image, {
+            gsap.to(visuals, {
               scale: 1,
               duration: 0.9,
               ease: "power3.out",
@@ -308,12 +310,12 @@ function ProcessStep({
           railOnLeft ? "min-[810px]:col-start-2" : "min-[810px]:col-start-1",
         )}
       >
-        <ImageReveal
-          src={step.image}
+        <VideoReveal
+          src={step.video}
+          poster={step.image}
           alt={step.imageAlt}
           className="size-full"
           parallax={16}
-          colorOnHover
           loading={index === 0 ? "eager" : "lazy"}
         />
       </div>

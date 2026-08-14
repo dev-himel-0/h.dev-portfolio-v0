@@ -1012,6 +1012,69 @@ test.describe("home", () => {
     ).toHaveCount(0);
   });
 
+  test("renders poster-backed videos for each process step", async ({
+    page,
+  }) => {
+    await page.goto("/");
+
+    const videos = page.locator("[data-process-media] [data-video-layer]");
+    await expect(videos).toHaveCount(processSteps.length);
+
+    for (const [index, step] of processSteps.entries()) {
+      const video = videos.nth(index);
+      await expect(video).toHaveAttribute(
+        "src",
+        new RegExp(step.video.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")),
+      );
+      await expect(video).toHaveAttribute(
+        "poster",
+        new RegExp(step.image.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")),
+      );
+      await expect(video).toHaveAttribute("preload", "none");
+      await expect(video).toHaveAttribute("playsinline", "");
+      await expect(video).toHaveAttribute("aria-hidden", "true");
+    }
+  });
+
+  test("plays a process video on desktop hover and resets on leave", async ({
+    page,
+  }) => {
+    test.skip((page.viewportSize()?.width ?? 0) < 810, "desktop hover only");
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.goto("/");
+
+    const media = page.locator("[data-video-reveal]").first();
+    const video = media.locator("[data-video-layer]");
+    await media.scrollIntoViewIfNeeded();
+    await media.hover();
+
+    await expect
+      .poll(() => media.getAttribute("data-video-status"), "video starts")
+      .toBe("playing");
+    await expect(video).toHaveJSProperty("paused", false);
+
+    await page.mouse.move(0, 0);
+    await expect
+      .poll(() => media.getAttribute("data-video-status"), "video resets")
+      .toBe("idle");
+    await expect(video).toHaveJSProperty("paused", true);
+  });
+
+  test("keeps process videos paused when reduced motion is enabled", async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+
+    const media = page.locator("[data-video-reveal]").first();
+    const video = media.locator("[data-video-layer]");
+    await media.scrollIntoViewIfNeeded();
+    await media.hover();
+
+    await expect(media).toHaveAttribute("data-video-status", "idle");
+    await expect(video).toHaveJSProperty("paused", true);
+  });
+
   test("scales the previous work card as the next card reaches the sticky rail", async ({
     page,
   }) => {
@@ -1983,7 +2046,9 @@ test.describe("how I work", () => {
 
       await expect(row.locator("[data-process-media] img")).toHaveAttribute(
         "src",
-        /images\.unsplash\.com/,
+        new RegExp(
+          encodeURIComponent(step.image).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+        ),
       );
       await expect(row.locator("[data-process-media]")).toHaveCSS(
         "border-radius",
