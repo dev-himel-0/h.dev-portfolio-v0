@@ -1518,7 +1518,7 @@ test.describe("how I work", () => {
     await expect(steps).toHaveCount(processSteps.length)
     await expect(section.locator("[data-process-desktop-track]")).toHaveCount(processSteps.length)
     await expect(section.locator("[data-process-horizontal-track]")).toHaveCount(
-      processSteps.length,
+      processSteps.length - 1,
     )
 
     for (const [index, step] of processSteps.entries()) {
@@ -1538,6 +1538,7 @@ test.describe("how I work", () => {
         "aria-label",
         `Step ${String(index + 1).padStart(2, "0")}`,
       )
+      await expect(row.locator("[data-process-node]")).toHaveCount(index === processSteps.length - 1 ? 3 : 2)
     }
 
     await page.evaluate(() => {
@@ -1567,6 +1568,7 @@ test.describe("how I work", () => {
         "6px",
       )
       await expect(section.locator("[data-process-horizontal-track]").last()).toBeVisible()
+      await expect(steps.last().locator("[data-process-horizontal-track]")).toHaveCount(0)
       await expect(section.locator("[data-process-mobile-track]")).toBeHidden()
     } else {
       await expect(section.locator("[data-process-mobile-track]")).toBeVisible()

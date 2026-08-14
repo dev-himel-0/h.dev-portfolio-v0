@@ -37,18 +37,20 @@ export function HowIWork() {
           step.querySelectorAll("[data-process-node-fill]"),
         )
 
-        if (!media || !numberStrip || !verticalFills.length || !horizontalFill) {
+        if (!media || !numberStrip || !verticalFills.length) {
           return
         }
 
         const finalNumber = -((index + 1) * 10)
         const setVerticalFill = gsap.quickSetter(verticalFills, "scaleY")
-        const setHorizontalFill = gsap.quickSetter(horizontalFill, "scaleX")
+        const setHorizontalFill = horizontalFill
+          ? gsap.quickSetter(horizontalFill, "scaleX")
+          : undefined
         const setNumberPosition = gsap.quickSetter(numberStrip, "yPercent")
         const applyProgress = (progress: number) => {
           const value = gsap.utils.clamp(0, 1, progress)
           setVerticalFill(value)
-          setHorizontalFill(value)
+          setHorizontalFill?.(value)
           setNumberPosition(finalNumber * value)
           const scale = 0.7 + value * 0.3
           nodes.forEach((node) => {
@@ -65,10 +67,12 @@ export function HowIWork() {
           scaleY: 0,
           transformOrigin: "top center",
         })
-        gsap.set(horizontalFill, {
-          scaleX: 0,
-          transformOrigin: index % 2 === 0 ? "left center" : "right center",
-        })
+        if (horizontalFill) {
+          gsap.set(horizontalFill, {
+            scaleX: 0,
+            transformOrigin: index % 2 === 0 ? "left center" : "right center",
+          })
+        }
         gsap.set(nodes, { autoAlpha: 0, scale: 0.7 })
 
         const trigger = ScrollTrigger.create({
@@ -224,22 +228,24 @@ function ProcessStep({
         />
       </div>
 
-      <div
-        aria-hidden="true"
-        data-process-horizontal-track
-        className={cn(
-          "pointer-events-none absolute bottom-0 hidden h-1.5 w-1/2 bg-black/10 min-[810px]:block",
-          railOnLeft ? "left-0" : "right-1/2",
-        )}
-      >
-        <span
-          data-process-horizontal-fill
+      {!last && (
+        <div
+          aria-hidden="true"
+          data-process-horizontal-track
           className={cn(
-            "absolute inset-y-0 left-0 w-full origin-left scale-x-0 bg-black",
-            !railOnLeft && "origin-right",
+            "pointer-events-none absolute bottom-0 hidden h-1.5 w-1/2 bg-black/10 min-[810px]:block",
+            railOnLeft ? "left-0" : "right-1/2",
           )}
-        />
-      </div>
+        >
+          <span
+            data-process-horizontal-fill
+            className={cn(
+              "absolute inset-y-0 left-0 w-full origin-left scale-x-0 bg-black",
+              !railOnLeft && "origin-right",
+            )}
+          />
+        </div>
+      )}
 
       <span
         aria-hidden="true"
