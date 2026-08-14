@@ -1812,7 +1812,7 @@ test.describe("about", () => {
       .toBe(0)
   })
 
-  test("manifesto is left-aligned and no word is cut off by its mask", async ({ page }) => {
+  test("manifesto is justified and no word is cut off by its mask", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "no-preference" })
     await page.goto("/")
     await waitForPage(page)
@@ -1822,7 +1822,7 @@ test.describe("about", () => {
     })
 
     const paragraph = page.locator("[data-about-manifesto] [data-stagger-text]")
-    await expect(paragraph).toHaveCSS("text-align", "left")
+    await expect(paragraph).toHaveCSS("text-align", "justify")
 
     const words = page.locator("[data-about-manifesto] [data-stagger-unit]")
     await expect
