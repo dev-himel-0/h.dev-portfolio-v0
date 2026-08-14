@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import { useEffect, useRef } from "react"
-import { usePathname, useRouter } from "next/navigation"
-import { useSmoothScroll } from "@/components/ui/smooth-scroll"
+import { useEffect, useRef } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useSmoothScroll } from "@/components/ui/smooth-scroll";
 import {
   completeWipe,
   registerWipeCurtain,
@@ -10,9 +10,9 @@ import {
   unregisterWipeCurtain,
   wipeCover,
   wipeCoverDeferred,
-} from "@/lib/wipe"
+} from "@/lib/wipe";
 
-const PANELS = 5
+const PANELS = 5;
 
 /**
  * The single, globally-mounted curtain wipe overlay (see `src/lib/wipe.ts`).
@@ -39,61 +39,62 @@ const PANELS = 5
  * so `PageTransition` plays the cover for those at `popstate` time instead.
  */
 export function WipeCurtain() {
-  const overlayRef = useRef<HTMLDivElement>(null)
-  const panelsRef = useRef<HTMLDivElement[]>([])
-  const lenis = useSmoothScroll()
-  const router = useRouter()
-  const pathname = usePathname()
+  const overlayRef = useRef<HTMLDivElement>(null);
+  const panelsRef = useRef<HTMLDivElement[]>([]);
+  const lenis = useSmoothScroll();
+  const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
-    const overlay = overlayRef.current
-    if (!overlay) return
-    registerWipeCurtain(overlay, panelsRef.current.filter(Boolean), lenis)
-    return () => unregisterWipeCurtain()
-  }, [lenis])
+    const overlay = overlayRef.current;
+    if (!overlay) return;
+    registerWipeCurtain(overlay, panelsRef.current.filter(Boolean), lenis);
+    return () => unregisterWipeCurtain();
+  }, [lenis]);
 
   useEffect(() => {
     const onClick = (event: MouseEvent) => {
-      if (event.defaultPrevented) return
-      if (event.button !== 0) return
-      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
+      if (event.defaultPrevented) return;
+      if (event.button !== 0) return;
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
+        return;
 
-      const target = event.target
-      if (!(target instanceof Element)) return
-      const anchor = target.closest("a")
-      if (!anchor) return
-      if (anchor.closest("#staggered-menu-panel")) return
-      if (anchor.target === "_blank") return
-      if (anchor.hasAttribute("download")) return
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      const anchor = target.closest("a");
+      if (!anchor) return;
+      if (anchor.closest("#staggered-menu-panel")) return;
+      if (anchor.target === "_blank") return;
+      if (anchor.hasAttribute("download")) return;
 
-      const href = anchor.getAttribute("href")
-      if (!href) return
+      const href = anchor.getAttribute("href");
+      if (!href) return;
 
       if (href.startsWith("#")) {
-        event.preventDefault()
-        const targetId = href.slice(1)
+        event.preventDefault();
+        const targetId = href.slice(1);
         wipeCover(() => {
-          const section = targetId ? document.getElementById(targetId) : null
-          scrollToInstant(section ?? 0)
-        })
-        return
+          const section = targetId ? document.getElementById(targetId) : null;
+          scrollToInstant(section ?? 0);
+        });
+        return;
       }
 
       if (href.startsWith("/") && !href.startsWith("//")) {
-        event.preventDefault()
+        event.preventDefault();
         wipeCoverDeferred(() => {
           if (href === pathname) {
-            completeWipe()
-            return
+            completeWipe();
+            return;
           }
-          router.push(href)
-        })
+          router.push(href);
+        });
       }
-    }
+    };
 
-    document.addEventListener("click", onClick, true)
-    return () => document.removeEventListener("click", onClick, true)
-  }, [router, pathname])
+    document.addEventListener("click", onClick, true);
+    return () => document.removeEventListener("click", onClick, true);
+  }, [router, pathname]);
 
   return (
     <div
@@ -107,11 +108,11 @@ export function WipeCurtain() {
         <div
           key={i}
           ref={(el) => {
-            if (el) panelsRef.current[i] = el
+            if (el) panelsRef.current[i] = el;
           }}
           className="stt-curtain-panel"
         />
       ))}
     </div>
-  )
+  );
 }

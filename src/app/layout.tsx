@@ -1,14 +1,14 @@
-import type { Metadata } from "next"
-import localFont from "next/font/local"
-import { Montserrat } from "next/font/google"
-import "./globals.css"
-import { cn } from "@/lib/utils"
-import { SmoothScroll } from "@/components/ui/smooth-scroll"
-import { ScrollToTop } from "@/components/ui/scroll-to-top"
-import { PageTransition } from "@/components/ui/page-transition"
-import { WipeCurtain } from "@/components/ui/wipe-curtain"
-import { CircleCursor } from "@/components/ui/circle-cursor"
-import { MotionProvider } from "@/components/ui/motion-provider"
+import type { Metadata } from "next";
+import localFont from "next/font/local";
+import { Montserrat } from "next/font/google";
+import "./globals.css";
+import { cn } from "@/lib/utils";
+import { SmoothScroll } from "@/components/ui/smooth-scroll";
+import { ScrollToTop } from "@/components/ui/scroll-to-top";
+import { PageTransition } from "@/components/ui/page-transition";
+import { WipeCurtain } from "@/components/ui/wipe-curtain";
+import { CircleCursor } from "@/components/ui/circle-cursor";
+import { MotionProvider } from "@/components/ui/motion-provider";
 
 const generalSans = localFont({
   src: [
@@ -19,9 +19,9 @@ const generalSans = localFont({
   ],
   variable: "--font-heading",
   display: "swap",
-})
+});
 
-const montserrat = Montserrat({ subsets: ["latin"], variable: "--font-sans" })
+const montserrat = Montserrat({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
   title: "Himel — Frontend Engineer",
@@ -30,12 +30,12 @@ export const metadata: Metadata = {
   icons: {
     icon: "/img/h.png",
   },
-}
+};
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
   return (
     <html
@@ -61,5 +61,5 @@ export default function RootLayout({
         <CircleCursor />
       </body>
     </html>
-  )
+  );
 }

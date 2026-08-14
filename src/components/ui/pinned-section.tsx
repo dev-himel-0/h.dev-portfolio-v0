@@ -1,18 +1,18 @@
-"use client"
+"use client";
 
-import { useRef, type ReactNode } from "react"
-import gsap from "gsap"
-import { ScrollTrigger } from "gsap/ScrollTrigger"
-import { useGSAP } from "@gsap/react"
-import { cn } from "@/lib/utils"
+import { useRef, type ReactNode } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
+import { cn } from "@/lib/utils";
 
-gsap.registerPlugin(ScrollTrigger, useGSAP)
+gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 interface PinnedSectionProps {
-  children: ReactNode
-  className?: string
+  children: ReactNode;
+  className?: string;
   /** Extra scroll distance the section stays pinned, e.g. "+=100%". */
-  end?: string
+  end?: string;
 }
 
 /**
@@ -20,15 +20,19 @@ interface PinnedSectionProps {
  * scrolls through `end` of extra distance. Inner content stays in view,
  * so reveals/scrubs inside keep working. Skipped under `prefers-reduced-motion`.
  */
-export function PinnedSection({ children, className, end = "+=100%" }: PinnedSectionProps) {
-  const ref = useRef<HTMLDivElement>(null)
-  const viewportRef = useRef<HTMLDivElement>(null)
+export function PinnedSection({
+  children,
+  className,
+  end = "+=100%",
+}: PinnedSectionProps) {
+  const ref = useRef<HTMLDivElement>(null);
+  const viewportRef = useRef<HTMLDivElement>(null);
 
   useGSAP(
     () => {
-      const scope = ref.current
+      const scope = ref.current;
       if (!scope) {
-        return
+        return;
       }
 
       ScrollTrigger.create({
@@ -37,16 +41,22 @@ export function PinnedSection({ children, className, end = "+=100%" }: PinnedSec
         end,
         pin: viewportRef.current,
         anticipatePin: 1,
-      })
+      });
     },
     { scope: ref },
-  )
+  );
 
   return (
-    <div ref={ref} className={cn(className)}>
-      <div ref={viewportRef} className="flex h-screen items-center justify-center">
+    <div
+      ref={ref}
+      className={cn(className)}
+    >
+      <div
+        ref={viewportRef}
+        className="flex h-screen items-center justify-center"
+      >
         {children}
       </div>
     </div>
-  )
+  );
 }

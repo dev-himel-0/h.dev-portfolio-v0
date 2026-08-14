@@ -1,9 +1,14 @@
-"use client"
+"use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react"
-import { usePathname } from "next/navigation"
-import { markSoftNavigation } from "@/lib/navigation"
-import { completeWipe, isWipeReady, wipeCoverDeferred, wipeReveal } from "@/lib/wipe"
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { usePathname } from "next/navigation";
+import { markSoftNavigation } from "@/lib/navigation";
+import {
+  completeWipe,
+  isWipeReady,
+  wipeCoverDeferred,
+  wipeReveal,
+} from "@/lib/wipe";
 
 /**
  * Route transition choreography for the shared curtain wipe. The invariant:
@@ -30,15 +35,15 @@ import { completeWipe, isWipeReady, wipeCoverDeferred, wipeReveal } from "@/lib/
  * skipped (instant) under `prefers-reduced-motion`.
  */
 export function PageTransition({ children }: { children: ReactNode }) {
-  const pathname = usePathname()
-  const [previousPathname, setPreviousPathname] = useState(pathname)
-  const lastPathnameRef = useRef(pathname)
-  const mountPathRef = useRef(pathname)
+  const pathname = usePathname();
+  const [previousPathname, setPreviousPathname] = useState(pathname);
+  const lastPathnameRef = useRef(pathname);
+  const mountPathRef = useRef(pathname);
 
   // Detect soft navigation during render, before the incoming page renders.
   if (pathname !== previousPathname) {
-    setPreviousPathname(pathname)
-    markSoftNavigation()
+    setPreviousPathname(pathname);
+    markSoftNavigation();
   }
 
   // Back/forward only — `popstate` never fires for router.push or Link. Some
@@ -50,21 +55,21 @@ export function PageTransition({ children }: { children: ReactNode }) {
   // `completeWipe` below lifts the curtain once the commit has landed.
   useEffect(() => {
     const onPopState = () => {
-      if (window.location.pathname === lastPathnameRef.current) return
-      wipeCoverDeferred(() => {})
-    }
-    window.addEventListener("popstate", onPopState)
-    return () => window.removeEventListener("popstate", onPopState)
-  }, [])
+      if (window.location.pathname === lastPathnameRef.current) return;
+      wipeCoverDeferred(() => {});
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
 
   // The route has committed and painted under the curtain — lift it.
   // Covers both the popstate wipe above and link-click wipes from
   // `WipeCurtain`; a no-op when no wipe is pending (e.g. reduced motion).
   useEffect(() => {
-    if (pathname === lastPathnameRef.current) return
-    lastPathnameRef.current = pathname
-    completeWipe()
-  }, [pathname])
+    if (pathname === lastPathnameRef.current) return;
+    lastPathnameRef.current = pathname;
+    completeWipe();
+  }, [pathname]);
 
   /**
    * Entrance wipe for directly-loaded pages: any hard load on a route other
@@ -76,28 +81,28 @@ export function PageTransition({ children }: { children: ReactNode }) {
    * or the popstate wipe, never this path.
    */
   useEffect(() => {
-    if (mountPathRef.current === "/") return
+    if (mountPathRef.current === "/") return;
 
-    let cancelled = false
+    let cancelled = false;
     // Wait for the wipe overlay (mounted by `WipeCurtain`, a sibling) to
     // register before animating; cap the wait so a missing overlay degrades
     // to an instant reveal instead of spinning forever.
     const play = (frame: number) => {
       requestAnimationFrame(() => {
-        if (cancelled) return
+        if (cancelled) return;
         if (!isWipeReady() && frame < 240) {
-          play(frame + 1)
-          return
+          play(frame + 1);
+          return;
         }
-        wipeReveal()
-      })
-    }
-    play(0)
+        wipeReveal();
+      });
+    };
+    play(0);
 
     return () => {
-      cancelled = true
-    }
-  }, [])
+      cancelled = true;
+    };
+  }, []);
 
-  return <div className="min-h-full">{children}</div>
+  return <div className="min-h-full">{children}</div>;
 }

@@ -1,16 +1,16 @@
-"use client"
+"use client";
 
-import type { CSSProperties, PointerEvent, ReactNode } from "react"
-import { cn } from "@/lib/utils"
+import type { CSSProperties, PointerEvent, ReactNode } from "react";
+import { cn } from "@/lib/utils";
 
 interface MagicBentoGridProps {
-  children: ReactNode
-  className?: string
+  children: ReactNode;
+  className?: string;
 }
 
 interface MagicBentoCellProps {
-  children: ReactNode
-  className?: string
+  children: ReactNode;
+  className?: string;
 }
 
 const spotStyle = {
@@ -18,28 +18,31 @@ const spotStyle = {
   "--spot-y": "50%",
   "--spot-opacity": "0",
   "--spot-scale": "1.2",
-} as CSSProperties
+} as CSSProperties;
 
 function updateSpot(event: PointerEvent<HTMLDivElement>) {
   if (
     event.pointerType === "touch" ||
     !window.matchMedia("(hover: hover) and (pointer: fine)").matches
   ) {
-    return
+    return;
   }
 
-  const cell = event.currentTarget
-  const rect = cell.getBoundingClientRect()
-  cell.style.setProperty("--spot-x", `${event.clientX - rect.left}px`)
-  cell.style.setProperty("--spot-y", `${event.clientY - rect.top}px`)
+  const cell = event.currentTarget;
+  const rect = cell.getBoundingClientRect();
+  cell.style.setProperty("--spot-x", `${event.clientX - rect.left}px`);
+  cell.style.setProperty("--spot-y", `${event.clientY - rect.top}px`);
 }
 
 export function MagicBentoGrid({ children, className }: MagicBentoGridProps) {
   return (
-    <div data-magic-bento className={cn("grid grid-cols-1 md:grid-cols-2", className)}>
+    <div
+      data-magic-bento
+      className={cn("grid grid-cols-1 md:grid-cols-2", className)}
+    >
       {children}
     </div>
-  )
+  );
 }
 
 export function MagicBentoCell({ children, className }: MagicBentoCellProps) {
@@ -58,13 +61,13 @@ export function MagicBentoCell({ children, className }: MagicBentoCellProps) {
           event.pointerType !== "touch" &&
           window.matchMedia("(hover: hover) and (pointer: fine)").matches
         ) {
-          event.currentTarget.style.setProperty("--spot-opacity", "1")
-          event.currentTarget.style.setProperty("--spot-scale", "1")
+          event.currentTarget.style.setProperty("--spot-opacity", "1");
+          event.currentTarget.style.setProperty("--spot-scale", "1");
         }
       }}
       onPointerLeave={(event) => {
-        event.currentTarget.style.setProperty("--spot-opacity", "0")
-        event.currentTarget.style.setProperty("--spot-scale", "1.2")
+        event.currentTarget.style.setProperty("--spot-opacity", "0");
+        event.currentTarget.style.setProperty("--spot-scale", "1.2");
       }}
     >
       <span
@@ -79,5 +82,5 @@ export function MagicBentoCell({ children, className }: MagicBentoCellProps) {
       />
       <div className="relative z-[1] h-full">{children}</div>
     </div>
-  )
+  );
 }

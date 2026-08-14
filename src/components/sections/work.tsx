@@ -1,18 +1,18 @@
-"use client"
+"use client";
 
-import { useRef } from "react"
-import gsap from "gsap"
-import { ScrollTrigger } from "gsap/ScrollTrigger"
-import { useGSAP } from "@gsap/react"
-import { ArrowUpRight } from "@phosphor-icons/react"
-import { SectionReveal } from "@/components/ui/section-reveal"
-import { SectionRail } from "@/components/ui/section-rail"
-import { ImageReveal } from "@/components/ui/image-reveal"
-import { RollingNumber } from "@/components/ui/rolling-number"
-import { projects, work, type Project } from "@/lib/data"
-import { cn } from "@/lib/utils"
+import { useRef } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
+import { ArrowUpRight } from "@phosphor-icons/react";
+import { SectionReveal } from "@/components/ui/section-reveal";
+import { SectionRail } from "@/components/ui/section-rail";
+import { ImageReveal } from "@/components/ui/image-reveal";
+import { RollingNumber } from "@/components/ui/rolling-number";
+import { projects, work, type Project } from "@/lib/data";
+import { cn } from "@/lib/utils";
 
-gsap.registerPlugin(ScrollTrigger, useGSAP)
+gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 /**
  * Editorial project list: desktop cards stack at the top of the viewport,
@@ -20,17 +20,17 @@ gsap.registerPlugin(ScrollTrigger, useGSAP)
  * Images keep their independent ImageReveal effects.
  */
 export function Work() {
-  const rootRef = useRef<HTMLElement>(null)
-  const cardsRef = useRef<HTMLDivElement>(null)
+  const rootRef = useRef<HTMLElement>(null);
+  const cardsRef = useRef<HTMLDivElement>(null);
 
   useGSAP(
     () => {
-      const rows = gsap.utils.toArray<HTMLElement>("[data-work-row]")
-      const media = gsap.matchMedia()
+      const rows = gsap.utils.toArray<HTMLElement>("[data-work-row]");
+      const media = gsap.matchMedia();
 
       media.add("(min-width: 810px)", () => {
         rows.slice(0, -1).forEach((row, index) => {
-          const nextRow = rows[index + 1]
+          const nextRow = rows[index + 1];
 
           gsap.fromTo(
             row,
@@ -46,14 +46,14 @@ export function Work() {
                 scrub: 0.3,
               },
             },
-          )
-        })
-      })
+          );
+        });
+      });
 
-      return () => media.revert()
+      return () => media.revert();
     },
     { scope: rootRef },
-  )
+  );
 
   return (
     <section
@@ -62,10 +62,19 @@ export function Work() {
       aria-labelledby="work-heading"
       className="relative bg-white py-24 text-black sm:py-28 lg:py-36"
     >
-      <SectionRail sectionRef={rootRef} contentRef={cardsRef} index={work.index} side="right" />
+      <SectionRail
+        sectionRef={rootRef}
+        contentRef={cardsRef}
+        index={work.index}
+        side="right"
+      />
 
       <div className="mx-auto w-full max-w-[72rem] px-5 sm:px-8">
-        <SectionReveal variant="fade" distance={100} className="mb-14 lg:mb-20">
+        <SectionReveal
+          variant="fade"
+          distance={100}
+          className="mb-14 lg:mb-20"
+        >
           <h2
             id="work-heading"
             className="font-heading text-[clamp(1.75rem,6.5vw,5.5rem)] leading-[0.82] font-semibold tracking-[-0.03em] whitespace-nowrap"
@@ -77,25 +86,39 @@ export function Work() {
           </h2>
         </SectionReveal>
 
-        <div ref={cardsRef} data-work-cards className="flex flex-col gap-10 sm:gap-14 lg:gap-16">
+        <div
+          ref={cardsRef}
+          data-work-cards
+          className="flex flex-col gap-10 sm:gap-14 lg:gap-16"
+        >
           {projects.map((project, index) => (
-            <ProjectCard key={project.title} project={project} index={index} />
+            <ProjectCard
+              key={project.title}
+              project={project}
+              index={index}
+            />
           ))}
         </div>
       </div>
     </section>
-  )
+  );
 }
 
 function ProjectCard({ project, index }: { project: Project; index: number }) {
-  const flipped = index % 2 === 1
-  const numeral = String(index + 1).padStart(2, "0")
+  const flipped = index % 2 === 1;
+  const numeral = String(index + 1).padStart(2, "0");
 
   const content = (
     <>
-      <ProjectFigure project={project} eager={index === 0} />
+      <ProjectFigure
+        project={project}
+        eager={index === 0}
+      />
 
-      <div data-work-info className="relative flex flex-1 flex-col justify-end pb-2">
+      <div
+        data-work-info
+        className="relative flex flex-1 flex-col justify-end pb-2"
+      >
         <RollingNumber
           value={numeral}
           marker="work-index"
@@ -103,7 +126,10 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
           delay={index * 0.08}
           className="hero-outline-text pointer-events-none absolute top-0 right-0 hidden font-heading text-[clamp(8.5rem,13vw,11.5rem)] leading-none font-semibold opacity-[0.06] select-none lg:block"
         />
-        <div data-work-content className="relative">
+        <div
+          data-work-content
+          className="relative"
+        >
           <p
             data-work-meta
             className="font-sans text-[0.625rem] tracking-[0.22em] text-black/50 uppercase"
@@ -133,7 +159,11 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
             className="mt-6 grid max-w-[34rem] grid-cols-1 gap-x-10 sm:grid-cols-2 lg:mt-7"
           >
             {project.impact.map((stat) => (
-              <div key={stat.label} data-impact-stat className="border-t border-black/10 pt-3">
+              <div
+                key={stat.label}
+                data-impact-stat
+                className="border-t border-black/10 pt-3"
+              >
                 <RollingNumber
                   value={stat.value}
                   marker="impact-value"
@@ -151,22 +181,29 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
         </div>
       </div>
     </>
-  )
+  );
 
   const cardClass = cn(
     "work-card group relative flex w-full flex-col gap-10 bg-white pt-10 sm:pt-12 min-[810px]:sticky min-[810px]:top-20 min-[810px]:z-[1] lg:flex-row lg:gap-14 lg:pt-14",
     flipped && "lg:flex-row-reverse",
-  )
+  );
 
   return project.href ? (
-    <a data-work-row href={project.href} className={cardClass}>
+    <a
+      data-work-row
+      href={project.href}
+      className={cardClass}
+    >
       {content}
     </a>
   ) : (
-    <div data-work-row className={cardClass}>
+    <div
+      data-work-row
+      className={cardClass}
+    >
       {content}
     </div>
-  )
+  );
 }
 
 /**
@@ -174,53 +211,59 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
  * mouse-following drift (desktop only), plus the scroll-scrubbed drift
  * and grayscale -> color reveal from ImageReveal. Skipped on touch devices.
  */
-function ProjectFigure({ project, eager = false }: { project: Project; eager?: boolean }) {
-  const ref = useRef<HTMLElement>(null)
+function ProjectFigure({
+  project,
+  eager = false,
+}: {
+  project: Project;
+  eager?: boolean;
+}) {
+  const ref = useRef<HTMLElement>(null);
 
   useGSAP(
     () => {
-      const figure = ref.current
-      const img = figure?.querySelector("img")
+      const figure = ref.current;
+      const img = figure?.querySelector("img");
       if (!figure || !img || !window.matchMedia("(pointer: fine)").matches) {
-        return
+        return;
       }
 
-      const xTo = gsap.quickTo(img, "x", { duration: 0.7, ease: "power3" })
-      const yTo = gsap.quickTo(img, "y", { duration: 0.7, ease: "power3" })
+      const xTo = gsap.quickTo(img, "x", { duration: 0.7, ease: "power3" });
+      const yTo = gsap.quickTo(img, "y", { duration: 0.7, ease: "power3" });
       const onEnter = () =>
         gsap.to(img, {
           scale: 1.07,
           duration: 0.9,
           ease: "power3.out",
           overwrite: "auto",
-        })
+        });
       const onLeave = () => {
-        xTo(0)
-        yTo(0)
+        xTo(0);
+        yTo(0);
         gsap.to(img, {
           scale: 1,
           duration: 0.9,
           ease: "power3.out",
           overwrite: "auto",
-        })
-      }
+        });
+      };
       const onMove = (event: MouseEvent) => {
-        const rect = figure.getBoundingClientRect()
-        xTo(((event.clientX - rect.left) / rect.width - 0.5) * 24)
-        yTo(((event.clientY - rect.top) / rect.height - 0.5) * 20)
-      }
+        const rect = figure.getBoundingClientRect();
+        xTo(((event.clientX - rect.left) / rect.width - 0.5) * 24);
+        yTo(((event.clientY - rect.top) / rect.height - 0.5) * 20);
+      };
 
-      figure.addEventListener("mouseenter", onEnter)
-      figure.addEventListener("mouseleave", onLeave)
-      figure.addEventListener("mousemove", onMove)
+      figure.addEventListener("mouseenter", onEnter);
+      figure.addEventListener("mouseleave", onLeave);
+      figure.addEventListener("mousemove", onMove);
       return () => {
-        figure.removeEventListener("mouseenter", onEnter)
-        figure.removeEventListener("mouseleave", onLeave)
-        figure.removeEventListener("mousemove", onMove)
-      }
+        figure.removeEventListener("mouseenter", onEnter);
+        figure.removeEventListener("mouseleave", onLeave);
+        figure.removeEventListener("mousemove", onMove);
+      };
     },
     { scope: ref },
-  )
+  );
 
   return (
     <figure
@@ -243,5 +286,5 @@ function ProjectFigure({ project, eager = false }: { project: Project; eager?: b
         </span>
       )}
     </figure>
-  )
+  );
 }

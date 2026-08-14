@@ -1,20 +1,20 @@
-"use client"
+"use client";
 
-import { cn } from "@/lib/utils"
-import { useState, type CSSProperties } from "react"
-import type { IconType } from "react-icons"
+import { cn } from "@/lib/utils";
+import { useState, type CSSProperties } from "react";
+import type { IconType } from "react-icons";
 
 export interface MaskedAvatarItem {
-  name: string
-  icon?: IconType
+  name: string;
+  icon?: IconType;
 }
 
 interface MaskedAvatarsProps {
-  items: MaskedAvatarItem[]
-  size?: number
-  overlap?: number
-  className?: string
-  "aria-label"?: string
+  items: MaskedAvatarItem[];
+  size?: number;
+  overlap?: number;
+  className?: string;
+  "aria-label"?: string;
 }
 
 /**
@@ -28,7 +28,7 @@ export function MaskedAvatars({
   className,
   "aria-label": ariaLabel = "Technology stack",
 }: MaskedAvatarsProps) {
-  const [activeIndex, setActiveIndex] = useState<number | null>(null)
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
   return (
     <div
@@ -37,11 +37,16 @@ export function MaskedAvatars({
       aria-label={ariaLabel}
       className={cn("relative flex items-end overflow-visible", className)}
     >
-      <ul role="list" className="m-0 flex list-none items-end p-0" style={{ paddingTop: 0 }}>
+      <ul
+        role="list"
+        className="m-0 flex list-none items-end p-0"
+        style={{ paddingTop: 0 }}
+      >
         {items.map((item, index) => {
-          const isActive = activeIndex === index
-          const isNeighbor = activeIndex !== null && Math.abs(activeIndex - index) === 1
-          const Icon = item.icon
+          const isActive = activeIndex === index;
+          const isNeighbor =
+            activeIndex !== null && Math.abs(activeIndex - index) === 1;
+          const Icon = item.icon;
 
           return (
             <li
@@ -83,11 +88,20 @@ export function MaskedAvatars({
                   } as CSSProperties
                 }
               >
-                <span data-tech-icon aria-hidden="true" className="text-black">
+                <span
+                  data-tech-icon
+                  aria-hidden="true"
+                  className="text-black"
+                >
                   {Icon ? (
-                    <Icon aria-hidden="true" size={size * 0.48} />
+                    <Icon
+                      aria-hidden="true"
+                      size={size * 0.48}
+                    />
                   ) : (
-                    <span className="font-sans text-sm font-medium">{item.name.slice(0, 1)}</span>
+                    <span className="font-sans text-sm font-medium">
+                      {item.name.slice(0, 1)}
+                    </span>
                   )}
                 </span>
               </div>
@@ -106,9 +120,9 @@ export function MaskedAvatars({
                 {item.name}
               </span>
             </li>
-          )
+          );
         })}
       </ul>
     </div>
-  )
+  );
 }

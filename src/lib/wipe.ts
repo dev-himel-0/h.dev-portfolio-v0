@@ -1,5 +1,5 @@
-import gsap from "gsap"
-import type Lenis from "lenis"
+import gsap from "gsap";
+import type Lenis from "lenis";
 
 /**
  * Shared cinematic curtain wipe for the whole app — the staggered black
@@ -51,20 +51,20 @@ const WIPE_TIMING = {
   hold: 0.15,
   reveal: 0.8,
   revealStagger: 0.08,
-} as const
+} as const;
 
 /** Safety cap for a deferred wipe whose route never commits (ms). */
-const DEFERRED_TIMEOUT = 4000
+const DEFERRED_TIMEOUT = 4000;
 
-const noop = () => {}
+const noop = () => {};
 
-let overlayEl: HTMLElement | null = null
-let panelEls: HTMLElement[] = []
-let lenis: Lenis | null = null
-let busy = false
+let overlayEl: HTMLElement | null = null;
+let panelEls: HTMLElement[] = [];
+let lenis: Lenis | null = null;
+let busy = false;
 
 /** Reveal callback of the deferred wipe currently covering the screen. */
-let pendingReveal = noop
+let pendingReveal = noop;
 
 /** Called by `WipeCurtain` when its overlay mounts (and on lenis swaps). */
 export function registerWipeCurtain(
@@ -72,27 +72,27 @@ export function registerWipeCurtain(
   panels: HTMLElement[],
   lenisInstance: Lenis | null,
 ) {
-  overlayEl = overlay
-  panelEls = panels
-  lenis = lenisInstance ?? null
+  overlayEl = overlay;
+  panelEls = panels;
+  lenis = lenisInstance ?? null;
 }
 
 /** Called by `WipeCurtain` on unmount. */
 export function unregisterWipeCurtain() {
-  overlayEl = null
-  panelEls = []
-  lenis = null
-  busy = false
-  pendingReveal = noop
+  overlayEl = null;
+  panelEls = [];
+  lenis = null;
+  busy = false;
+  pendingReveal = noop;
 }
 
 export function isWipeBusy() {
-  return busy
+  return busy;
 }
 
 /** Whether the curtain overlay is mounted and ready to animate. */
 export function isWipeReady() {
-  return overlayEl !== null && panelEls.length > 0
+  return overlayEl !== null && panelEls.length > 0;
 }
 
 /**
@@ -102,14 +102,14 @@ export function isWipeReady() {
  * already resolved its (reduced-motion / missing-overlay) path.
  */
 export function completeWipe() {
-  const reveal = pendingReveal
-  pendingReveal = noop
-  reveal()
+  const reveal = pendingReveal;
+  pendingReveal = noop;
+  reveal();
 }
 
 function runAction(action: () => void) {
   try {
-    action()
+    action();
   } catch {
     // The wipe must always complete and reveal the page.
   }
@@ -118,19 +118,21 @@ function runAction(action: () => void) {
 /** Jump under a covered wipe without leaving Lenis' target out of sync. */
 export function scrollToInstant(target: number | HTMLElement) {
   if (lenis) {
-    lenis.scrollTo(target, { immediate: true, force: true })
-    return
+    lenis.scrollTo(target, { immediate: true, force: true });
+    return;
   }
 
   const top =
-    typeof target === "number" ? target : target.getBoundingClientRect().top + window.scrollY
-  window.scrollTo({ top, behavior: "instant" })
+    typeof target === "number"
+      ? target
+      : target.getBoundingClientRect().top + window.scrollY;
+  window.scrollTo({ top, behavior: "instant" });
 }
 
 function resetWipe() {
-  if (overlayEl) gsap.set(overlayEl, { display: "none" })
-  lenis?.start()
-  busy = false
+  if (overlayEl) gsap.set(overlayEl, { display: "none" });
+  lenis?.start();
+  busy = false;
 }
 
 /**
@@ -143,27 +145,27 @@ function resetWipe() {
 export function wipeCover(action: () => void): Promise<void> {
   return new Promise((resolve) => {
     const finish = () => {
-      resetWipe()
-      resolve()
-    }
+      resetWipe();
+      resolve();
+    };
 
     if (busy) {
-      runAction(action)
-      resolve()
-      return
+      runAction(action);
+      resolve();
+      return;
     }
-    busy = true
+    busy = true;
 
     // An unregistered overlay degrades to an instant action.
     if (!overlayEl || panelEls.length === 0) {
-      runAction(action)
-      finish()
-      return
+      runAction(action);
+      finish();
+      return;
     }
 
-    lenis?.stop()
-    gsap.set(overlayEl, { display: "flex" })
-    gsap.set(panelEls, { yPercent: 101, autoAlpha: 1 })
+    lenis?.stop();
+    gsap.set(overlayEl, { display: "flex" });
+    gsap.set(panelEls, { yPercent: 101, autoAlpha: 1 });
 
     gsap
       .timeline({ onComplete: finish })
@@ -180,8 +182,8 @@ export function wipeCover(action: () => void): Promise<void> {
         duration: WIPE_TIMING.reveal,
         ease: "power4.inOut",
         stagger: WIPE_TIMING.revealStagger,
-      })
-  })
+      });
+  });
 }
 
 /**
@@ -196,36 +198,36 @@ export function wipeCover(action: () => void): Promise<void> {
 export function wipeCoverDeferred(action: () => void): Promise<void> {
   return new Promise((resolve) => {
     const finish = () => {
-      resetWipe()
-      pendingReveal = noop
-      resolve()
-    }
+      resetWipe();
+      pendingReveal = noop;
+      resolve();
+    };
 
     if (busy) {
-      runAction(action)
-      resolve()
-      return
+      runAction(action);
+      resolve();
+      return;
     }
-    busy = true
+    busy = true;
 
     // An unregistered overlay degrades to an instant action.
     if (!overlayEl || panelEls.length === 0) {
-      runAction(action)
-      finish()
-      return
+      runAction(action);
+      finish();
+      return;
     }
 
-    lenis?.stop()
-    gsap.set(overlayEl, { display: "flex" })
-    gsap.set(panelEls, { yPercent: 101, autoAlpha: 1 })
+    lenis?.stop();
+    gsap.set(overlayEl, { display: "flex" });
+    gsap.set(panelEls, { yPercent: 101, autoAlpha: 1 });
 
-    let routeCommitted = false
-    let settled = false
+    let routeCommitted = false;
+    let settled = false;
 
     const settle = () => {
-      if (settled) return
-      settled = true
-      pendingReveal = noop
+      if (settled) return;
+      settled = true;
+      pendingReveal = noop;
       gsap.to(panelEls, {
         yPercent: -101,
         duration: WIPE_TIMING.reveal,
@@ -233,8 +235,8 @@ export function wipeCoverDeferred(action: () => void): Promise<void> {
         ease: "power4.inOut",
         stagger: WIPE_TIMING.revealStagger,
         onComplete: finish,
-      })
-    }
+      });
+    };
 
     // 1. Cover: panels animate in from bottom to cover the viewport completely.
     gsap.to(panelEls, {
@@ -244,26 +246,26 @@ export function wipeCoverDeferred(action: () => void): Promise<void> {
       stagger: WIPE_TIMING.coverStagger,
       onComplete: () => {
         // 2. Action: Execute navigation under solid black cover.
-        runAction(action)
+        runAction(action);
 
         pendingReveal = () => {
-          settle()
-        }
+          settle();
+        };
 
         // If route committed while covering or immediately, reveal now.
         if (routeCommitted) {
-          settle()
+          settle();
         } else {
-          setTimeout(settle, DEFERRED_TIMEOUT)
+          setTimeout(settle, DEFERRED_TIMEOUT);
         }
       },
-    })
+    });
 
     // completeWipe() calls pendingReveal when incoming route commits.
     pendingReveal = () => {
-      routeCommitted = true
-    }
-  })
+      routeCommitted = true;
+    };
+  });
 }
 
 /**
@@ -274,24 +276,24 @@ export function wipeCoverDeferred(action: () => void): Promise<void> {
 export function wipeReveal(): Promise<void> {
   return new Promise((resolve) => {
     const finish = () => {
-      resetWipe()
-      resolve()
-    }
+      resetWipe();
+      resolve();
+    };
 
     if (busy) {
-      resolve()
-      return
+      resolve();
+      return;
     }
-    busy = true
+    busy = true;
 
     if (!overlayEl || panelEls.length === 0) {
-      finish()
-      return
+      finish();
+      return;
     }
 
-    lenis?.stop()
-    gsap.set(overlayEl, { display: "flex" })
-    gsap.set(panelEls, { yPercent: 0, autoAlpha: 1 })
+    lenis?.stop();
+    gsap.set(overlayEl, { display: "flex" });
+    gsap.set(panelEls, { yPercent: 0, autoAlpha: 1 });
 
     gsap.to(panelEls, {
       yPercent: -101,
@@ -300,6 +302,6 @@ export function wipeReveal(): Promise<void> {
       ease: "power4.inOut",
       stagger: WIPE_TIMING.revealStagger,
       onComplete: finish,
-    })
-  })
+    });
+  });
 }

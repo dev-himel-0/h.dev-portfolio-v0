@@ -1,36 +1,36 @@
-"use client"
+"use client";
 
-import { useRef, type ReactNode } from "react"
-import gsap from "gsap"
-import { useGSAP } from "@gsap/react"
-import { cn } from "@/lib/utils"
-import { Odometer, type OdometerHandle } from "@/components/ui/odometer"
+import { useRef, type ReactNode } from "react";
+import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
+import { cn } from "@/lib/utils";
+import { Odometer, type OdometerHandle } from "@/components/ui/odometer";
 
-gsap.registerPlugin(useGSAP)
+gsap.registerPlugin(useGSAP);
 
 interface CurtainRevealProps {
   /** When true, children fade out then the panels wipe away and onComplete fires. Ignored when `progress` is set. */
-  play?: boolean
+  play?: boolean;
   /** Number of vertical panels. */
-  panels?: number
+  panels?: number;
   /** Duration of the panel wipe. */
-  duration?: number
+  duration?: number;
   /** Stagger between panels. */
-  stagger?: number
+  stagger?: number;
   /** Duration of the children fade-out. */
-  fadeDuration?: number
+  fadeDuration?: number;
   /**
    * When set, the curtain drives itself: a progress line under the content
    * fills over `progress` ms with a 0-100% odometer, then the content fades
    * out and the panels wipe away.
    */
-  progress?: number
+  progress?: number;
   /** Content shown on top of the panels (e.g. the loader words). */
-  children?: ReactNode
+  children?: ReactNode;
   /** Fires when the panel wipe starts (or immediately under reduced motion). */
-  onReveal?: () => void
-  onComplete?: () => void
-  className?: string
+  onReveal?: () => void;
+  onComplete?: () => void;
+  className?: string;
 }
 
 /**
@@ -56,22 +56,28 @@ export function CurtainReveal({
   onComplete,
   className,
 }: CurtainRevealProps) {
-  const rootRef = useRef<HTMLDivElement>(null)
-  const odometerRef = useRef<OdometerHandle>(null)
+  const rootRef = useRef<HTMLDivElement>(null);
+  const odometerRef = useRef<OdometerHandle>(null);
 
   useGSAP(
     () => {
-      const root = rootRef.current
-      if (!root) return
+      const root = rootRef.current;
+      if (!root) return;
 
-      const bandEls = Array.from(root.querySelectorAll<HTMLElement>("[data-curtain-panel]"))
-      const content = root.querySelector<HTMLElement>("[data-curtain-content]")
+      const bandEls = Array.from(
+        root.querySelectorAll<HTMLElement>("[data-curtain-panel]"),
+      );
+      const content = root.querySelector<HTMLElement>("[data-curtain-content]");
 
       const startWipe = () => {
-        onReveal?.()
-        const tl = gsap.timeline()
+        onReveal?.();
+        const tl = gsap.timeline();
         if (content) {
-          tl.to(content, { autoAlpha: 0, duration: fadeDuration, ease: "power2.in" }, 0)
+          tl.to(
+            content,
+            { autoAlpha: 0, duration: fadeDuration, ease: "power2.in" },
+            0,
+          );
         }
         tl.to(
           bandEls,
@@ -82,52 +88,81 @@ export function CurtainReveal({
             stagger,
           },
           content ? fadeDuration + 0.1 : 0,
-        )
-        if (onComplete) tl.add(onComplete)
-      }
+        );
+        if (onComplete) tl.add(onComplete);
+      };
 
       if (progress !== undefined) {
-        const fill = root.querySelector<HTMLElement>("[data-curtain-progress-fill]")
-        const odometer = root.querySelector<HTMLElement>("[data-odometer]")
+        const fill = root.querySelector<HTMLElement>(
+          "[data-curtain-progress-fill]",
+        );
+        const odometer = root.querySelector<HTMLElement>("[data-odometer]");
 
         if (fill) {
-          const state = { v: 0 }
-          const total = progress / 1000
-          const settle = 0.42
-          const main = total - settle
-          const seg = main / 3
-          const setFillProgress = gsap.quickSetter(fill, "scaleX")
+          const state = { v: 0 };
+          const total = progress / 1000;
+          const settle = 0.42;
+          const main = total - settle;
+          const seg = main / 3;
+          const setFillProgress = gsap.quickSetter(fill, "scaleX");
 
           const write = () => {
-            setFillProgress(state.v)
-            odometerRef.current?.set(Math.round(state.v * 100))
-          }
+            setFillProgress(state.v);
+            odometerRef.current?.set(Math.round(state.v * 100));
+          };
 
-          const tl = gsap.timeline()
+          const tl = gsap.timeline();
           tl.fromTo(
             odometer,
             { autoAlpha: 0, y: 6 },
             { autoAlpha: 1, y: 0, duration: 0.5, ease: "power2.out" },
             0.15,
           )
-            .to(state, { v: 1 / 3, duration: seg, ease: "power2.inOut", onUpdate: write })
-            .to(state, { v: 2 / 3, duration: seg, ease: "power2.inOut", onUpdate: write })
-            .to(state, { v: 1, duration: seg, ease: "power2.inOut", onUpdate: write })
-            .to(fill, { scaleX: 1.015, duration: 0.12, ease: "power2.out" }, ">-0.05")
+            .to(state, {
+              v: 1 / 3,
+              duration: seg,
+              ease: "power2.inOut",
+              onUpdate: write,
+            })
+            .to(state, {
+              v: 2 / 3,
+              duration: seg,
+              ease: "power2.inOut",
+              onUpdate: write,
+            })
+            .to(state, {
+              v: 1,
+              duration: seg,
+              ease: "power2.inOut",
+              onUpdate: write,
+            })
+            .to(
+              fill,
+              { scaleX: 1.015, duration: 0.12, ease: "power2.out" },
+              ">-0.05",
+            )
             .to(fill, { scaleX: 1, duration: 0.3, ease: "power2.inOut" })
-            .to(fill, { opacity: 0.55, duration: 0.15, ease: "power2.in" }, ">-0.1")
-            .to(fill, { opacity: 1, duration: 0.15, ease: "power2.out" }, ">-0.05")
-            .add(startWipe, ">")
-          return
+            .to(
+              fill,
+              { opacity: 0.55, duration: 0.15, ease: "power2.in" },
+              ">-0.1",
+            )
+            .to(
+              fill,
+              { opacity: 1, duration: 0.15, ease: "power2.out" },
+              ">-0.05",
+            )
+            .add(startWipe, ">");
+          return;
         }
-        startWipe()
-        return
+        startWipe();
+        return;
       }
 
-      if (play) startWipe()
+      if (play) startWipe();
     },
     { dependencies: [play, progress] },
-  )
+  );
 
   return (
     <div
@@ -136,10 +171,17 @@ export function CurtainReveal({
       className={cn("pointer-events-none fixed inset-0 z-50 flex", className)}
     >
       {Array.from({ length: panels }).map((_, i) => (
-        <div key={i} data-curtain-panel className="h-full flex-1 bg-black will-change-transform" />
+        <div
+          key={i}
+          data-curtain-panel
+          className="h-full flex-1 bg-black will-change-transform"
+        />
       ))}
       {(children || progress !== undefined) && (
-        <div data-curtain-content className="absolute inset-0 flex items-center justify-center">
+        <div
+          data-curtain-content
+          className="absolute inset-0 flex items-center justify-center"
+        >
           <div className="flex w-fit flex-col items-center">
             {children}
             {progress !== undefined && (
@@ -160,5 +202,5 @@ export function CurtainReveal({
         </div>
       )}
     </div>
-  )
+  );
 }

@@ -1,25 +1,25 @@
-"use client"
+"use client";
 
-import { useRef, type ComponentProps } from "react"
-import Image from "next/image"
-import gsap from "gsap"
-import { ScrollTrigger } from "gsap/ScrollTrigger"
-import { useGSAP } from "@gsap/react"
-import { cn } from "@/lib/utils"
+import { useRef, type ComponentProps } from "react";
+import Image from "next/image";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
+import { cn } from "@/lib/utils";
 
-gsap.registerPlugin(ScrollTrigger, useGSAP)
+gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 interface ImageRevealProps extends Omit<ComponentProps<typeof Image>, "fill"> {
-  src: string
-  alt: string
-  className?: string
+  src: string;
+  alt: string;
+  className?: string;
   /** Parallax strength: the image drifts vertically while in view (0 = none). */
-  parallax?: number
+  parallax?: number;
   /** How the image fits its frame: "cover" crops to fill, "contain" shows it whole. */
-  objectFit?: "cover" | "contain"
-  start?: string
+  objectFit?: "cover" | "contain";
+  start?: string;
   /** Lift the grayscale filter to full color when the parent `group` is hovered. */
-  colorOnHover?: boolean
+  colorOnHover?: boolean;
 }
 
 /**
@@ -39,16 +39,16 @@ export function ImageReveal({
   colorOnHover = false,
   ...rest
 }: ImageRevealProps) {
-  const ref = useRef<HTMLDivElement>(null)
-  const imgRef = useRef<HTMLImageElement>(null)
-  const wrapRef = useRef<HTMLDivElement>(null)
+  const ref = useRef<HTMLDivElement>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
+  const wrapRef = useRef<HTMLDivElement>(null);
 
   useGSAP(
     () => {
-      const scope = ref.current
-      const img = imgRef.current
+      const scope = ref.current;
+      const img = imgRef.current;
       if (!scope || !img) {
-        return
+        return;
       }
 
       gsap
@@ -62,12 +62,21 @@ export function ImageReveal({
         .fromTo(
           scope,
           { clipPath: "inset(100% 0% 0% 0%)" },
-          { clipPath: "inset(0% 0% 0% 0%)", duration: 1.1, ease: "power4.inOut" },
+          {
+            clipPath: "inset(0% 0% 0% 0%)",
+            duration: 1.1,
+            ease: "power4.inOut",
+          },
         )
-        .fromTo(img, { scale: 1.15 }, { scale: 1, duration: 1.4, ease: "power3.out" }, 0)
+        .fromTo(
+          img,
+          { scale: 1.15 },
+          { scale: 1, duration: 1.4, ease: "power3.out" },
+          0,
+        );
 
       if (parallax > 0) {
-        const wrap = wrapRef.current
+        const wrap = wrapRef.current;
         if (wrap) {
           gsap.fromTo(
             wrap,
@@ -82,19 +91,29 @@ export function ImageReveal({
                 scrub: true,
               },
             },
-          )
+          );
         }
       }
     },
     { scope: ref },
-  )
+  );
 
   return (
-    <div ref={ref} data-image-reveal className={cn("relative overflow-hidden", className)}>
-      <div data-image-viewport className="absolute inset-0 overflow-hidden">
+    <div
+      ref={ref}
+      data-image-reveal
+      className={cn("relative overflow-hidden", className)}
+    >
+      <div
+        data-image-viewport
+        className="absolute inset-0 overflow-hidden"
+      >
         <div
           ref={wrapRef}
-          className={cn("absolute inset-x-0 top-0", parallax === 0 && "inset-0")}
+          className={cn(
+            "absolute inset-x-0 top-0",
+            parallax === 0 && "inset-0",
+          )}
           style={parallax > 0 ? { height: "135%" } : undefined}
         >
           <Image
@@ -105,12 +124,13 @@ export function ImageReveal({
             sizes="(max-width: 768px) 100vw, 50vw"
             className={cn(
               `object-${objectFit} grayscale`,
-              colorOnHover && "transition-[filter] duration-700 ease-out group-hover:grayscale-0",
+              colorOnHover &&
+                "transition-[filter] duration-700 ease-out group-hover:grayscale-0",
             )}
             {...rest}
           />
         </div>
       </div>
     </div>
-  )
+  );
 }

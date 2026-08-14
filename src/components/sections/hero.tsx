@@ -1,19 +1,19 @@
-"use client"
+"use client";
 
-import { useRef } from "react"
-import { ArrowUpRight } from "@phosphor-icons/react"
-import gsap from "gsap"
-import { ScrollTrigger } from "gsap/ScrollTrigger"
-import { useGSAP } from "@gsap/react"
-import { Navbar } from "@/components/sections/navbar"
-import { FlipLink } from "@/components/ui/flip-link"
-import { hero } from "@/lib/data"
+import { useRef } from "react";
+import { ArrowUpRight } from "@phosphor-icons/react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
+import { Navbar } from "@/components/sections/navbar";
+import { FlipLink } from "@/components/ui/flip-link";
+import { hero } from "@/lib/data";
 
-gsap.registerPlugin(ScrollTrigger, useGSAP)
+gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 const actionIcons = {
   "arrow-up-right": ArrowUpRight,
-}
+};
 
 /**
  * Gap between the preloader wipe starting and the hero's first beat. The
@@ -21,36 +21,43 @@ const actionIcons = {
  * / 0.08 stagger) fully clears ~1.8s after wipe-start. The timeline begins
  * just as the last bands leave, so every beat below plays on an open screen.
  */
-const ENTRANCE_DELAY_S = 1.65
+const ENTRANCE_DELAY_S = 1.65;
 
 export function Hero({
   isRevealed,
   entranceDelay = ENTRANCE_DELAY_S,
 }: {
-  isRevealed: boolean
-  entranceDelay?: number
+  isRevealed: boolean;
+  entranceDelay?: number;
 }) {
-  const rootRef = useRef<HTMLDivElement>(null)
+  const rootRef = useRef<HTMLDivElement>(null);
 
   useGSAP(
     () => {
-      if (!isRevealed) return
+      if (!isRevealed) return;
 
-      gsap.set("[data-hero-line]", { willChange: "transform" })
-      gsap.set(["[data-hero-rail-content]", "[data-hero-rail-line]", "[data-scroll-arrow]"], {
-        willChange: "transform",
-      })
-      gsap.set("[data-hero-action]", { willChange: "transform,opacity" })
+      gsap.set("[data-hero-line]", { willChange: "transform" });
+      gsap.set(
+        [
+          "[data-hero-rail-content]",
+          "[data-hero-rail-line]",
+          "[data-scroll-arrow]",
+        ],
+        {
+          willChange: "transform",
+        },
+      );
+      gsap.set("[data-hero-action]", { willChange: "transform,opacity" });
       gsap.set("[data-scroll-line]", {
         scaleY: 0,
         transformOrigin: "50% 0%",
         transformBox: "fill-box",
         willChange: "transform",
-      })
+      });
       gsap.set("[data-scroll-chevron]", {
         autoAlpha: 0,
         willChange: "transform,opacity",
-      })
+      });
 
       const timeline = gsap.timeline({
         delay: entranceDelay,
@@ -67,14 +74,22 @@ export function Hero({
               "[data-hero-action]",
             ],
             { clearProps: "willChange" },
-          )
+          );
         },
-      })
+      });
 
       timeline
-        .from("[data-hero-greeting]", { y: 10, autoAlpha: 0, duration: 0.55 }, 0.1)
+        .from(
+          "[data-hero-greeting]",
+          { y: 10, autoAlpha: 0, duration: 0.55 },
+          0.1,
+        )
         .from("[data-hero-mono]", { y: -12, autoAlpha: 0, duration: 0.55 }, 0.1)
-        .from("[data-hero-menu-toggle]", { y: -10, autoAlpha: 0, duration: 0.5 }, 0.22)
+        .from(
+          "[data-hero-menu-toggle]",
+          { y: -10, autoAlpha: 0, duration: 0.5 },
+          0.22,
+        )
         .from(
           "[data-hero-rail-content]",
           { y: 10, autoAlpha: 0, duration: 0.5, ease: "power3.out" },
@@ -82,7 +97,12 @@ export function Hero({
         )
         .from(
           "[data-hero-rail-line]",
-          { scaleY: 0, transformOrigin: "top center", duration: 0.7, ease: "power3.out" },
+          {
+            scaleY: 0,
+            transformOrigin: "top center",
+            duration: 0.7,
+            ease: "power3.out",
+          },
           0.26,
         )
         .from(
@@ -95,9 +115,21 @@ export function Hero({
           { yPercent: 110, autoAlpha: 0, duration: 1.05, ease: "expo.out" },
           0.48,
         )
-        .from("[data-hero-action]", { y: 18, autoAlpha: 0, duration: 0.7, stagger: 0.1 }, 1.0)
-        .to("[data-scroll-line]", { scaleY: 1, duration: 0.9, ease: "power3.inOut" }, 1.3)
-        .to("[data-scroll-chevron]", { autoAlpha: 1, y: 0, duration: 0.4, ease: "power2.out" }, 1.8)
+        .from(
+          "[data-hero-action]",
+          { y: 18, autoAlpha: 0, duration: 0.7, stagger: 0.1 },
+          1.0,
+        )
+        .to(
+          "[data-scroll-line]",
+          { scaleY: 1, duration: 0.9, ease: "power3.inOut" },
+          1.3,
+        )
+        .to(
+          "[data-scroll-chevron]",
+          { autoAlpha: 1, y: 0, duration: 0.4, ease: "power2.out" },
+          1.8,
+        );
 
       const parallaxTargets = [
         "[data-hero-title-parallax]",
@@ -105,12 +137,12 @@ export function Hero({
         "[data-hero-actions-parallax]",
         "[data-hero-rail-parallax]",
         "[data-hero-scroll]",
-      ]
-      const parallaxMedia = gsap.matchMedia()
+      ];
+      const parallaxMedia = gsap.matchMedia();
 
       parallaxMedia.add("(prefers-reduced-motion: no-preference)", () => {
-        const desktop = () => window.matchMedia("(min-width: 1024px)").matches
-        const tablet = () => window.matchMedia("(min-width: 640px)").matches
+        const desktop = () => window.matchMedia("(min-width: 1024px)").matches;
+        const tablet = () => window.matchMedia("(min-width: 640px)").matches;
 
         gsap.to("[data-scroll-arrow]", {
           y: -10,
@@ -119,13 +151,14 @@ export function Hero({
           yoyo: true,
           repeat: -1,
           delay: entranceDelay + 2.15,
-        })
+        });
 
         const parallaxTimeline = gsap.timeline({
           scrollTrigger: {
             trigger: rootRef.current,
             start: "top top",
-            end: () => Math.max(1, rootRef.current?.offsetHeight ?? window.innerHeight),
+            end: () =>
+              Math.max(1, rootRef.current?.offsetHeight ?? window.innerHeight),
             scrub: 0.7,
             invalidateOnRefresh: true,
             onToggle: (self) =>
@@ -133,7 +166,7 @@ export function Hero({
                 willChange: self.isActive ? "transform,opacity" : "auto",
               }),
           },
-        })
+        });
 
         parallaxTimeline
           .to(
@@ -188,17 +221,17 @@ export function Hero({
               ease: "none",
             },
             0,
-          )
-      })
+          );
+      });
 
-      return () => parallaxMedia.revert()
+      return () => parallaxMedia.revert();
     },
     {
       scope: rootRef,
       dependencies: [isRevealed],
       revertOnUpdate: true,
     },
-  )
+  );
 
   return (
     <div
@@ -216,10 +249,22 @@ export function Hero({
           aria-hidden="true"
           className="absolute top-[40.5%] left-[clamp(2.25rem,2.65vw,2.75rem)] hidden justify-center lg:flex"
         >
-          <div data-hero-rail-parallax className="overflow-hidden">
-            <div data-hero-rail-content className="flex flex-col items-center gap-4">
-              <span data-hero-rail-dot className="size-1.5 bg-black" />
-              <span data-hero-rail-line className="h-14 w-px origin-top bg-black/50" />
+          <div
+            data-hero-rail-parallax
+            className="overflow-hidden"
+          >
+            <div
+              data-hero-rail-content
+              className="flex flex-col items-center gap-4"
+            >
+              <span
+                data-hero-rail-dot
+                className="size-1.5 bg-black"
+              />
+              <span
+                data-hero-rail-line
+                className="h-14 w-px origin-top bg-black/50"
+              />
               <span
                 data-hero-rail-label
                 className="text-[0.625rem] font-medium tracking-[0.22em] text-black/60 uppercase [writing-mode:vertical-rl]"
@@ -231,22 +276,32 @@ export function Hero({
         </div>
 
         <div className="relative z-10 mx-auto flex w-full max-w-[75rem] -translate-y-[0.6vh] flex-col items-center">
-          <div data-hero-greeting-parallax className="mb-[clamp(0.75rem,2.5vh,1.5rem)]">
+          <div
+            data-hero-greeting-parallax
+            className="mb-[clamp(0.75rem,2.5vh,1.5rem)]"
+          >
             <p
               data-hero-greeting
               className="text-[1.0625rem] font-normal tracking-[0.18em] text-black/70"
             >
-              Hi there, I am <strong className="text-[1.125rem] font-medium">Himel</strong>
+              Hi there, I am{" "}
+              <strong className="text-[1.125rem] font-medium">Himel</strong>
             </p>
           </div>
 
-          <div data-hero-title-parallax className="w-full">
+          <div
+            data-hero-title-parallax
+            className="w-full"
+          >
             <h1
               id="hero-heading"
               className="hero-title w-full text-center text-[clamp(2.625rem,14.5vw,7.25rem)] leading-[0.82] font-semibold tracking-[-0.03em] lg:text-[clamp(7.25rem,11.5vw,11.75rem)]"
             >
               <span className="block overflow-hidden pb-[0.03em]">
-                <span data-hero-line="filled" className="block whitespace-nowrap">
+                <span
+                  data-hero-line="filled"
+                  className="block whitespace-nowrap"
+                >
                   {hero.filledTitle}
                 </span>
               </span>
@@ -266,10 +321,13 @@ export function Hero({
             className="mt-[clamp(2rem,5.5vh,3.25rem)] flex w-full max-w-[18rem] flex-col items-stretch justify-center gap-4 sm:max-w-none sm:flex-row sm:items-center sm:gap-6"
           >
             {hero.actions.map((action) => {
-              const Icon = action.icon ? actionIcons[action.icon] : undefined
+              const Icon = action.icon ? actionIcons[action.icon] : undefined;
 
               return (
-                <div key={action.href} data-hero-action>
+                <div
+                  key={action.href}
+                  data-hero-action
+                >
                   <FlipLink
                     href={action.href}
                     label={action.label}
@@ -277,12 +335,16 @@ export function Hero({
                     variant={action.variant}
                   />
                 </div>
-              )
+              );
             })}
           </div>
         </div>
 
-        <div data-hero-scroll aria-hidden="true" className="absolute left-1/2 -translate-x-1/2">
+        <div
+          data-hero-scroll
+          aria-hidden="true"
+          className="absolute left-1/2 -translate-x-1/2"
+        >
           <svg
             data-scroll-arrow
             aria-hidden="true"
@@ -313,5 +375,5 @@ export function Hero({
         </div>
       </section>
     </div>
-  )
+  );
 }

@@ -1,30 +1,30 @@
-"use client"
+"use client";
 
-import { useRef } from "react"
-import { ArrowUpRight } from "@phosphor-icons/react"
-import gsap from "gsap"
-import { ScrollTrigger } from "gsap/ScrollTrigger"
-import { useGSAP } from "@gsap/react"
-import { navigation, profile, socials } from "@/lib/data"
+import { useRef } from "react";
+import { ArrowUpRight } from "@phosphor-icons/react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
+import { navigation, profile, socials } from "@/lib/data";
 
-gsap.registerPlugin(ScrollTrigger, useGSAP)
+gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 /**
  * The closing frame of the portfolio: the contact panel slides upward over a
  * footer layer, while the oversized brand keeps its own masked reveal.
  */
 export function SiteFooter() {
-  const rootRef = useRef<HTMLDivElement>(null)
-  const contactRef = useRef<HTMLElement>(null)
-  const brandStageRef = useRef<HTMLDivElement>(null)
-  const brandRef = useRef<HTMLSpanElement>(null)
+  const rootRef = useRef<HTMLDivElement>(null);
+  const contactRef = useRef<HTMLElement>(null);
+  const brandStageRef = useRef<HTMLDivElement>(null);
+  const brandRef = useRef<HTMLSpanElement>(null);
 
   useGSAP(
     () => {
-      const contact = contactRef.current
-      const brand = brandRef.current
-      const stage = brandStageRef.current
-      if (!contact || !brand || !stage) return
+      const contact = contactRef.current;
+      const brand = brandRef.current;
+      const stage = brandStageRef.current;
+      if (!contact || !brand || !stage) return;
 
       gsap.to(contact, {
         y: () => -(stage.offsetHeight * 0.25),
@@ -39,13 +39,13 @@ export function SiteFooter() {
               willChange: self.isActive ? "transform" : "auto",
             }),
         },
-      })
+      });
 
       gsap.set(brand, {
         yPercent: 112,
         autoAlpha: 0,
         willChange: "transform, opacity",
-      })
+      });
 
       gsap.to(brand, {
         yPercent: 0,
@@ -58,10 +58,10 @@ export function SiteFooter() {
           once: true,
         },
         onComplete: () => gsap.set(brand, { clearProps: "willChange" }),
-      })
+      });
     },
     { scope: rootRef },
-  )
+  );
 
   return (
     <div
@@ -107,7 +107,10 @@ export function SiteFooter() {
               </FooterColumn>
 
               <FooterColumn label="Navigate">
-                <nav aria-label="Footer navigation" data-footer-nav>
+                <nav
+                  aria-label="Footer navigation"
+                  data-footer-nav
+                >
                   <ul className="space-y-2">
                     {navigation.map((item) => (
                       <li key={item.href}>
@@ -127,13 +130,19 @@ export function SiteFooter() {
                 </nav>
               </FooterColumn>
 
-              <FooterColumn label="Elsewhere" className="col-span-2 sm:col-span-1">
+              <FooterColumn
+                label="Elsewhere"
+                className="col-span-2 sm:col-span-1"
+              >
                 <ul
                   data-footer-socials
                   className="flex flex-wrap justify-start gap-x-4 gap-y-1 sm:flex-nowrap sm:justify-end"
                 >
                   {socials.map((social) => (
-                    <li key={social.label} className="whitespace-nowrap">
+                    <li
+                      key={social.label}
+                      className="whitespace-nowrap"
+                    >
                       {social.href ? (
                         <a
                           href={social.href}
@@ -173,7 +182,7 @@ export function SiteFooter() {
         </div>
       </footer>
     </div>
-  )
+  );
 }
 
 function FooterColumn({
@@ -181,9 +190,9 @@ function FooterColumn({
   children,
   className = "",
 }: {
-  label: string
-  children: React.ReactNode
-  className?: string
+  label: string;
+  children: React.ReactNode;
+  className?: string;
 }) {
   return (
     <div className={className}>
@@ -192,5 +201,5 @@ function FooterColumn({
       </p>
       <div className="font-sans text-sm leading-[1.55]">{children}</div>
     </div>
-  )
+  );
 }
