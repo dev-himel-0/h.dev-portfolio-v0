@@ -42,6 +42,16 @@ const visibleDigit = (strip: import("@playwright/test").Locator) =>
     )
   })
 
+const translateY = (element: import("@playwright/test").Locator) =>
+  element.evaluate((node) => {
+    const transform = getComputedStyle(node).transform
+    if (transform === "none") return 0
+    return new DOMMatrixReadOnly(transform).m42
+  })
+
+const opacityOf = (element: import("@playwright/test").Locator) =>
+  element.evaluate((node) => Number.parseFloat(getComputedStyle(node).opacity))
+
 test.describe("home", () => {
   test("loads with a 200 response", async ({ page }) => {
     const response = await page.goto("/")
@@ -140,6 +150,53 @@ test.describe("home", () => {
     for (const action of hero.actions) {
       await expect(page.getByRole("link", { name: action.label })).toBeVisible()
     }
+  })
+
+  test("choreographs the hero layers into a cinematic scroll exit", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" })
+    await page.goto("/")
+    await expect(page.locator("[data-curtain-content]")).toBeHidden({
+      timeout: 15_000,
+    })
+
+    const title = page.locator("[data-hero-title-parallax]")
+    const greeting = page.locator("[data-hero-greeting-parallax]")
+    const action = page.locator("[data-hero-actions-parallax]")
+    const scrollCue = page.locator("[data-hero-scroll]")
+    const initial = await translateY(title)
+    const initialAction = await translateY(action)
+    const initialCueOpacity = await opacityOf(scrollCue)
+
+    await page.evaluate(() =>
+      window.scrollTo({ top: Math.round(window.innerHeight * 0.5), behavior: "instant" }),
+    )
+    await expect
+      .poll(() => translateY(title), "hero title moves upward during scroll")
+      .toBeLessThan(initial - 2)
+    await expect
+      .poll(() => translateY(greeting), "hero greeting moves upward at a slower rate")
+      .toBeLessThan(-1)
+    await expect
+      .poll(() => translateY(action), "hero action moves down against the title")
+      .toBeGreaterThan(initialAction + 1)
+    await expect
+      .poll(() => opacityOf(scrollCue), "scroll cue exits early")
+      .toBeLessThan(initialCueOpacity - 0.1)
+  })
+
+  test("keeps the hero title static with reduced motion enabled", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" })
+    await page.goto("/")
+
+    const title = page.locator("[data-hero-title-parallax]")
+    const initial = await translateY(title)
+
+    await page.evaluate(() =>
+      window.scrollTo({ top: Math.round(window.innerHeight * 0.5), behavior: "instant" }),
+    )
+    await page.waitForTimeout(100)
+
+    expect(await translateY(title)).toBeCloseTo(initial, 0)
   })
 
   test("scroll arrow fades and slides up with page scroll, disappearing at the bottom", async ({
