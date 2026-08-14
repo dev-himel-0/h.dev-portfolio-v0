@@ -257,11 +257,23 @@ function ProcessStep({
         data-process-node
         className={cn(
           "pointer-events-none absolute bottom-[-0.6875rem] z-[2] hidden size-8 rounded-full border-[0.3125rem] border-black/10 bg-white min-[810px]:block",
-          last || railOnLeft ? "left-[-0.6875rem]" : "left-1/2 -translate-x-1/2",
+          railOnLeft ? "left-[-0.6875rem]" : "left-1/2 -translate-x-1/2",
         )}
       >
         <span data-process-node-fill className="absolute inset-1 rounded-full bg-black opacity-0" />
       </span>
+      {last && (
+        <span
+          aria-hidden="true"
+          data-process-node
+          className={cn(
+            "pointer-events-none absolute bottom-[-0.6875rem] z-[2] hidden size-8 rounded-full border-[0.3125rem] border-black/10 bg-white min-[810px]:block",
+            railOnLeft ? "left-1/2 -translate-x-1/2" : "left-[-0.6875rem]",
+          )}
+        >
+          <span data-process-node-fill className="absolute inset-1 rounded-full bg-black opacity-0" />
+        </span>
+      )}
 
       <span
         aria-hidden="true"
