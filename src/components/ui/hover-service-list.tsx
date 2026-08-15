@@ -1,57 +1,29 @@
 "use client";
 
-import { useRef, useState, type PointerEvent } from "react";
+import { useRef, useState } from "react";
 import Image from "next/image";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
-import {
-  AnimatePresence,
-  motion,
-  useMotionValue,
-  useSpring,
-  useTransform,
-  useVelocity,
-} from "motion/react";
 import { serviceIconSources, servicesSection, type Service } from "@/lib/data";
 import { cn } from "@/lib/utils";
+import { ImageTrail } from "@/components/ui/image-trail";
 
 interface HoverServiceListProps {
   services: Service[];
 }
 
 /**
- * Editorial service selector adapted from the hover-testimonial reference:
- * rows drive the detail panel while a service image follows the pointer on
- * fine pointers. Pointer coordinates stay outside React state so movement
- * never re-renders the section.
+ * Editorial service selector: rows drive the detail panel while the
+ * capabilities list creates a contained image trail on fine pointers.
  */
 export function HoverServiceList({ services }: HoverServiceListProps) {
   const rootRef = useRef<HTMLDivElement>(null);
-  const listRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [pointerVisible, setPointerVisible] = useState(false);
-  const pointerX = useMotionValue(0);
-  const pointerY = useMotionValue(0);
-  const followX = useSpring(pointerX, {
-    stiffness: 120,
-    damping: 18,
-    mass: 0.7,
-  });
-  const followY = useSpring(pointerY, {
-    stiffness: 120,
-    damping: 18,
-    mass: 0.7,
-  });
-  const horizontalVelocity = useVelocity(followX);
-  const tiltTarget = useTransform(horizontalVelocity, (value) =>
-    Math.max(-10, Math.min(10, value / 90)),
-  );
-  const cardRotation = useSpring(tiltTarget, {
-    stiffness: 160,
-    damping: 22,
-    mass: 0.5,
-  });
   const activeService = services[activeIndex] ?? services[0];
+  const trailImages = services.map(({ title, image }) => ({
+    src: image,
+    alt: `${title} preview`,
+  }));
 
   useGSAP(
     () => {
@@ -110,37 +82,6 @@ export function HoverServiceList({ services }: HoverServiceListProps) {
     setActiveIndex(index);
   };
 
-  const updatePointerPosition = (event: PointerEvent<HTMLDivElement>) => {
-    if (
-      !window.matchMedia("(hover: hover) and (pointer: fine)").matches ||
-      !listRef.current
-    ) {
-      return;
-    }
-
-    const rect = listRef.current.getBoundingClientRect();
-    pointerX.set(event.clientX - rect.left);
-    pointerY.set(event.clientY - rect.top);
-  };
-
-  const handlePointerEnter = (event: PointerEvent<HTMLDivElement>) => {
-    if (
-      !window.matchMedia("(hover: hover) and (pointer: fine)").matches ||
-      !listRef.current
-    ) {
-      return;
-    }
-
-    const rect = listRef.current.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
-    followX.jump?.(x);
-    followY.jump?.(y);
-    pointerX.set(x);
-    pointerY.set(y);
-    setPointerVisible(true);
-  };
-
   return (
     <div
       ref={rootRef}
@@ -164,126 +105,91 @@ export function HoverServiceList({ services }: HoverServiceListProps) {
       </div>
 
       <div
-        ref={listRef}
         data-service-list
         className="relative pt-2"
-        onPointerMove={updatePointerPosition}
-        onPointerEnter={handlePointerEnter}
-        onPointerLeave={() => setPointerVisible(false)}
       >
-        <motion.div
-          data-service-pointer-card
-          aria-hidden="true"
-          className="pointer-events-none absolute top-0 left-0 z-10 hidden will-change-transform lg:block"
-          style={{ x: followX, y: followY }}
-        >
-          <motion.div
-            className="relative -mt-[119px] -ml-[95px] h-[238px] w-[190px] overflow-hidden bg-black/10"
-            style={{ rotate: cardRotation }}
-            initial={false}
-            animate={{
-              scale: pointerVisible ? 1 : 0.72,
-              opacity: pointerVisible ? 1 : 0,
-            }}
-            transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <AnimatePresence
-              initial={false}
-              mode="wait"
-            >
-              <motion.div
-                key={activeService.title}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.32, ease: "easeOut" }}
-                className="absolute inset-0 z-0"
-              >
-                <Image
-                  src={activeService.image}
-                  alt={`${activeService.title} preview`}
-                  fill
-                  sizes="190px"
-                  data-service-pointer-image
-                  data-image-source={activeService.image}
-                  draggable={false}
-                  className="object-cover contrast-105 grayscale"
-                />
-              </motion.div>
-            </AnimatePresence>
-          </motion.div>
-        </motion.div>
-
         {services.map((service, index) => {
           const active = index === activeIndex;
           const icon = serviceIconSources[service.icon];
 
           return (
             <div key={service.title}>
-              <button
-                type="button"
-                data-service-row
-                aria-controls="services-detail"
-                aria-pressed={active}
-                onClick={() => selectService(index)}
-                onFocus={() => selectService(index)}
-                onPointerEnter={() => selectService(index)}
-                className={cn(
-                  "group grid h-20 w-full grid-cols-[2.125rem_minmax(0,1fr)_auto] items-center gap-4 border-0 bg-transparent p-0 text-left outline-none max-[319px]:gap-3 lg:h-24",
-                  "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-black",
-                )}
+              <ImageTrail
+                data-service-row-trail
+                images={trailImages}
+                threshold={48}
+                minDelay={55}
+                duration={900}
+                maxItems={5}
+                rotationRange={12}
+                overlayClassName="hidden lg:block"
+                className="relative"
               >
-                <span
-                  data-service-index
-                  aria-hidden="true"
+                <button
+                  type="button"
+                  data-service-row
+                  aria-controls="services-detail"
+                  aria-pressed={active}
+                  onClick={() => selectService(index)}
+                  onFocus={() => selectService(index)}
+                  onPointerEnter={() => selectService(index)}
                   className={cn(
-                    "relative inline-flex h-4 items-center font-sans text-[0.6875rem] tracking-[0.06em] text-black/40 transition-colors duration-300",
-                    active && "text-black",
+                    "group grid h-20 w-full grid-cols-[2.125rem_minmax(0,1fr)_auto] items-center gap-4 border-0 bg-transparent p-0 text-left outline-none max-[319px]:gap-3 lg:h-24",
+                    "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-black",
                   )}
                 >
                   <span
+                    data-service-index
+                    aria-hidden="true"
                     className={cn(
-                      "block size-2 bg-black opacity-0 transition-opacity duration-300",
-                      active && "opacity-100",
-                    )}
-                  />
-                  <span
-                    className={cn(
-                      "absolute left-0 transition-opacity duration-300",
-                      active && "opacity-0",
+                      "relative inline-flex h-4 items-center font-sans text-[0.6875rem] tracking-[0.06em] text-black/40 transition-colors duration-300",
+                      active && "text-black",
                     )}
                   >
-                    {String(index + 1).padStart(2, "0")}
+                    <span
+                      className={cn(
+                        "block size-2 bg-black opacity-0 transition-opacity duration-300",
+                        active && "opacity-100",
+                      )}
+                    />
+                    <span
+                      className={cn(
+                        "absolute left-0 transition-opacity duration-300",
+                        active && "opacity-0",
+                      )}
+                    >
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
                   </span>
-                </span>
-                <span
-                  data-service-title
-                  className={cn(
-                    "block min-w-0 font-heading text-[clamp(1.45rem,3.25vw,2.5rem)] leading-[1.1] font-medium tracking-[-0.03em] text-black transition-colors duration-300 max-[319px]:text-[clamp(1.2rem,7vw,1.45rem)]",
-                    !active && "text-black/85",
-                  )}
-                >
-                  {service.title}
-                </span>
-                <span
-                  aria-hidden="true"
-                  className={cn(
-                    "flex size-10 shrink-0 items-center justify-end text-black/40 transition-colors duration-300",
-                    active && "text-black",
-                  )}
-                >
-                  <Image
-                    data-service-icon
-                    data-image-source={icon.src}
-                    src={icon.src}
-                    alt={icon.alt}
-                    width={40}
-                    height={40}
-                    draggable={false}
-                    className="size-8 object-contain sm:size-9 lg:size-10"
-                  />
-                </span>
-              </button>
+                  <span
+                    data-service-title
+                    className={cn(
+                      "block min-w-0 font-heading text-[clamp(1.45rem,3.25vw,2.5rem)] leading-[1.1] font-medium tracking-[-0.03em] text-black transition-colors duration-300 max-[319px]:text-[clamp(1.2rem,7vw,1.45rem)]",
+                      !active && "text-black/85",
+                    )}
+                  >
+                    {service.title}
+                  </span>
+                  <span
+                    aria-hidden="true"
+                    className={cn(
+                      "flex size-10 shrink-0 items-center justify-end text-black/40 transition-colors duration-300",
+                      active && "text-black",
+                    )}
+                  >
+                    <Image
+                      data-service-icon
+                      data-image-source={icon.src}
+                      src={icon.src}
+                      alt={icon.alt}
+                      width={40}
+                      height={40}
+                      draggable={false}
+                      className="size-8 object-contain sm:size-9 lg:size-10"
+                    />
+                  </span>
+                </button>
+              </ImageTrail>
               <div
                 aria-hidden="true"
                 className="h-px bg-black/10"

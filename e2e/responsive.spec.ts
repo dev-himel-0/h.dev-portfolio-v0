@@ -25,7 +25,7 @@ test.describe("responsive layout", () => {
             if (element.closest(".smg")) return false;
             if (element.closest("[data-circle-cursor]")) return false;
             if (element.closest("[data-stack-icon]")) return false;
-            if (element.closest("[data-service-pointer-card]")) return false;
+            if (element.closest("[data-image-trail-item]")) return false;
             if (element.closest("[data-image-reveal]")) return false;
             const style = getComputedStyle(element);
             return style.display !== "none" && style.visibility !== "hidden";

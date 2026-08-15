@@ -413,7 +413,7 @@ test.describe("home", () => {
     await expect.poll(opacity, "a small scroll keeps the bar hidden").toBe(0);
   });
 
-  test("navbar background fades in after the scroll threshold as a sharp full-bleed frosted bar", async ({
+  test("navbar background fades in after the scroll threshold as sharp full-bleed transparent glass", async ({
     page,
   }) => {
     await page.goto("/");
@@ -433,7 +433,8 @@ test.describe("home", () => {
       .poll(opacity, "background fades to full opacity")
       .toBeCloseTo(1, 1);
 
-    // Bold & sharp: edge-to-edge, square corners, no border, blur.
+    // Match the reference glass treatment: edge-to-edge, square corners,
+    // transparent surface, no border, and a restrained 10px blur.
     const viewport = page.viewportSize();
     const box = await bar.boundingBox();
     expect(box).not.toBeNull();
@@ -448,6 +449,11 @@ test.describe("home", () => {
         (element) => getComputedStyle(element).borderBottomWidth,
       ),
     ).toBe("0px");
+    expect(
+      await bar.evaluate(
+        (element) => getComputedStyle(element).backgroundColor,
+      ),
+    ).toBe("rgba(0, 0, 0, 0)");
 
     const backdropFilter = () =>
       bar.evaluate((element) => getComputedStyle(element).backdropFilter);
@@ -456,7 +462,7 @@ test.describe("home", () => {
         backdropFilter,
         "bar uses a GPU backdrop blur (no SVG displacement)",
       )
-      .toContain("blur(");
+      .toBe("blur(10px)");
     const filterValue = await bar.evaluate(
       (element) => getComputedStyle(element).backdropFilter,
     );
@@ -1008,7 +1014,7 @@ test.describe("home", () => {
       page.locator("[data-process-media] [data-image-fade]"),
     ).toHaveCount(0);
     await expect(
-      page.locator("[data-service-pointer-card] .image-white-fade"),
+      page.locator("[data-image-trail-overlay] .image-white-fade"),
     ).toHaveCount(0);
   });
 
@@ -1324,7 +1330,7 @@ test.describe("home", () => {
       await expect(img).toHaveCount(1);
       await expect(img).toHaveAttribute(
         "src",
-        new RegExp(project.image.split("/").pop()!.replace(/\./g, "\\.")),
+        new RegExp(project.image!.split("/").pop()!.replace(/\./g, "\\.")),
       );
       await expect(img).toHaveAttribute(
         "loading",
@@ -1697,18 +1703,49 @@ test.describe("services", () => {
       await expect(
         section.locator("[data-service-detail-panel]"),
       ).toContainText(services[1].description);
-      await expect(
-        section.locator("[data-service-pointer-card]"),
-      ).toBeVisible();
-      const pointerImage = section.locator("[data-service-pointer-image]");
-      await expect(pointerImage).toBeVisible();
-      await expect(pointerImage).toHaveAttribute(
-        "data-image-source",
-        services[1].image,
+      await expect(section.locator("[data-service-pointer-card]")).toHaveCount(
+        0,
       );
-      await expect(
-        section.locator("[data-service-pointer-card] > div"),
-      ).toHaveCSS("border-width", "0px");
+
+      const trailItems = section.locator("[data-image-trail-item]");
+      await expect
+        .poll(
+          () => trailItems.count(),
+          "image trail spawns on capability hover",
+        )
+        .toBeGreaterThan(0);
+
+      const trailSource = await trailItems
+        .first()
+        .locator("[data-image-source]")
+        .getAttribute("data-image-source");
+      expect(services.some((service) => service.image === trailSource)).toBe(
+        true,
+      );
+
+      const rowTrail = section.locator("[data-service-row-trail]").nth(1);
+      await expect(rowTrail).toHaveCSS("overflow", "hidden");
+      const trailBounds = await rowTrail.evaluate((element) => {
+        const root = element.getBoundingClientRect();
+        const overlay = element
+          .querySelector("[data-image-trail-overlay]")!
+          .getBoundingClientRect();
+        return {
+          root: {
+            x: root.x,
+            y: root.y,
+            width: root.width,
+            height: root.height,
+          },
+          overlay: {
+            x: overlay.x,
+            y: overlay.y,
+            width: overlay.width,
+            height: overlay.height,
+          },
+        };
+      });
+      expect(trailBounds.overlay).toEqual(trailBounds.root);
     }
   });
 
@@ -1724,7 +1761,12 @@ test.describe("services", () => {
       services.length,
     );
     await expect(section.locator("[data-service-detail-panel]")).toBeVisible();
-    await expect(section.locator("[data-service-pointer-card]")).toBeHidden();
+    await expect(section.locator("[data-image-trail-overlay]")).toHaveCount(
+      services.length,
+    );
+    await expect(
+      section.locator("[data-image-trail-overlay]:visible"),
+    ).toHaveCount(0);
 
     const hasOverflow = await page.evaluate(
       () => document.documentElement.scrollWidth > window.innerWidth,
@@ -1739,6 +1781,20 @@ test.describe("services", () => {
     await expect(section.locator("[data-service-detail-panel]")).toContainText(
       services[2].description,
     );
+  });
+
+  test("does not spawn the image trail when reduced motion is enabled", async ({
+    page,
+  }) => {
+    test.skip((page.viewportSize()?.width ?? 0) < 1024, "desktop hover only");
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+
+    const section = page.locator("#services");
+    await section.scrollIntoViewIfNeeded();
+    await section.locator("[data-service-row]").first().hover();
+
+    await expect(section.locator("[data-image-trail-item]")).toHaveCount(0);
   });
 });
 

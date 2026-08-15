@@ -643,11 +643,11 @@ header[data-open="true"] ~ .smg .smg-prelayer {
   }
 }
 
-/* ---- Navbar full-bleed background ----
-   The frosted backdrop-filter lives on the inline style (see navbar.tsx)
-   so Tailwind's Lightning CSS pass can't strip the unprefixed property. */
+/* ---- Navbar transparent glass ----
+   The backdrop-filter declarations live on the inline style (see navbar.tsx)
+   so Tailwind's Lightning CSS pass can't strip them. */
 .navbar-bg {
-  background: rgba(255, 255, 255, 0.55);
+  background: transparent;
 }
 
 header[data-open="true"] .navbar-bg {

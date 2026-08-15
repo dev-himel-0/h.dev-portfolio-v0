@@ -158,9 +158,9 @@ export function Navbar() {
         data-open={open}
       >
         {/*
-         * Full-bleed frosted bar behind the header content — sharp corners,
-         * hairline bottom border, black while the menu is open. Always
-         * mounted; GSAP fades it in/out across the scroll threshold.
+         * Full-bleed transparent glass behind the header content — black
+         * while the menu is open. Always mounted; GSAP fades it in/out
+         * across the scroll threshold.
          */}
         <div
           ref={bgRef}
@@ -168,8 +168,8 @@ export function Navbar() {
           aria-hidden="true"
           className="navbar-bg pointer-events-none absolute inset-0"
           style={{
-            WebkitBackdropFilter: "blur(16px) saturate(1.4)",
-            backdropFilter: "blur(16px) saturate(1.4)",
+            WebkitBackdropFilter: "blur(10px)",
+            backdropFilter: "blur(10px)",
           }}
         />
 
