@@ -55,7 +55,7 @@ export function SiteFooter() {
         scrollTrigger: {
           trigger: stage,
           start: "top 92%",
-          once: true,
+          toggleActions: "restart none restart reset",
         },
         onComplete: () => gsap.set(brand, { clearProps: "willChange" }),
       });

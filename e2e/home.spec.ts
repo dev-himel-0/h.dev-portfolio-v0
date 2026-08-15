@@ -1585,6 +1585,22 @@ test.describe("home", () => {
         timeout: 5_000,
       })
       .toMatch(/matrix\(1, 0, 0, 1, 0, -/);
+
+    await page.locator("#home").scrollIntoViewIfNeeded();
+
+    await expect
+      .poll(() => brandState().then((state) => state.opacity), {
+        timeout: 5_000,
+      })
+      .toBe("0");
+
+    await brand.scrollIntoViewIfNeeded();
+
+    await expect
+      .poll(() => brandState().then((state) => state.opacity), {
+        timeout: 5_000,
+      })
+      .toBe("1");
   });
 });
 
