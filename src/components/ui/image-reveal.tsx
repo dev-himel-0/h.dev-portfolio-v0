@@ -51,6 +51,21 @@ export function ImageReveal({
         return;
       }
 
+      const reducedMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
+      const canUseParallax =
+        parallax > 0 && window.matchMedia("(min-width: 810px)").matches;
+
+      if (reducedMotion) {
+        gsap.set(scope, { clearProps: "clipPath" });
+        gsap.set(img, { clearProps: "transform" });
+        if (wrapRef.current) {
+          gsap.set(wrapRef.current, { clearProps: "transform" });
+        }
+        return;
+      }
+
       gsap
         .timeline({
           scrollTrigger: {
@@ -75,7 +90,7 @@ export function ImageReveal({
           0,
         );
 
-      if (parallax > 0) {
+      if (canUseParallax) {
         const wrap = wrapRef.current;
         if (wrap) {
           gsap.fromTo(

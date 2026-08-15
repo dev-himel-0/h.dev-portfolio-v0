@@ -140,7 +140,9 @@ export function Hero({
       ];
       const parallaxMedia = gsap.matchMedia();
 
-      parallaxMedia.add("(prefers-reduced-motion: no-preference)", () => {
+      parallaxMedia.add(
+        "(prefers-reduced-motion: no-preference) and (min-width: 810px)",
+        () => {
         const desktop = () => window.matchMedia("(min-width: 1024px)").matches;
         const tablet = () => window.matchMedia("(min-width: 640px)").matches;
 
@@ -222,7 +224,8 @@ export function Hero({
             },
             0,
           );
-      });
+        },
+      );
 
       return () => parallaxMedia.revert();
     },

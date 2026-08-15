@@ -60,6 +60,8 @@ export function StaggerText({
           ease: "power4.out",
           stagger: divideBy === "word" ? 0.05 : 0.02,
           delay,
+          onStart: () => gsap.set(units, { willChange: "transform" }),
+          onComplete: () => gsap.set(units, { clearProps: "willChange" }),
           scrollTrigger: {
             trigger: el,
             start: "top 88%",
@@ -78,7 +80,7 @@ export function StaggerText({
     >
       <span
         data-stagger-unit
-        className="inline-block will-change-transform"
+        className="inline-block"
       >
         {part}
       </span>

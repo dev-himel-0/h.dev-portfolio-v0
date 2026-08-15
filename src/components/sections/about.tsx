@@ -27,8 +27,15 @@ export function About() {
       const root = rootRef.current;
       if (!root) return;
 
+      const reducedMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
+      if (reducedMotion) return;
+
+      const canUseParallax = window.matchMedia("(min-width: 810px)").matches;
+
       const content = root.querySelector<HTMLElement>("[data-about-content]");
-      if (content) {
+      if (content && canUseParallax) {
         gsap.fromTo(
           content,
           { yPercent: 4 },

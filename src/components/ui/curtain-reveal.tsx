@@ -64,6 +64,12 @@ export function CurtainReveal({
       const root = rootRef.current;
       if (!root) return;
 
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        onReveal?.();
+        onComplete?.();
+        return;
+      }
+
       const bandEls = Array.from(
         root.querySelectorAll<HTMLElement>("[data-curtain-panel]"),
       );

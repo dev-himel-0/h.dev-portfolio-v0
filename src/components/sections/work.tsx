@@ -28,7 +28,9 @@ export function Work() {
       const rows = gsap.utils.toArray<HTMLElement>("[data-work-row]");
       const media = gsap.matchMedia();
 
-      media.add("(min-width: 810px)", () => {
+      media.add(
+        "(min-width: 810px) and (prefers-reduced-motion: no-preference)",
+        () => {
         rows.slice(0, -1).forEach((row, index) => {
           const nextRow = rows[index + 1];
 
@@ -224,7 +226,13 @@ function ProjectFigure({
     () => {
       const figure = ref.current;
       const img = figure?.querySelector("img");
-      if (!figure || !img || !window.matchMedia("(pointer: fine)").matches) {
+      if (
+        !figure ||
+        !img ||
+        !window.matchMedia(
+          "(pointer: fine) and (prefers-reduced-motion: no-preference)",
+        ).matches
+      ) {
         return;
       }
 

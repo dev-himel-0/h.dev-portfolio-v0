@@ -72,6 +72,10 @@ export function Stack() {
 
   useGSAP(
     () => {
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        return;
+      }
+
       gsap.from("[data-bento-cell]", {
         y: 34,
         autoAlpha: 0,

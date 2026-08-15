@@ -39,7 +39,13 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
   const [lenis, setLenis] = useState<Lenis | null>(null);
 
   useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const canUseSmoothScroll = window.matchMedia(
+      "(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)",
+    ).matches;
+
+    // Native touch scrolling is already compositor-driven. Running Lenis and
+    // a second RAF loop on phones makes scrolling compete with the browser.
+    if (!canUseSmoothScroll) return;
 
     const instance = new Lenis(LENIS_OPTIONS);
     const publishId = window.requestAnimationFrame(() => setLenis(instance));

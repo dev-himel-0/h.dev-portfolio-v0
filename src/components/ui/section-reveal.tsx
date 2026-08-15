@@ -46,6 +46,11 @@ export function SectionReveal({
       const marked = scope.querySelectorAll<HTMLElement>("[data-reveal]");
       const targets = marked.length ? Array.from(marked) : [scope];
 
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        gsap.set(targets, { clearProps: "all" });
+        return;
+      }
+
       const from =
         variant === "mask"
           ? { yPercent: 110 }

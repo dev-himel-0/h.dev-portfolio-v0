@@ -188,6 +188,18 @@ test.describe("home", () => {
     const initialAction = await translateY(action);
     const initialCueOpacity = await opacityOf(scrollCue);
 
+    if ((page.viewportSize()?.width ?? 0) < 810) {
+      await page.evaluate(() =>
+        window.scrollTo({ top: Math.round(window.innerHeight * 0.5) }),
+      );
+      await page.waitForTimeout(100);
+      expect(await translateY(title)).toBeCloseTo(initial, 0);
+      expect(await translateY(greeting)).toBeCloseTo(0, 0);
+      expect(await translateY(action)).toBeCloseTo(initialAction, 0);
+      expect(await opacityOf(scrollCue)).toBeCloseTo(initialCueOpacity, 1);
+      return;
+    }
+
     await page.evaluate(() =>
       window.scrollTo({
         top: Math.round(window.innerHeight * 0.5),
@@ -279,6 +291,16 @@ test.describe("home", () => {
     const initialOpacity = await opacity();
     expect(initial).toBeGreaterThan(20);
     expect(initialOpacity).toBeGreaterThan(0.9);
+
+    if ((page.viewportSize()?.width ?? 0) < 810) {
+      await page.evaluate(() =>
+        window.scrollTo(0, document.documentElement.scrollHeight / 2),
+      );
+      await page.waitForTimeout(100);
+      expect(await opacity()).toBeCloseTo(initialOpacity, 1);
+      expect(await translateY()).toBeCloseTo(0, 0);
+      return;
+    }
 
     await page.evaluate(() =>
       window.scrollTo(0, document.documentElement.scrollHeight / 2),
@@ -433,9 +455,10 @@ test.describe("home", () => {
       .poll(opacity, "background fades to full opacity")
       .toBeCloseTo(1, 1);
 
-    // Match the reference glass treatment: edge-to-edge, square corners,
-    // transparent surface, no border, and a restrained 10px blur.
+    // Desktop keeps the glass treatment. Touch layouts use an opaque surface
+    // to avoid repainting the page behind a live backdrop blur.
     const viewport = page.viewportSize();
+    const isTouchLayout = (viewport?.width ?? 0) < 810;
     const box = await bar.boundingBox();
     expect(box).not.toBeNull();
     expect(box!.x).toBeCloseTo(0, 0);
@@ -453,16 +476,16 @@ test.describe("home", () => {
       await bar.evaluate(
         (element) => getComputedStyle(element).backgroundColor,
       ),
-    ).toBe("rgba(0, 0, 0, 0)");
+    ).toBe(isTouchLayout ? "rgba(255, 255, 255, 0.94)" : "rgba(0, 0, 0, 0)");
 
     const backdropFilter = () =>
       bar.evaluate((element) => getComputedStyle(element).backdropFilter);
     await expect
       .poll(
         backdropFilter,
-        "bar uses a GPU backdrop blur (no SVG displacement)",
+        "bar uses the viewport-appropriate surface",
       )
-      .toBe("blur(10px)");
+      .toBe(isTouchLayout ? "none" : "blur(10px)");
     const filterValue = await bar.evaluate(
       (element) => getComputedStyle(element).backdropFilter,
     );
@@ -1477,6 +1500,9 @@ test.describe("home", () => {
   }) => {
     await page.emulateMedia({ reducedMotion: "no-preference" });
     await page.goto("/");
+    await expect(page.locator("[data-curtain-content]")).toBeHidden({
+      timeout: 15_000,
+    });
 
     const contact = page.locator("#contact");
     const footer = page.locator("[data-site-footer]");
@@ -1586,6 +1612,28 @@ test.describe("home", () => {
         timeout: 5_000,
       })
       .toMatch(/^(none|matrix\(1, 0, 0, 1, 0, 0\))$/);
+
+    if ((page.viewportSize()?.width ?? 0) < 810) {
+      // Touch layouts keep the contact panel in normal flow rather than
+      // running a continuous scrub while the user scrolls.
+      await expect
+        .poll(initialContactTransform, { timeout: 5_000 })
+        .toMatch(/^(none|matrix\(1, 0, 0, 1, 0, 0\))$/);
+      await page.locator("#home").scrollIntoViewIfNeeded();
+      await expect
+        .poll(() => brandState().then((state) => state.opacity), {
+          timeout: 5_000,
+        })
+        .toBe("0");
+      await brand.scrollIntoViewIfNeeded();
+      await expect
+        .poll(() => brandState().then((state) => state.opacity), {
+          timeout: 5_000,
+        })
+        .toBe("1");
+      return;
+    }
+
     await expect
       .poll(initialContactTransform, {
         timeout: 5_000,
@@ -1773,7 +1821,9 @@ test.describe("services", () => {
     );
     expect(hasOverflow).toBe(false);
 
-    await section.locator("[data-service-row]").nth(2).click();
+    const selectedRow = section.locator("[data-service-row]").nth(2);
+    await selectedRow.scrollIntoViewIfNeeded();
+    await selectedRow.click();
     await expect(section.locator("[data-service-row]").nth(2)).toHaveAttribute(
       "aria-pressed",
       "true",
@@ -2260,6 +2310,20 @@ test.describe("how I work", () => {
       await expect.poll(() => nodeDotScale()).toBeGreaterThan(0.9);
     }
     const fullNumberY = await numberY();
+
+    if ((page.viewportSize()?.width ?? 0) < 810) {
+      await page.evaluate(
+        (y) => window.scrollTo(0, y),
+        start + (end - start) * 0.45,
+      );
+      await expect.poll(() => scaleY()).toBeGreaterThan(0.9);
+      await expect.poll(() => numberY()).toBe(fullNumberY);
+
+      await page.evaluate((y) => window.scrollTo(0, y), start - 80);
+      await expect.poll(() => scaleY()).toBeGreaterThan(0.9);
+      await expect.poll(() => numberY()).toBe(fullNumberY);
+      return;
+    }
 
     await page.evaluate(
       (y) => window.scrollTo(0, y),

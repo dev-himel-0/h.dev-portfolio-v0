@@ -154,7 +154,7 @@ function RollingDigit({
         aria-hidden="true"
         data-odometer-strip
         data-digit={digit}
-        className="flex flex-col will-change-transform"
+        className="flex flex-col"
         style={{ transform: `translateY(-${target}%)` }}
       >
         {DIGIT_TAPE.map((value) => (

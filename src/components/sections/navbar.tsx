@@ -65,6 +65,10 @@ export function Navbar() {
     const second = iconSecondRef.current;
     if (!inner || !first || !second) return;
 
+    const reducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
     // Neutralize the `.smg-toggle-lines` CSS `translate` default (-80%) so the
     // GSAP transform below is the only positioning — avoids a double shift.
     inner.style.translate = "0 0";
@@ -92,7 +96,7 @@ export function Navbar() {
     gsap.set(inner, { yPercent: 0 });
     gsap.to(inner, {
       yPercent: -(((lines.length - 1) / lines.length) * 100),
-      duration: 0.5 + lines.length * 0.07,
+      duration: reducedMotion ? 0 : 0.5 + lines.length * 0.07,
       ease: "power4.out",
       overwrite: true,
     });
@@ -101,7 +105,7 @@ export function Navbar() {
     iconTimelineRef.current = gsap
       .timeline({
         defaults: {
-          duration: open ? 0.4 : 0.3,
+          duration: reducedMotion ? 0 : open ? 0.4 : 0.3,
           ease: YUNOX_TOGGLE_EASE,
           overwrite: "auto",
         },
@@ -139,7 +143,10 @@ export function Navbar() {
           gsap.to(bg, {
             autoAlpha: visible ? 1 : 0,
             y: visible ? 0 : -8,
-            duration: 0.55,
+            duration: window.matchMedia("(prefers-reduced-motion: reduce)")
+              .matches
+              ? 0
+              : 0.55,
             ease: "power3.out",
             overwrite: "auto",
           });

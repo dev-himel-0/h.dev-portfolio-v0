@@ -70,6 +70,8 @@ export function ImageTrail({
   const lastTimeRef = React.useRef(0);
   const imageIndexRef = React.useRef(0);
   const timeoutRefs = React.useRef<Set<number>>(new Set());
+  const canUseTrailRef = React.useRef(false);
+  const reducedMotionRef = React.useRef(false);
   const normalizedImages = React.useMemo(
     () => images.map(normalizeImage),
     [images],
@@ -89,6 +91,27 @@ export function ImageTrail({
     };
   }, []);
 
+  React.useEffect(() => {
+    const finePointer = window.matchMedia(
+      "(hover: hover) and (pointer: fine)",
+    );
+    const reducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    );
+    const sync = () => {
+      canUseTrailRef.current = finePointer.matches;
+      reducedMotionRef.current = reducedMotion.matches;
+    };
+
+    sync();
+    finePointer.addEventListener("change", sync);
+    reducedMotion.addEventListener("change", sync);
+    return () => {
+      finePointer.removeEventListener("change", sync);
+      reducedMotion.removeEventListener("change", sync);
+    };
+  }, []);
+
   const removeItem = React.useCallback((id: string) => {
     setTrail((current) => current.filter((item) => item.id !== id));
   }, []);
@@ -97,17 +120,10 @@ export function ImageTrail({
     (event: React.PointerEvent<HTMLDivElement>) => {
       onPointerMove?.(event);
 
-      const canUseTrail = window.matchMedia(
-        "(hover: hover) and (pointer: fine)",
-      ).matches;
-      const reducedMotion = window.matchMedia(
-        "(prefers-reduced-motion: reduce)",
-      ).matches;
-
       if (
         disabled ||
-        reducedMotion ||
-        !canUseTrail ||
+        reducedMotionRef.current ||
+        !canUseTrailRef.current ||
         !normalizedImages.length ||
         safeMaxItems === 0
       ) {

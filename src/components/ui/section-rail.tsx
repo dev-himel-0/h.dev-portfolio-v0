@@ -37,6 +37,14 @@ export function SectionRail({
     const section = sectionRef.current;
     if (!rail || !content || !section) return;
 
+    // The rail is hidden below the large breakpoint. Avoid attaching a scroll
+    // listener for an element that cannot be seen on touch-sized layouts.
+    if (!window.matchMedia("(min-width: 1024px)").matches) return;
+
+    const reducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
     let visible = false;
     let contentTopAbs = 0;
     let sectionBottomAbs = 0;
@@ -51,6 +59,10 @@ export function SectionRail({
     measure();
 
     const show = () => {
+      if (reducedMotion) {
+        gsap.set(rail, { opacity: 1, y: 0 });
+        return;
+      }
       gsap.to(rail, {
         opacity: 1,
         y: 0,
@@ -61,6 +73,10 @@ export function SectionRail({
     };
 
     const hide = () => {
+      if (reducedMotion) {
+        gsap.set(rail, { opacity: 0, y: -96 });
+        return;
+      }
       gsap.to(rail, {
         opacity: 0,
         y: -96,

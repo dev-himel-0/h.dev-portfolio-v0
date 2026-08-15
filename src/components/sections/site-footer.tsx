@@ -26,20 +26,29 @@ export function SiteFooter() {
       const stage = brandStageRef.current;
       if (!contact || !brand || !stage) return;
 
-      gsap.to(contact, {
-        y: () => -(stage.offsetHeight * 0.25),
-        ease: "none",
-        scrollTrigger: {
-          trigger: contact,
-          start: "bottom bottom",
-          end: "bottom top",
-          scrub: 0.8,
-          onToggle: (self) =>
-            gsap.set(contact, {
-              willChange: self.isActive ? "transform" : "auto",
-            }),
-        },
-      });
+      const reducedMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
+      if (reducedMotion) return;
+
+      const canUseParallax = window.matchMedia("(min-width: 810px)").matches;
+
+      if (canUseParallax) {
+        gsap.to(contact, {
+          y: () => -(stage.offsetHeight * 0.25),
+          ease: "none",
+          scrollTrigger: {
+            trigger: contact,
+            start: "bottom bottom",
+            end: "bottom top",
+            scrub: 0.8,
+            onToggle: (self) =>
+              gsap.set(contact, {
+                willChange: self.isActive ? "transform" : "auto",
+              }),
+          },
+        });
+      }
 
       gsap.set(brand, {
         yPercent: 112,

@@ -17,6 +17,10 @@ export function Services() {
 
   useGSAP(
     () => {
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        return;
+      }
+
       gsap.from("[data-service-row]", {
         y: 30,
         autoAlpha: 0,

@@ -654,6 +654,21 @@ header[data-open="true"] .navbar-bg {
   background: #000;
 }
 
+/* Backdrop blur is a full-width live backdrop on mobile GPUs. A solid bar
+   keeps the navbar readable without forcing the browser to repaint the page
+   behind it during touch scrolling. */
+@media (max-width: 809px) {
+  [data-navbar-bg] {
+    background: rgb(255 255 255 / 0.94);
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+
+  header[data-open="true"] [data-navbar-bg] {
+    background: #000;
+  }
+}
+
 /* ---- Navbar toggle ---- */
 .smg-toggle {
   display: inline-flex;
@@ -853,7 +868,6 @@ header[data-open="true"] .navbar-bg {
 .stt-curtain-panel {
   flex: 1;
   background: #000;
-  will-change: transform;
 }
 
 /* Desktop-only circle cursor host. The white ink uses difference blending so

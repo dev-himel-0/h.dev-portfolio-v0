@@ -7,7 +7,7 @@ import { SmoothScroll } from "@/components/ui/smooth-scroll";
 import { ScrollToTop } from "@/components/ui/scroll-to-top";
 import { PageTransition } from "@/components/ui/page-transition";
 import { WipeCurtain } from "@/components/ui/wipe-curtain";
-import { CircleCursor } from "@/components/ui/circle-cursor";
+import { DesktopEnhancements } from "@/components/ui/desktop-enhancements";
 import { MotionProvider } from "@/components/ui/motion-provider";
 
 const generalSans = localFont({
@@ -58,7 +58,7 @@ export default function RootLayout({
             <WipeCurtain />
           </MotionProvider>
         </SmoothScroll>
-        <CircleCursor />
+        <DesktopEnhancements />
       </body>
     </html>
   );

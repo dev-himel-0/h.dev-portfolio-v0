@@ -21,6 +21,11 @@ export function HowIWork() {
       const flow = flowRef.current;
       if (!flow) return;
 
+      const reducedMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
+      const isMobile = !window.matchMedia("(min-width: 810px)").matches;
+
       const steps = gsap.utils.toArray<HTMLElement>("[data-process-step]");
       const cleanups: Array<() => void> = [];
 
@@ -69,6 +74,48 @@ export function HowIWork() {
             node.style.visibility = value > 0 ? "visible" : "hidden";
           });
         };
+
+        if (reducedMotion) {
+          gsap.set(media, { autoAlpha: 1, y: 0 });
+          gsap.set(copy, { autoAlpha: 1, y: 0 });
+          gsap.set(verticalFills, { scaleY: 1 });
+          setHorizontalFill?.(1);
+          setNumberPosition(finalNumber);
+          gsap.set(nodes, { autoAlpha: 1, scale: 1 });
+          return;
+        }
+
+        // Touch scrolling should not drive a progress animation on every
+        // scroll event. Keep a lightweight once-only reveal on phones.
+        if (isMobile) {
+          gsap.set(verticalFills, { scaleY: 1 });
+          setNumberPosition(finalNumber);
+          gsap.set(nodes, { autoAlpha: 1, scale: 1 });
+          gsap.fromTo(
+            media,
+            { autoAlpha: 0, y: 24 },
+            {
+              autoAlpha: 1,
+              y: 0,
+              duration: 0.65,
+              ease: "power3.out",
+              scrollTrigger: { trigger: step, start: "top 84%", once: true },
+            },
+          );
+          gsap.fromTo(
+            copy,
+            { autoAlpha: 0, y: 16 },
+            {
+              autoAlpha: 1,
+              y: 0,
+              duration: 0.55,
+              ease: "power3.out",
+              stagger: 0.05,
+              scrollTrigger: { trigger: step, start: "top 84%", once: true },
+            },
+          );
+          return;
+        }
 
         gsap.set(media, { autoAlpha: 0, y: 40 });
         gsap.set(copy, { autoAlpha: 0, y: 20 });
