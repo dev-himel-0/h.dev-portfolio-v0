@@ -20,10 +20,6 @@ export function HoverServiceList({ services }: HoverServiceListProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const activeService = services[activeIndex] ?? services[0];
-  const trailImages = services.map(({ title, image }) => ({
-    src: image,
-    alt: `${title} preview`,
-  }));
 
   useGSAP(
     () => {
@@ -116,7 +112,7 @@ export function HoverServiceList({ services }: HoverServiceListProps) {
             <div key={service.title}>
               <ImageTrail
                 data-service-row-trail
-                images={trailImages}
+                images={[{ src: service.image, alt: `${service.title} preview` }]}
                 threshold={48}
                 minDelay={55}
                 duration={900}

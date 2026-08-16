@@ -31,6 +31,10 @@ export interface Service {
 }
 
 export type ServiceIcon =
+  | "landing-page"
+  | "web-design"
+  | "web-development"
+  | "ai-automation"
   | "product-design"
   | "framer-development"
   | "ui-ux-design"
@@ -40,6 +44,22 @@ export const serviceIconSources: Record<
   ServiceIcon,
   { alt: string; src: string }
 > = {
+  "landing-page": {
+    alt: "Landing page service icon",
+    src: "/img/services/icons/landing-page.png",
+  },
+  "web-design": {
+    alt: "Website design service icon",
+    src: "/img/services/icons/web-design.png",
+  },
+  "web-development": {
+    alt: "Web development service icon",
+    src: "/img/services/icons/web-dev.png",
+  },
+  "ai-automation": {
+    alt: "AI automation service icon",
+    src: "/img/services/icons/ai-automation.png",
+  },
   "product-design": {
     alt: "Product design icon",
     src: "https://framerusercontent.com/images/rA85Y0EWOdi7zZR56JJDPw4A.png?width=512&height=512",
@@ -216,40 +236,36 @@ export const projects: Project[] = [
 
 export const services: Service[] = [
   {
+    title: "Landing Page",
+    description:
+      "Crafting focused landing pages that communicate value clearly and guide users towards desired action.",
+    tags: ["React", "Next.js", "GSAP", "Motion"],
+    icon: "landing-page",
+    image: "/img/projects/project01.webp",
+  },
+  {
+    title: "Website Design",
+    description:
+      "Designing clear, intuitive websites that balance visual appeal with usability and strong structure.",
+    tags: ["Tailwind", "Design Systems"],
+    icon: "web-design",
+    image: "/img/projects/project02.webp",
+  },
+  {
     title: "Web Development",
     description:
-      "Placeholder copy. Production-ready websites and web apps built with modern frameworks, clean architecture, and obsessive attention to detail.",
-    tags: ["React", "Next.js", "TypeScript"],
-    icon: "framer-development",
-    image:
-      "https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=900&auto=format&fit=crop",
+      "Building responsive, maintainable web experiences with clear architecture, fast interactions, and a strong technical foundation.",
+    tags: ["React", "Next.js", "TypeScript", "Node.js"],
+    icon: "web-development",
+    image: "/img/projects/project04.webp",
   },
   {
-    title: "UI Implementation",
+    title: "AI Automation",
     description:
-      "Placeholder copy. Pixel-perfect conversion of design to code, with a strong eye for typography, spacing, and visual hierarchy.",
-    tags: ["Tailwind", "Design Systems"],
-    icon: "ui-ux-design",
-    image:
-      "https://images.unsplash.com/photo-1558655146-d09347e92766?q=80&w=900&auto=format&fit=crop",
-  },
-  {
-    title: "Motion & Interaction",
-    description:
-      "Placeholder copy. Smooth scroll experiences, micro-interactions, and animation that makes interfaces feel alive without slowing them down.",
-    tags: ["GSAP", "Lenis", "Motion"],
-    icon: "creative-direction",
-    image:
-      "https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=900&auto=format&fit=crop",
-  },
-  {
-    title: "Performance",
-    description:
-      "Placeholder copy. Auditing and optimizing load times, Core Web Vitals, and rendering — because speed is part of the design.",
-    tags: ["Lighthouse", "Core Web Vitals"],
-    icon: "product-design",
-    image:
-      "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=900&auto=format&fit=crop",
+      "Designing practical AI-powered workflows that reduce repetitive work, connect the right tools, and keep people in control.",
+    tags: ["AI Workflows", "APIs", "Automation", "Integrations"],
+    icon: "ai-automation",
+    image: "/img/projects/project03.webp",
   },
 ];
 

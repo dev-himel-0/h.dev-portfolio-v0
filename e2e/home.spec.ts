@@ -1764,9 +1764,7 @@ test.describe("services", () => {
         .first()
         .locator("[data-image-source]")
         .getAttribute("data-image-source");
-      expect(services.some((service) => service.image === trailSource)).toBe(
-        true,
-      );
+      expect(trailSource).toBe(services[1].image);
 
       const rowTrail = section.locator("[data-service-row-trail]").nth(1);
       await expect(rowTrail).toHaveCSS("overflow", "hidden");
