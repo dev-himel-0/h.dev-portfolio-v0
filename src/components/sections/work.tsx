@@ -31,26 +31,27 @@ export function Work() {
       media.add(
         "(min-width: 810px) and (prefers-reduced-motion: no-preference)",
         () => {
-        rows.slice(0, -1).forEach((row, index) => {
-          const nextRow = rows[index + 1];
+          rows.slice(0, -1).forEach((row, index) => {
+            const nextRow = rows[index + 1];
 
-          gsap.fromTo(
-            row,
-            { scale: 1 },
-            {
-              scale: 0.8,
-              ease: "power1.inOut",
-              transformOrigin: "50% 50%",
-              scrollTrigger: {
-                trigger: nextRow,
-                start: "top bottom",
-                end: "top 80px",
-                scrub: 0.3,
+            gsap.fromTo(
+              row,
+              { scale: 1 },
+              {
+                scale: 0.8,
+                ease: "power1.inOut",
+                transformOrigin: "50% 50%",
+                scrollTrigger: {
+                  trigger: nextRow,
+                  start: "top bottom",
+                  end: "top 80px",
+                  scrub: 0.3,
+                },
               },
-            },
-          );
-        });
-      });
+            );
+          });
+        },
+      );
 
       return () => media.revert();
     },

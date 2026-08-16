@@ -37,92 +37,91 @@ export function SectionRail({
     const section = sectionRef.current;
     if (!rail || !content || !section) return;
 
-    // The rail is hidden below the large breakpoint. Avoid attaching a scroll
-    // listener for an element that cannot be seen on touch-sized layouts.
-    if (!window.matchMedia("(min-width: 1024px)").matches) return;
+    const media = gsap.matchMedia();
 
-    const reducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
+    media.add("(min-width: 1024px)", () => {
+      const reducedMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
 
-    let visible = false;
-    let contentTopAbs = 0;
-    let sectionBottomAbs = 0;
+      let visible = false;
+      let contentTopAbs = 0;
+      let sectionBottomAbs = 0;
 
-    gsap.set(rail, { yPercent: -50, y: 0 });
+      gsap.set(rail, { yPercent: -50, y: 0 });
 
-    const measure = () => {
-      contentTopAbs = content.getBoundingClientRect().top + window.scrollY;
-      sectionBottomAbs =
-        section.getBoundingClientRect().bottom + window.scrollY;
-    };
-    measure();
-
-    const show = () => {
-      if (reducedMotion) {
-        gsap.set(rail, { opacity: 1, y: 0 });
-        return;
-      }
-      gsap.to(rail, {
-        opacity: 1,
-        y: 0,
-        duration: 0.8,
-        ease: "power3.out",
-        overwrite: "auto",
-      });
-    };
-
-    const hide = () => {
-      if (reducedMotion) {
-        gsap.set(rail, { opacity: 0, y: -96 });
-        return;
-      }
-      gsap.to(rail, {
-        opacity: 0,
-        y: -96,
-        duration: 1.4,
-        ease: "power3.inOut",
-        overwrite: "auto",
-      });
-    };
-
-    const apply = () => {
-      const next =
-        window.scrollY >= contentTopAbs - window.innerHeight / 2 &&
-        window.scrollY < sectionBottomAbs - window.innerHeight - 4;
-      if (next !== visible) {
-        visible = next;
-        if (next) {
-          show();
-        } else {
-          hide();
-        }
-      }
-    };
-
-    const onResize = () => {
+      const measure = () => {
+        contentTopAbs = content.getBoundingClientRect().top + window.scrollY;
+        sectionBottomAbs =
+          section.getBoundingClientRect().bottom + window.scrollY;
+      };
       measure();
-      apply();
-    };
 
-    const onScroll = () => apply();
-    if (lenis) {
-      lenis.on("scroll", onScroll);
-    } else {
-      window.addEventListener("scroll", onScroll, { passive: true });
-    }
-    window.addEventListener("resize", onResize);
-    void document.fonts?.ready?.then(onResize);
-    apply();
+      const show = () => {
+        if (reducedMotion) {
+          gsap.set(rail, { opacity: 1, y: 0 });
+          return;
+        }
+        gsap.to(rail, {
+          opacity: 1,
+          y: 0,
+          duration: 0.8,
+          ease: "power3.out",
+          overwrite: "auto",
+        });
+      };
 
-    return () => {
+      const hide = () => {
+        if (reducedMotion) {
+          gsap.set(rail, { opacity: 0, y: -96 });
+          return;
+        }
+        gsap.to(rail, {
+          opacity: 0,
+          y: -96,
+          duration: 1.4,
+          ease: "power3.inOut",
+          overwrite: "auto",
+        });
+      };
+
+      const apply = () => {
+        const next =
+          window.scrollY >= contentTopAbs - window.innerHeight / 2 &&
+          window.scrollY < sectionBottomAbs - window.innerHeight - 4;
+        if (next !== visible) {
+          visible = next;
+          if (next) show();
+          else hide();
+        }
+      };
+
+      const onResize = () => {
+        measure();
+        apply();
+      };
+
+      const onScroll = () => apply();
       if (lenis) {
-        lenis.off("scroll", onScroll);
+        lenis.on("scroll", onScroll);
       } else {
-        window.removeEventListener("scroll", onScroll);
+        window.addEventListener("scroll", onScroll, { passive: true });
       }
-      window.removeEventListener("resize", onResize);
-    };
+      window.addEventListener("resize", onResize);
+      void document.fonts?.ready?.then(onResize);
+      apply();
+
+      return () => {
+        if (lenis) {
+          lenis.off("scroll", onScroll);
+        } else {
+          window.removeEventListener("scroll", onScroll);
+        }
+        window.removeEventListener("resize", onResize);
+      };
+    });
+
+    return () => media.revert();
   }, [contentRef, sectionRef, lenis]);
 
   return (

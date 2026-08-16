@@ -193,7 +193,7 @@ function CapabilityCell({
           <h3
             data-stack-title
             className={cn(
-              "font-heading font-medium tracking-[-0.035em] whitespace-nowrap",
+              "min-w-0 font-heading font-medium tracking-[-0.035em] [text-wrap:balance]",
               isWide
                 ? "max-w-[19rem] text-[clamp(1.55rem,2.8vw,2.5rem)]/[0.98]"
                 : "max-w-none text-[clamp(1.25rem,1.8vw,1.75rem)]/[0.98]",

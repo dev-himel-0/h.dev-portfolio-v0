@@ -92,12 +92,8 @@ export function ImageTrail({
   }, []);
 
   React.useEffect(() => {
-    const finePointer = window.matchMedia(
-      "(hover: hover) and (pointer: fine)",
-    );
-    const reducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    );
+    const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)");
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     const sync = () => {
       canUseTrailRef.current = finePointer.matches;
       reducedMotionRef.current = reducedMotion.matches;

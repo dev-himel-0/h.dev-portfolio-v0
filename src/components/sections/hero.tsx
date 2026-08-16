@@ -143,87 +143,91 @@ export function Hero({
       parallaxMedia.add(
         "(prefers-reduced-motion: no-preference) and (min-width: 810px)",
         () => {
-        const desktop = () => window.matchMedia("(min-width: 1024px)").matches;
-        const tablet = () => window.matchMedia("(min-width: 640px)").matches;
+          const desktop = () =>
+            window.matchMedia("(min-width: 1024px)").matches;
+          const tablet = () => window.matchMedia("(min-width: 640px)").matches;
 
-        gsap.to("[data-scroll-arrow]", {
-          y: -10,
-          duration: 1.1,
-          ease: "sine.inOut",
-          yoyo: true,
-          repeat: -1,
-          delay: entranceDelay + 2.15,
-        });
+          gsap.to("[data-scroll-arrow]", {
+            y: -10,
+            duration: 1.1,
+            ease: "sine.inOut",
+            yoyo: true,
+            repeat: -1,
+            delay: entranceDelay + 2.15,
+          });
 
-        const parallaxTimeline = gsap.timeline({
-          scrollTrigger: {
-            trigger: rootRef.current,
-            start: "top top",
-            end: () =>
-              Math.max(1, rootRef.current?.offsetHeight ?? window.innerHeight),
-            scrub: 0.7,
-            invalidateOnRefresh: true,
-            onToggle: (self) =>
-              gsap.set(parallaxTargets, {
-                willChange: self.isActive ? "transform,opacity" : "auto",
-              }),
-          },
-        });
+          const parallaxTimeline = gsap.timeline({
+            scrollTrigger: {
+              trigger: rootRef.current,
+              start: "top top",
+              end: () =>
+                Math.max(
+                  1,
+                  rootRef.current?.offsetHeight ?? window.innerHeight,
+                ),
+              scrub: 0.7,
+              invalidateOnRefresh: true,
+              onToggle: (self) =>
+                gsap.set(parallaxTargets, {
+                  willChange: self.isActive ? "transform,opacity" : "auto",
+                }),
+            },
+          });
 
-        parallaxTimeline
-          .to(
-            "[data-hero-title-parallax]",
-            {
-              y: () => (desktop() ? -72 : tablet() ? -48 : -28),
-              scale: () => (desktop() ? 0.92 : tablet() ? 0.95 : 0.97),
-              opacity: () => (desktop() ? 0.82 : tablet() ? 0.88 : 0.94),
-              transformOrigin: "50% 50%",
-              duration: 1,
-              ease: "none",
-            },
-            0,
-          )
-          .to(
-            "[data-hero-greeting-parallax]",
-            {
-              y: () => (desktop() ? -28 : tablet() ? -18 : -10),
-              opacity: () => (desktop() ? 0.55 : tablet() ? 0.68 : 0.8),
-              duration: 1,
-              ease: "none",
-            },
-            0,
-          )
-          .to(
-            "[data-hero-actions-parallax]",
-            {
-              y: () => (desktop() ? 20 : tablet() ? 14 : 8),
-              opacity: () => (desktop() ? 0.65 : tablet() ? 0.78 : 0.86),
-              duration: 1,
-              ease: "none",
-              stagger: 0.04,
-            },
-            0,
-          )
-          .to(
-            "[data-hero-rail-parallax]",
-            {
-              y: -36,
-              opacity: 0.35,
-              duration: 1,
-              ease: "none",
-            },
-            0,
-          )
-          .to(
-            "[data-hero-scroll]",
-            {
-              y: -64,
-              opacity: 0,
-              duration: 0.28,
-              ease: "none",
-            },
-            0,
-          );
+          parallaxTimeline
+            .to(
+              "[data-hero-title-parallax]",
+              {
+                y: () => (desktop() ? -72 : tablet() ? -48 : -28),
+                scale: () => (desktop() ? 0.92 : tablet() ? 0.95 : 0.97),
+                opacity: () => (desktop() ? 0.82 : tablet() ? 0.88 : 0.94),
+                transformOrigin: "50% 50%",
+                duration: 1,
+                ease: "none",
+              },
+              0,
+            )
+            .to(
+              "[data-hero-greeting-parallax]",
+              {
+                y: () => (desktop() ? -28 : tablet() ? -18 : -10),
+                opacity: () => (desktop() ? 0.55 : tablet() ? 0.68 : 0.8),
+                duration: 1,
+                ease: "none",
+              },
+              0,
+            )
+            .to(
+              "[data-hero-actions-parallax]",
+              {
+                y: () => (desktop() ? 20 : tablet() ? 14 : 8),
+                opacity: () => (desktop() ? 0.65 : tablet() ? 0.78 : 0.86),
+                duration: 1,
+                ease: "none",
+                stagger: 0.04,
+              },
+              0,
+            )
+            .to(
+              "[data-hero-rail-parallax]",
+              {
+                y: -36,
+                opacity: 0.35,
+                duration: 1,
+                ease: "none",
+              },
+              0,
+            )
+            .to(
+              "[data-hero-scroll]",
+              {
+                y: -64,
+                opacity: 0,
+                duration: 0.28,
+                ease: "none",
+              },
+              0,
+            );
         },
       );
 

@@ -125,7 +125,7 @@ export function SiteFooter() {
                       <li key={item.href}>
                         <a
                           href={item.href}
-                          className="group inline-flex items-center gap-2 text-black/60 transition-colors duration-300 hover:text-black focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:outline-none"
+                          className="group inline-flex min-h-11 items-center gap-2 text-black/60 transition-colors duration-300 hover:text-black focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:outline-none"
                         >
                           {item.label}
                           <ArrowUpRight
@@ -155,7 +155,7 @@ export function SiteFooter() {
                       {social.href ? (
                         <a
                           href={social.href}
-                          className="text-black/60 transition-colors duration-300 hover:text-black focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:outline-none"
+                          className="inline-flex min-h-11 items-center text-black/60 transition-colors duration-300 hover:text-black focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:outline-none"
                         >
                           {social.label}
                         </a>

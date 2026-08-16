@@ -481,10 +481,7 @@ test.describe("home", () => {
     const backdropFilter = () =>
       bar.evaluate((element) => getComputedStyle(element).backdropFilter);
     await expect
-      .poll(
-        backdropFilter,
-        "bar uses the viewport-appropriate surface",
-      )
+      .poll(backdropFilter, "bar uses the viewport-appropriate surface")
       .toBe(isTouchLayout ? "none" : "blur(10px)");
     const filterValue = await bar.evaluate(
       (element) => getComputedStyle(element).backdropFilter,

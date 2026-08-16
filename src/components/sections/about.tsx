@@ -250,7 +250,8 @@ function SocialItem({ link, index }: { link: SocialLink; index: number }) {
     </div>
   );
 
-  const wrapper = "relative border-l border-black/10 first:border-l-0";
+  const wrapper =
+    "relative inline-flex min-h-11 items-center border-l border-black/10 first:border-l-0";
 
   return link.href ? (
     <a

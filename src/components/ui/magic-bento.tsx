@@ -80,7 +80,7 @@ export function MagicBentoCell({ children, className }: MagicBentoCellProps) {
           transform: "translate(-50%, -50%) scale(var(--spot-scale))",
         }}
       />
-      <div className="relative z-[1] h-full">{children}</div>
+      <div className="relative z-[1] h-full min-w-0">{children}</div>
     </div>
   );
 }

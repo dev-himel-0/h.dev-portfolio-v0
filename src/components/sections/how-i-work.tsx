@@ -420,7 +420,7 @@ function ProcessStep({
             draggable={false}
             className="size-10 object-contain grayscale sm:size-11"
           />
-          <h3 className="font-heading text-[2.5rem] leading-none font-semibold tracking-[-0.03em] sm:text-[2.75rem]">
+          <h3 className="min-w-0 flex-1 font-heading text-[2.5rem] leading-none font-semibold tracking-[-0.03em] [text-wrap:balance] sm:text-[2.75rem]">
             {step.title}
           </h3>
         </div>

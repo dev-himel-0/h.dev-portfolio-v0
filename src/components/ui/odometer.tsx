@@ -122,7 +122,7 @@ export function Odometer({ ref, digits = 3, className }: OdometerProps) {
                 tapeRefs.current[p] = el;
               }}
               data-odometer-tape
-               className="absolute inset-x-0 top-0 flex flex-col"
+              className="absolute inset-x-0 top-0 flex flex-col"
             >
               {tape.map((d, i) => (
                 <span
