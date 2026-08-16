@@ -31,7 +31,16 @@ import {
   SiTypescript,
   SiVercel,
 } from "react-icons/si";
-import { TbGauge, TbWaveSine } from "react-icons/tb";
+import {
+  TbApi,
+  TbBolt,
+  TbComponents,
+  TbGauge,
+  TbLayout,
+  TbPlugConnected,
+  TbRobot,
+  TbWaveSine,
+} from "react-icons/tb";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -41,8 +50,10 @@ const toolIcons: Record<string, IconType> = {
   TypeScript: SiTypescript,
   "Node.js": SiNodedotjs,
   Figma: SiFigma,
+  Tailwind: SiTailwindcss,
   "Tailwind CSS": SiTailwindcss,
   Storybook: SiStorybook,
+  "Design Systems": TbComponents,
   GSAP: SiGsap,
   Motion: SiFramer,
   Lenis: TbWaveSine,
@@ -50,13 +61,17 @@ const toolIcons: Record<string, IconType> = {
   "Chrome DevTools": SiGooglechrome,
   Vercel: SiVercel,
   "Core Web Vitals": TbGauge,
+  "AI Workflows": TbRobot,
+  APIs: TbApi,
+  Automation: TbBolt,
+  Integrations: TbPlugConnected,
 };
 
 const ghostIconByCapability: Record<string, IconType> = {
+  "Landing Page": TbLayout,
+  "Website Design": SiFigma,
   "Web Development": SiReact,
-  "UI Implementation": SiFigma,
-  "Motion & Interaction": SiFramer,
-  Performance: SiGooglechrome,
+  "AI Automation": TbRobot,
 };
 
 const iconPositionStyle = {

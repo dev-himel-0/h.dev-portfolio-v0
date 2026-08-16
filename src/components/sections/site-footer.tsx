@@ -5,6 +5,7 @@ import { ArrowUpRight } from "@phosphor-icons/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
+import { SectionReveal } from "@/components/ui/section-reveal";
 import { navigation, profile, socials } from "@/lib/data";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
@@ -86,8 +87,16 @@ export function SiteFooter() {
         className="relative z-10 overflow-clip bg-white py-24 sm:py-28 lg:py-36"
       >
         <div className="mx-auto w-full max-w-[100rem] px-5 sm:px-8 lg:px-10">
-          <div className="mx-auto grid gap-12 lg:max-w-[76rem] lg:grid-cols-[minmax(0,1.1fr)_minmax(22rem,0.9fr)] lg:gap-20">
-            <div>
+          <SectionReveal
+            variant="fade"
+            distance={100}
+            stagger={0.12}
+            className="mx-auto grid gap-12 lg:max-w-[76rem] lg:grid-cols-[minmax(0,1.1fr)_minmax(22rem,0.9fr)] lg:gap-20"
+          >
+            <div
+              data-reveal
+              data-contact-reveal
+            >
               <p className="font-sans text-[0.625rem] font-medium tracking-[0.24em] text-black/45 uppercase">
                 Contact
               </p>
@@ -109,7 +118,11 @@ export function SiteFooter() {
               </a>
             </div>
 
-            <div className="grid grid-cols-2 gap-y-10 self-end lg:justify-items-end lg:text-right">
+            <div
+              data-reveal
+              data-contact-reveal
+              className="grid grid-cols-2 gap-y-10 self-end lg:justify-items-end lg:text-right"
+            >
               <FooterColumn label="Based in">
                 <p>{profile.location}</p>
                 <p className="mt-1 text-black/45">{profile.availability}</p>
@@ -167,7 +180,7 @@ export function SiteFooter() {
                 </ul>
               </FooterColumn>
             </div>
-          </div>
+          </SectionReveal>
         </div>
       </section>
 

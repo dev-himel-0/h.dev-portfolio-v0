@@ -1574,6 +1574,32 @@ test.describe("home", () => {
     expect(hasOverflow).toBe(false);
   });
 
+  test("reveals both contact columns on scroll entry", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.goto("/");
+    await expect(page.locator("[data-curtain-content]")).toBeHidden({
+      timeout: 15_000,
+    });
+
+    const targets = page.locator("[data-contact-reveal]");
+    await expect(targets).toHaveCount(2);
+
+    for (const target of [targets.first(), targets.last()]) {
+      expect(await opacityOf(target)).toBeLessThan(0.05);
+      expect(await translateY(target)).toBeGreaterThan(90);
+    }
+
+    await targets
+      .first()
+      .evaluate((element) => element.scrollIntoView({ block: "center" }));
+
+    for (const target of [targets.first(), targets.last()]) {
+      await expect.poll(() => opacityOf(target)).toBeGreaterThan(0.99);
+      await expect.poll(() => translateY(target)).toBeGreaterThanOrEqual(-0.5);
+      await expect.poll(() => translateY(target)).toBeLessThanOrEqual(0.5);
+    }
+  });
+
   test("slides the contact panel and footer brand up into view", async ({
     page,
   }) => {
@@ -1859,6 +1885,9 @@ test.describe("stack", () => {
     );
     await expect(section).not.toContainText("TOOLS & SYSTEMS");
     await expect(section.locator("[data-magic-bento]")).toBeVisible();
+    expect(stackCapabilities.map(({ title }) => title)).toEqual(
+      services.map(({ title }) => title),
+    );
     await expect(section.locator("[data-bento-cell]")).toHaveCount(
       stackCapabilities.length,
     );
@@ -2241,6 +2270,49 @@ test.describe("how I work", () => {
         () => document.documentElement.scrollWidth > window.innerWidth,
       );
       expect(hasOverflow).toBe(false);
+    }
+  });
+
+  test("reveals the process heading before the animated steps", async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await page.goto("/");
+    await expect(page.locator("[data-curtain-content]")).toBeHidden({
+      timeout: 15_000,
+    });
+
+    const heading = page.locator("[data-process-heading]");
+    expect(await opacityOf(heading)).toBeLessThan(0.05);
+    expect(await translateY(heading)).toBeGreaterThan(90);
+
+    await heading.evaluate((element) =>
+      element.scrollIntoView({ block: "center" }),
+    );
+
+    await expect.poll(() => opacityOf(heading)).toBeGreaterThan(0.99);
+    await expect.poll(() => translateY(heading)).toBeGreaterThanOrEqual(-0.5);
+    await expect.poll(() => translateY(heading)).toBeLessThanOrEqual(0.5);
+  });
+
+  test("shows the missing section reveals immediately with reduced motion", async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+    await expect(page.locator("[data-curtain-content]")).toBeHidden({
+      timeout: 15_000,
+    });
+
+    const targets = page.locator(
+      "[data-process-heading], [data-contact-reveal]",
+    );
+    await expect(targets).toHaveCount(3);
+
+    for (let index = 0; index < (await targets.count()); index += 1) {
+      const target = targets.nth(index);
+      expect(await opacityOf(target)).toBeCloseTo(1, 2);
+      expect(await translateY(target)).toBeCloseTo(0, 1);
     }
   });
 

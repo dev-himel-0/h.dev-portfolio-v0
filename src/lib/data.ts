@@ -276,32 +276,13 @@ export const servicesSection = {
   label: "CAPABILITIES",
 };
 
-export const stackCapabilities: StackCapability[] = [
-  {
-    title: "Web Development",
-    description:
-      "A focused frontend foundation for products that need to feel fast, stable, and effortless to use.",
-    tools: ["React", "Next.js", "TypeScript", "Node.js"],
-  },
-  {
-    title: "UI Implementation",
-    description:
-      "Design systems and interfaces translated into precise, responsive code without losing the original intent.",
-    tools: ["Figma", "Tailwind CSS", "Storybook", "TypeScript"],
-  },
-  {
-    title: "Motion & Interaction",
-    description:
-      "Motion with purpose: clear transitions, tactile feedback, and smooth scroll experiences that support the story.",
-    tools: ["GSAP", "Motion", "Lenis", "React"],
-  },
-  {
-    title: "Performance",
-    description:
-      "A performance-first workflow that keeps the experience quick from the first render through every interaction.",
-    tools: ["Lighthouse", "Chrome DevTools", "Vercel", "Core Web Vitals"],
-  },
-];
+export const stackCapabilities: StackCapability[] = services.map(
+  ({ title, description, tags }) => ({
+    title,
+    description,
+    tools: tags,
+  }),
+);
 
 export const stackSection = {
   index: "04",

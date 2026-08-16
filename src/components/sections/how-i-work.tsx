@@ -1,6 +1,7 @@
 "use client";
 
 import { SectionRail } from "@/components/ui/section-rail";
+import { SectionReveal } from "@/components/ui/section-reveal";
 import { VideoReveal } from "@/components/ui/video-reveal";
 import { processSection, processSteps, serviceIconSources } from "@/lib/data";
 import { cn } from "@/lib/utils";
@@ -217,25 +218,34 @@ export function HowIWork() {
       />
 
       <div className="mx-auto w-full max-w-[75rem] px-[1.875rem]">
-        <header className="mb-[3.75rem] flex w-full flex-col items-end gap-7 text-right sm:mb-[5rem] lg:mb-[6.25rem]">
-          <span
-            data-process-label
-            className="sr-only"
+        <SectionReveal
+          variant="fade"
+          distance={100}
+        >
+          <header
+            data-reveal
+            data-process-heading
+            className="mb-[3.75rem] flex w-full flex-col items-end gap-7 text-right sm:mb-[5rem] lg:mb-[6.25rem]"
           >
-            {processSection.index} / PROCESS
-          </span>
-          <h2
-            id="how-i-work-heading"
-            className="font-heading text-[clamp(2.5rem,7vw,5.5rem)] leading-[0.88] font-semibold tracking-[-0.045em] whitespace-nowrap"
-          >
-            <span className="inline-block pb-[0.03em]">
-              {processSection.filledTitle}
-            </span>{" "}
-            <span className="hero-outline-text inline-block pb-[0.2em] tracking-[-0.035em]">
-              {processSection.outlinedTitle}
+            <span
+              data-process-label
+              className="sr-only"
+            >
+              {processSection.index} / PROCESS
             </span>
-          </h2>
-        </header>
+            <h2
+              id="how-i-work-heading"
+              className="font-heading text-[clamp(2.5rem,7vw,5.5rem)] leading-[0.88] font-semibold tracking-[-0.045em] whitespace-nowrap"
+            >
+              <span className="inline-block pb-[0.03em]">
+                {processSection.filledTitle}
+              </span>{" "}
+              <span className="hero-outline-text inline-block pb-[0.2em] tracking-[-0.035em]">
+                {processSection.outlinedTitle}
+              </span>
+            </h2>
+          </header>
+        </SectionReveal>
 
         <ol
           ref={flowRef}
