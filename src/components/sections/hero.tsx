@@ -1,13 +1,13 @@
 "use client";
 
-import { useRef } from "react";
-import { ArrowUpRight } from "@phosphor-icons/react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
 import { Navbar } from "@/components/sections/navbar";
 import { FlipLink } from "@/components/ui/flip-link";
 import { hero } from "@/lib/data";
+import { useGSAP } from "@gsap/react";
+import { ArrowUpRight } from "@phosphor-icons/react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useRef } from "react";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -291,8 +291,8 @@ export function Hero({
               data-hero-greeting
               className="text-[1.0625rem] font-normal tracking-[0.18em] text-black/70"
             >
-              Hi there, I am{" "}
-              <strong className="text-[1.125rem] font-medium">Himel</strong>
+              hi, i am{" "}
+              <strong className="text-[1.125rem] font-bold">HIMEL</strong>
             </p>
           </div>
 
