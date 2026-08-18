@@ -152,8 +152,8 @@ export const navigation: NavigationItem[] = [
 ];
 
 export const hero = {
-  filledTitle: "Frontend",
-  outlinedTitle: "Engineer",
+  filledTitle: "SHAHADAT",
+  outlinedTitle: "HIMEL",
   actions: [
     {
       label: "View selected work",
@@ -170,7 +170,7 @@ export const hero = {
 };
 
 export const work = {
-  index: "02",
+  index: "01",
   filledTitle: "Selected",
   outlinedTitle: "Projects",
 };
@@ -284,7 +284,7 @@ export const services: Service[] = [
 ];
 
 export const servicesSection = {
-  index: "03",
+  index: "02",
   filledTitle: "What I",
   outlinedTitle: "Offer",
   label: "CAPABILITIES",
@@ -299,7 +299,7 @@ export const stackCapabilities: StackCapability[] = services.map(
 );
 
 export const stackSection = {
-  index: "04",
+  index: "03",
   filledTitle: "What I",
   outlinedTitle: "Use",
 };
@@ -348,7 +348,7 @@ export const processSteps: ProcessStep[] = [
 ];
 
 export const processSection = {
-  index: "05",
+  index: "04",
   filledTitle: "How I",
   outlinedTitle: "Work",
 };

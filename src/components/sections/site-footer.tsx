@@ -7,6 +7,7 @@ import {
   navigation,
   profile,
   siteFooter,
+  stats,
   socials,
 } from "@/lib/data";
 import { useGSAP } from "@gsap/react";
@@ -44,9 +45,8 @@ export function SiteFooter() {
 
   useGSAP(
     () => {
-      const footerInfo = rootRef.current?.querySelector<HTMLElement>(
-        "[data-footer-info]",
-      );
+      const footerInfo =
+        rootRef.current?.querySelector<HTMLElement>("[data-footer-info]");
       const stage = brandStageRef.current;
       const brand = brandRevealRef.current;
       if (!footerInfo || !stage || !brand) return;
@@ -194,18 +194,18 @@ export function SiteFooter() {
             distance={40}
             stagger={0.12}
             start="top 82%"
-            className="mx-auto grid max-w-[76rem] justify-items-start gap-10 px-6 py-[clamp(2.5rem,5vw,4rem)] text-left sm:grid-cols-2 sm:px-10 lg:grid-cols-4 lg:gap-12 lg:px-0"
+            className="mx-auto grid max-w-[76rem] justify-items-start gap-7 px-6 py-[clamp(2rem,3.5vw,3rem)] text-left sm:grid-cols-2 sm:px-10 lg:grid-cols-4 lg:gap-8 lg:px-0"
           >
             <div
               data-reveal
               data-footer-contact-info
-              className="grid justify-items-start gap-7 sm:col-span-2 sm:grid-cols-2 lg:col-span-1 lg:grid-cols-1 lg:gap-6"
+              className="grid justify-items-start gap-5 sm:col-span-2 sm:grid-cols-2 lg:col-span-1 lg:grid-cols-1 lg:gap-4"
             >
               <div>
                 <p className="font-sans text-[0.625rem] font-medium tracking-[0.22em] text-black/45 uppercase">
                   {siteFooter.locationLabel}
                 </p>
-                <div className="mt-3 flex items-center justify-start gap-2 font-heading text-[clamp(1rem,1.8vw,1.25rem)] leading-[1.2] font-medium tracking-[-0.025em] text-black/90">
+                <div className="mt-2 flex items-center justify-start gap-2 font-heading text-[clamp(1rem,1.8vw,1.25rem)] leading-[1.2] font-medium tracking-[-0.025em] text-black/90">
                   <MapPin
                     aria-hidden="true"
                     weight="regular"
@@ -221,7 +221,7 @@ export function SiteFooter() {
                 </p>
                 <a
                   href={`mailto:${profile.email}`}
-                  className="group mt-3 inline-flex min-h-11 items-center justify-start gap-2 font-heading text-[clamp(1rem,1.8vw,1.25rem)] leading-[1.2] font-medium tracking-[-0.025em] text-black/90 transition-colors duration-300 hover:text-black focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-4 focus-visible:ring-offset-white focus-visible:outline-none"
+                  className="group mt-2 inline-flex min-h-11 items-center justify-start gap-2 font-heading text-[clamp(1rem,1.8vw,1.25rem)] leading-[1.2] font-medium tracking-[-0.025em] text-black/90 transition-colors duration-300 hover:text-black focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-4 focus-visible:ring-offset-white focus-visible:outline-none"
                 >
                   <EnvelopeSimple
                     aria-hidden="true"
@@ -234,7 +234,7 @@ export function SiteFooter() {
                     className="size-4 transition-transform duration-300 ease-out group-hover:translate-x-1 group-hover:-translate-y-1"
                   />
                 </a>
-                <p className="mt-2 max-w-[16rem] font-sans text-xs leading-[1.5] text-black/50">
+                <p className="mt-1 max-w-[16rem] font-sans text-xs leading-[1.5] text-black/50">
                   {profile.availability}
                 </p>
               </div>
@@ -248,7 +248,7 @@ export function SiteFooter() {
               <p className="font-sans text-[0.625rem] font-medium tracking-[0.22em] text-black/45 uppercase">
                 {siteFooter.linksLabel}
               </p>
-              <ul className="mt-3 space-y-0">
+              <ul className="mt-2 space-y-0">
                 {navigation.map((item) => (
                   <li key={item.href}>
                     <a
@@ -273,7 +273,7 @@ export function SiteFooter() {
               <p className="font-sans text-[0.625rem] font-medium tracking-[0.22em] text-black/45 uppercase">
                 {siteFooter.socialsLabel}
               </p>
-              <ul className="mt-3 space-y-0">
+              <ul className="mt-2 space-y-0">
                 {socials.map((social) => (
                   <li key={social.label}>
                     <FooterSocialItem social={social} />
@@ -289,12 +289,35 @@ export function SiteFooter() {
               <p className="font-sans text-[0.625rem] font-medium tracking-[0.22em] text-black/45 uppercase">
                 {siteFooter.profileLabel}
               </p>
-              <p className="mt-3 font-heading text-[clamp(1rem,1.8vw,1.25rem)] leading-[1.2] font-medium tracking-[-0.025em] text-black/90">
+              <p className="mt-2 font-heading text-[clamp(1rem,1.8vw,1.25rem)] leading-[1.2] font-medium tracking-[-0.025em] text-black/90">
                 {profile.role}
               </p>
-              <p className="mt-2 font-sans text-xs leading-[1.5] text-black/50">
-                {profile.experienceYears}+ years experience
-              </p>
+              <div
+                data-footer-profile-stats
+                className="mt-4 grid grid-cols-2 gap-x-4 gap-y-3 lg:grid-cols-1 lg:gap-2"
+              >
+                {stats.map((stat) => (
+                  <div
+                    key={stat.label}
+                    data-footer-profile-stat
+                    className="border-t border-black/10 pt-2"
+                  >
+                    <p
+                      data-footer-profile-value
+                      className="font-heading text-[clamp(1.25rem,2.4vw,1.5rem)] leading-none font-semibold tracking-[-0.04em] text-black tabular-nums"
+                    >
+                      {stat.value}
+                      {stat.suffix}
+                    </p>
+                    <p
+                      data-footer-profile-label
+                      className="mt-1 font-sans text-[0.5625rem] leading-snug font-medium tracking-[0.14em] text-black/50 uppercase"
+                    >
+                      {stat.label}
+                    </p>
+                  </div>
+                ))}
+              </div>
             </div>
           </SectionReveal>
         </div>
@@ -351,11 +374,7 @@ export function SiteFooter() {
   );
 }
 
-function FooterSocialItem({
-  social,
-}: {
-  social: (typeof socials)[number];
-}) {
+function FooterSocialItem({ social }: { social: (typeof socials)[number] }) {
   const SocialIcon = FOOTER_SOCIAL_ICONS[social.icon];
   const icon = (
     <SocialIcon

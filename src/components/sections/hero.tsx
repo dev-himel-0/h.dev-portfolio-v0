@@ -2,7 +2,7 @@
 
 import { Navbar } from "@/components/sections/navbar";
 import { FlipLink } from "@/components/ui/flip-link";
-import { hero } from "@/lib/data";
+import { hero, profile } from "@/lib/data";
 import { useGSAP } from "@gsap/react";
 import { ArrowUpRight } from "@phosphor-icons/react";
 import gsap from "gsap";
@@ -39,10 +39,9 @@ export function Hero({
       const root = rootRef.current;
       if (!root) return;
 
-      const select = (selector: string) => Array.from(root.querySelectorAll(selector));
+      const select = (selector: string) =>
+        Array.from(root.querySelectorAll<HTMLElement>(selector));
       const heroLines = select("[data-hero-line]");
-      const heroRailContent = select("[data-hero-rail-content]");
-      const heroRailLine = select("[data-hero-rail-line]");
       const scrollArrow = select("[data-scroll-arrow]");
       const heroActions = select("[data-hero-action]");
       const scrollLine = select("[data-scroll-line]");
@@ -55,28 +54,48 @@ export function Hero({
       const heroTitleParallax = select("[data-hero-title-parallax]");
       const heroGreetingParallax = select("[data-hero-greeting-parallax]");
       const heroActionsParallax = select("[data-hero-actions-parallax]");
-      const heroRailParallax = select("[data-hero-rail-parallax]");
       const heroScroll = select("[data-hero-scroll]");
       const parallaxTargets = [
         ...heroTitleParallax,
         ...heroGreetingParallax,
         ...heroActionsParallax,
-        ...heroRailParallax,
         ...heroScroll,
       ];
       const willChangeTargets = [
         ...heroLines,
-        ...heroRailContent,
-        ...heroRailLine,
         ...scrollArrow,
         ...scrollLine,
         ...scrollChevron,
         ...heroActions,
       ];
 
+      const reducedMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
+
+      if (reducedMotion) {
+        gsap.set(
+          [
+            ...heroGreeting,
+            ...heroMono,
+            ...heroMenuToggle,
+            ...heroLines,
+            ...heroActions,
+          ],
+          { clearProps: "transform,opacity,visibility" },
+        );
+        gsap.set(scrollLine, { scaleY: 1, clearProps: "willChange" });
+        gsap.set(scrollChevron, {
+          autoAlpha: 1,
+          y: 0,
+          clearProps: "willChange",
+        });
+        return;
+      }
+
       gsap.set(heroLines, { willChange: "transform" });
-      gsap.set([...heroRailContent, ...heroRailLine, ...scrollArrow], {
-        willChange: "transform",
+      gsap.set(scrollArrow, {
+        willChange: "transform,opacity",
       });
       gsap.set(heroActions, { willChange: "transform,opacity" });
       gsap.set(scrollLine, {
@@ -87,6 +106,7 @@ export function Hero({
       });
       gsap.set(scrollChevron, {
         autoAlpha: 0,
+        y: 6,
         willChange: "transform,opacity",
       });
 
@@ -99,32 +119,8 @@ export function Hero({
       });
 
       timeline
-        .from(
-          heroGreeting,
-          { y: 10, autoAlpha: 0, duration: 0.55 },
-          0.1,
-        )
         .from(heroMono, { y: -12, autoAlpha: 0, duration: 0.55 }, 0.1)
-        .from(
-          heroMenuToggle,
-          { y: -10, autoAlpha: 0, duration: 0.5 },
-          0.22,
-        )
-        .from(
-          heroRailContent,
-          { y: 10, autoAlpha: 0, duration: 0.5, ease: "power3.out" },
-          0.18,
-        )
-        .from(
-          heroRailLine,
-          {
-            scaleY: 0,
-            transformOrigin: "top center",
-            duration: 0.7,
-            ease: "power3.out",
-          },
-          0.26,
-        )
+        .from(heroMenuToggle, { y: -10, autoAlpha: 0, duration: 0.5 }, 0.22)
         .from(
           filledHeroLine,
           { yPercent: 110, autoAlpha: 0, duration: 1, ease: "expo.out" },
@@ -133,22 +129,27 @@ export function Hero({
         .from(
           outlinedHeroLine,
           { yPercent: 110, autoAlpha: 0, duration: 1.05, ease: "expo.out" },
-          0.48,
+          0.44,
+        )
+        .from(
+          heroGreeting,
+          { y: 10, autoAlpha: 0, duration: 0.5, ease: "power3.out" },
+          0.92,
         )
         .from(
           heroActions,
           { y: 18, autoAlpha: 0, duration: 0.7, stagger: 0.1 },
-          1.0,
+          1.08,
         )
         .to(
           scrollLine,
           { scaleY: 1, duration: 0.9, ease: "power3.inOut" },
-          1.3,
+          1.32,
         )
         .to(
           scrollChevron,
           { autoAlpha: 1, y: 0, duration: 0.4, ease: "power2.out" },
-          1.8,
+          1.82,
         );
 
       const parallaxMedia = gsap.matchMedia();
@@ -191,8 +192,8 @@ export function Hero({
             .to(
               heroTitleParallax,
               {
-                y: () => (desktop() ? -72 : tablet() ? -48 : -28),
-                scale: () => (desktop() ? 0.92 : tablet() ? 0.95 : 0.97),
+                y: () => (desktop() ? -82 : tablet() ? -54 : -32),
+                scale: () => (desktop() ? 0.93 : tablet() ? 0.95 : 0.97),
                 opacity: () => (desktop() ? 0.82 : tablet() ? 0.88 : 0.94),
                 transformOrigin: "50% 50%",
                 duration: 1,
@@ -203,7 +204,7 @@ export function Hero({
             .to(
               heroGreetingParallax,
               {
-                y: () => (desktop() ? -28 : tablet() ? -18 : -10),
+                y: () => (desktop() ? -30 : tablet() ? -20 : -12),
                 opacity: () => (desktop() ? 0.55 : tablet() ? 0.68 : 0.8),
                 duration: 1,
                 ease: "none",
@@ -213,19 +214,8 @@ export function Hero({
             .to(
               heroActionsParallax,
               {
-                y: () => (desktop() ? 20 : tablet() ? 14 : 8),
+                y: () => (desktop() ? 24 : tablet() ? 16 : 8),
                 opacity: () => (desktop() ? 0.65 : tablet() ? 0.78 : 0.86),
-                duration: 1,
-                ease: "none",
-                stagger: 0.04,
-              },
-              0,
-            )
-            .to(
-              heroRailParallax,
-              {
-                y: -36,
-                opacity: 0.35,
                 duration: 1,
                 ease: "none",
               },
@@ -244,10 +234,11 @@ export function Hero({
         },
       );
 
+      return () => parallaxMedia.revert();
     },
     {
       scope: rootRef,
-      dependencies: [isRevealed],
+      dependencies: [entranceDelay, isRevealed],
       revertOnUpdate: true,
     },
   );
@@ -262,100 +253,78 @@ export function Hero({
       <section
         id="home"
         aria-labelledby="hero-heading"
-        className="hero-section relative flex min-h-[100svh] items-center justify-center"
+        className="hero-section relative flex min-h-[100svh] items-center"
       >
-        <div
-          aria-hidden="true"
-          className="absolute top-[40.5%] left-[clamp(2.25rem,2.65vw,2.75rem)] hidden justify-center lg:flex"
-        >
-          <div
-            data-hero-rail-parallax
-            className="overflow-hidden"
-          >
-            <div
-              data-hero-rail-content
-              className="flex flex-col items-center gap-4"
-            >
-              <span
-                data-hero-rail-dot
-                className="size-1.5 bg-black"
-              />
-              <span
-                data-hero-rail-line
-                className="h-14 w-px origin-top bg-black/50"
-              />
-              <span
-                data-hero-rail-label
-                className="text-[0.625rem] font-medium tracking-[0.22em] text-black/60 uppercase [writing-mode:vertical-rl]"
+        <div className="hero-shell relative z-10 mx-auto flex w-full max-w-[96rem] items-center justify-center">
+          <div className="hero-lockup w-full">
+            <div className="hero-name-frame">
+              <div
+                data-hero-title-parallax
+                className="hero-title-stage"
               >
-                01
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div className="relative z-10 mx-auto flex w-full max-w-[75rem] -translate-y-[0.6vh] flex-col items-center">
-          <div
-            data-hero-greeting-parallax
-            className="mb-[clamp(0.75rem,2.5vh,1.5rem)]"
-          >
-            <p
-              data-hero-greeting
-              className="text-[1.0625rem] font-normal tracking-[0.18em] text-black/70"
-            >
-              hi, i am{" "}
-              <strong className="text-[1.125rem] font-bold">HIMEL</strong>
-            </p>
-          </div>
-
-          <div
-            data-hero-title-parallax
-            className="w-full"
-          >
-            <h1
-              id="hero-heading"
-              className="hero-title w-full text-center text-[clamp(2.625rem,14.5vw,7.25rem)] leading-[0.82] font-semibold tracking-[-0.03em] lg:text-[clamp(7.25rem,11.5vw,11.75rem)]"
-            >
-              <span className="block overflow-hidden pb-[0.03em]">
-                <span
-                  data-hero-line="filled"
-                  className="block whitespace-nowrap"
+                <h1
+                  id="hero-heading"
+                  className="hero-title w-full font-bold"
                 >
-                  {hero.filledTitle}
-                </span>
-              </span>
-              <span className="block overflow-hidden pb-[0.21em]">
-                <span
-                  data-hero-line="outlined"
-                  className="hero-outline-text block tracking-[-0.025em] whitespace-nowrap"
-                >
-                  {hero.outlinedTitle}
-                </span>
-              </span>
-            </h1>
-          </div>
+                  <span className="hero-title-word">
+                    <span className="hero-title-word-mask">
+                      <span
+                        data-hero-line="filled"
+                        className="block whitespace-nowrap"
+                      >
+                        {hero.filledTitle}
+                      </span>
+                    </span>
+                  </span>
+                  <span className="hero-title-word hero-title-word-outlined">
+                    <span className="hero-title-word-mask">
+                      <span
+                        data-hero-line="outlined"
+                        className="hero-outline-text block whitespace-nowrap"
+                      >
+                        {hero.outlinedTitle}
+                      </span>
+                    </span>
+                  </span>
+                </h1>
+              </div>
 
-          <div
-            data-hero-actions-parallax
-            className="mt-[clamp(2rem,5.5vh,3.25rem)] flex w-full max-w-[18rem] flex-col items-stretch justify-center gap-4 sm:max-w-none sm:flex-row sm:items-center sm:gap-6"
-          >
-            {hero.actions.map((action) => {
-              const Icon = action.icon ? actionIcons[action.icon] : undefined;
-
-              return (
+              <div
+                data-hero-greeting-parallax
+                className="hero-meta-stage"
+              >
                 <div
-                  key={action.href}
-                  data-hero-action
+                  data-hero-greeting
+                  className="hero-lockup-meta"
                 >
-                  <FlipLink
-                    href={action.href}
-                    label={action.label}
-                    icon={Icon}
-                    variant={action.variant}
-                  />
+                  <span>{profile.role}</span>
+                  <span>{profile.location}</span>
                 </div>
-              );
-            })}
+              </div>
+            </div>
+
+            <div
+              data-hero-actions-parallax
+              className="hero-actions"
+            >
+              {hero.actions.map((action) => {
+                const Icon = action.icon ? actionIcons[action.icon] : undefined;
+
+                return (
+                  <div
+                    key={action.href}
+                    data-hero-action
+                  >
+                    <FlipLink
+                      href={action.href}
+                      label={action.label}
+                      icon={Icon}
+                      variant={action.variant}
+                    />
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
 
