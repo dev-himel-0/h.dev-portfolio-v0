@@ -55,12 +55,12 @@ test.describe("responsive layout", () => {
     });
   }
 
-  test("wraps narrow footer socials without clipping", async ({ page }) => {
+  test("keeps narrow contact actions inside the viewport", async ({ page }) => {
     await page.setViewportSize({ width: 280, height: 640 });
     await page.goto("/");
 
     const items = await page
-      .locator("[data-footer-socials] > li")
+      .locator("[data-contact-actions] a")
       .evaluateAll((elements) =>
         elements.map((element) => {
           const rect = element.getBoundingClientRect();
@@ -107,9 +107,7 @@ test.describe("responsive layout", () => {
     await page.goto("/");
 
     const heights = await page
-      .locator(
-        "#about a[aria-label], #contact [data-footer-nav] a, #contact [data-footer-socials] a",
-      )
+      .locator("#about a[aria-label], #contact [data-contact-actions] a")
       .evaluateAll((elements) =>
         elements.map((element) => element.getBoundingClientRect().height),
       );

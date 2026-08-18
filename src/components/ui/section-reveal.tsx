@@ -66,7 +66,8 @@ export function SectionReveal({
         scrollTrigger: {
           trigger: scope,
           start,
-          once: true,
+          onEnter: (self) =>
+            requestAnimationFrame(() => self.kill(false, true)),
         },
       });
     },

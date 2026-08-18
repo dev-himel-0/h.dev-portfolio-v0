@@ -36,25 +36,56 @@ export function Hero({
     () => {
       if (!isRevealed) return;
 
-      gsap.set("[data-hero-line]", { willChange: "transform" });
-      gsap.set(
-        [
-          "[data-hero-rail-content]",
-          "[data-hero-rail-line]",
-          "[data-scroll-arrow]",
-        ],
-        {
-          willChange: "transform",
-        },
-      );
-      gsap.set("[data-hero-action]", { willChange: "transform,opacity" });
-      gsap.set("[data-scroll-line]", {
+      const root = rootRef.current;
+      if (!root) return;
+
+      const select = (selector: string) => Array.from(root.querySelectorAll(selector));
+      const heroLines = select("[data-hero-line]");
+      const heroRailContent = select("[data-hero-rail-content]");
+      const heroRailLine = select("[data-hero-rail-line]");
+      const scrollArrow = select("[data-scroll-arrow]");
+      const heroActions = select("[data-hero-action]");
+      const scrollLine = select("[data-scroll-line]");
+      const scrollChevron = select("[data-scroll-chevron]");
+      const heroGreeting = select("[data-hero-greeting]");
+      const heroMono = select("[data-hero-mono]");
+      const heroMenuToggle = select("[data-hero-menu-toggle]");
+      const filledHeroLine = select("[data-hero-line='filled']");
+      const outlinedHeroLine = select("[data-hero-line='outlined']");
+      const heroTitleParallax = select("[data-hero-title-parallax]");
+      const heroGreetingParallax = select("[data-hero-greeting-parallax]");
+      const heroActionsParallax = select("[data-hero-actions-parallax]");
+      const heroRailParallax = select("[data-hero-rail-parallax]");
+      const heroScroll = select("[data-hero-scroll]");
+      const parallaxTargets = [
+        ...heroTitleParallax,
+        ...heroGreetingParallax,
+        ...heroActionsParallax,
+        ...heroRailParallax,
+        ...heroScroll,
+      ];
+      const willChangeTargets = [
+        ...heroLines,
+        ...heroRailContent,
+        ...heroRailLine,
+        ...scrollArrow,
+        ...scrollLine,
+        ...scrollChevron,
+        ...heroActions,
+      ];
+
+      gsap.set(heroLines, { willChange: "transform" });
+      gsap.set([...heroRailContent, ...heroRailLine, ...scrollArrow], {
+        willChange: "transform",
+      });
+      gsap.set(heroActions, { willChange: "transform,opacity" });
+      gsap.set(scrollLine, {
         scaleY: 0,
         transformOrigin: "50% 0%",
         transformBox: "fill-box",
         willChange: "transform",
       });
-      gsap.set("[data-scroll-chevron]", {
+      gsap.set(scrollChevron, {
         autoAlpha: 0,
         willChange: "transform,opacity",
       });
@@ -63,40 +94,29 @@ export function Hero({
         delay: entranceDelay,
         defaults: { ease: "power4.out" },
         onComplete: () => {
-          gsap.set(
-            [
-              "[data-hero-line]",
-              "[data-hero-rail-content]",
-              "[data-hero-rail-line]",
-              "[data-scroll-arrow]",
-              "[data-scroll-line]",
-              "[data-scroll-chevron]",
-              "[data-hero-action]",
-            ],
-            { clearProps: "willChange" },
-          );
+          gsap.set(willChangeTargets, { clearProps: "willChange" });
         },
       });
 
       timeline
         .from(
-          "[data-hero-greeting]",
+          heroGreeting,
           { y: 10, autoAlpha: 0, duration: 0.55 },
           0.1,
         )
-        .from("[data-hero-mono]", { y: -12, autoAlpha: 0, duration: 0.55 }, 0.1)
+        .from(heroMono, { y: -12, autoAlpha: 0, duration: 0.55 }, 0.1)
         .from(
-          "[data-hero-menu-toggle]",
+          heroMenuToggle,
           { y: -10, autoAlpha: 0, duration: 0.5 },
           0.22,
         )
         .from(
-          "[data-hero-rail-content]",
+          heroRailContent,
           { y: 10, autoAlpha: 0, duration: 0.5, ease: "power3.out" },
           0.18,
         )
         .from(
-          "[data-hero-rail-line]",
+          heroRailLine,
           {
             scaleY: 0,
             transformOrigin: "top center",
@@ -106,38 +126,31 @@ export function Hero({
           0.26,
         )
         .from(
-          "[data-hero-line='filled']",
+          filledHeroLine,
           { yPercent: 110, autoAlpha: 0, duration: 1, ease: "expo.out" },
           0.34,
         )
         .from(
-          "[data-hero-line='outlined']",
+          outlinedHeroLine,
           { yPercent: 110, autoAlpha: 0, duration: 1.05, ease: "expo.out" },
           0.48,
         )
         .from(
-          "[data-hero-action]",
+          heroActions,
           { y: 18, autoAlpha: 0, duration: 0.7, stagger: 0.1 },
           1.0,
         )
         .to(
-          "[data-scroll-line]",
+          scrollLine,
           { scaleY: 1, duration: 0.9, ease: "power3.inOut" },
           1.3,
         )
         .to(
-          "[data-scroll-chevron]",
+          scrollChevron,
           { autoAlpha: 1, y: 0, duration: 0.4, ease: "power2.out" },
           1.8,
         );
 
-      const parallaxTargets = [
-        "[data-hero-title-parallax]",
-        "[data-hero-greeting-parallax]",
-        "[data-hero-actions-parallax]",
-        "[data-hero-rail-parallax]",
-        "[data-hero-scroll]",
-      ];
       const parallaxMedia = gsap.matchMedia();
 
       parallaxMedia.add(
@@ -147,7 +160,7 @@ export function Hero({
             window.matchMedia("(min-width: 1024px)").matches;
           const tablet = () => window.matchMedia("(min-width: 640px)").matches;
 
-          gsap.to("[data-scroll-arrow]", {
+          gsap.to(scrollArrow, {
             y: -10,
             duration: 1.1,
             ease: "sine.inOut",
@@ -176,7 +189,7 @@ export function Hero({
 
           parallaxTimeline
             .to(
-              "[data-hero-title-parallax]",
+              heroTitleParallax,
               {
                 y: () => (desktop() ? -72 : tablet() ? -48 : -28),
                 scale: () => (desktop() ? 0.92 : tablet() ? 0.95 : 0.97),
@@ -188,7 +201,7 @@ export function Hero({
               0,
             )
             .to(
-              "[data-hero-greeting-parallax]",
+              heroGreetingParallax,
               {
                 y: () => (desktop() ? -28 : tablet() ? -18 : -10),
                 opacity: () => (desktop() ? 0.55 : tablet() ? 0.68 : 0.8),
@@ -198,7 +211,7 @@ export function Hero({
               0,
             )
             .to(
-              "[data-hero-actions-parallax]",
+              heroActionsParallax,
               {
                 y: () => (desktop() ? 20 : tablet() ? 14 : 8),
                 opacity: () => (desktop() ? 0.65 : tablet() ? 0.78 : 0.86),
@@ -209,7 +222,7 @@ export function Hero({
               0,
             )
             .to(
-              "[data-hero-rail-parallax]",
+              heroRailParallax,
               {
                 y: -36,
                 opacity: 0.35,
@@ -219,7 +232,7 @@ export function Hero({
               0,
             )
             .to(
-              "[data-hero-scroll]",
+              heroScroll,
               {
                 y: -64,
                 opacity: 0,
@@ -231,7 +244,6 @@ export function Hero({
         },
       );
 
-      return () => parallaxMedia.revert();
     },
     {
       scope: rootRef,

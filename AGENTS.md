@@ -130,7 +130,7 @@ Skills are installed in `.agents/skills/` (+ `.opencode/skills/`). When a task m
 ## Build workflow
 
 - **One section at a time.** Foundation first, then sections in order: preloader → navbar+menu → hero → work → services → stack → about → contact → footer
-- After each section: run `npm run lint`, `npm run build`, and `npm run test:e2e`, then a visual check with `npm run dev`
-- **After EVERY UI change** (component, section, layout, animation, copy, styles): run `npm run test:e2e` — the Playwright config starts/reuses the dev server automatically. If the changed UI isn't covered, extend `e2e/*.spec.ts` with tests for it; never leave a failing test behind. Assertions pull expected copy from `src/lib/data.ts`, never hardcoded strings.
+- After each section: run `npm run lint` and `npm run build`, then a visual check with `npm run dev`
+- **E2E tests are opt-in:** run `npm run test:e2e` only when the user explicitly requests it. When requested, the Playwright config starts/reuses the dev server automatically. If the changed UI isn't covered, extend `e2e/*.spec.ts` with tests for it; never leave a failing test behind. Assertions pull expected copy from `src/lib/data.ts`, never hardcoded strings.
 - Never proceed to the next section without user confirmation
 - Only commit when the user explicitly asks

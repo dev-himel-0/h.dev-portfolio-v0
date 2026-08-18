@@ -172,27 +172,38 @@
   paint-order: stroke fill;
 }
 
-/* Alpha-only fade for the oversized footer word. The page stays monochrome;
-   only the lower edge of the glyphs dissolves into the white surface. */
-.footer-brand-fade {
-  -webkit-mask-image: linear-gradient(
-    to top,
-    transparent 0%,
-    transparent 14%,
-    rgb(0 0 0 / 0.6) 50%,
-    #000 100%
+/* The stage starts at the contact seam and crops away the font's empty line-box
+   space. The glyph can slide from the seam without sitting beneath the panel. */
+[data-site-footer] {
+  --footer-brand-size: clamp(6.5rem, 27vw, 27rem);
+  --footer-top-space: clamp(1.5rem, 3.5vw, 3rem);
+  --footer-stage-size: calc(
+    var(--footer-brand-size) * 0.75 + var(--footer-top-space)
   );
-  mask-image: linear-gradient(
-    to top,
-    transparent 0%,
-    transparent 14%,
-    rgb(0 0 0 / 0.6) 50%,
-    #000 100%
-  );
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  -webkit-mask-size: 100% 100%;
-  mask-size: 100% 100%;
+}
+
+[data-footer-stage] {
+  height: var(--footer-stage-size);
+}
+
+[data-footer-brand-reveal] {
+  font-size: var(--footer-brand-size);
+}
+
+/* A blurred white surface dissolves only the lower glyphs into the footer. It
+   keeps the palette flat black-and-white instead of adding a color gradient. */
+.footer-brand-wash {
+  position: absolute;
+  right: -2%;
+  bottom: -0.08em;
+  left: -2%;
+  z-index: 20;
+  height: 0.5em;
+  background: #fff;
+  filter: blur(0.075em);
+  opacity: 0.96;
+  transform: translateY(0.04em) scaleX(1.04);
+  transform-origin: 50% 100%;
 }
 
 .video-reveal__video {

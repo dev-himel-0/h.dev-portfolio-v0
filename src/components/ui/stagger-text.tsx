@@ -65,7 +65,8 @@ export function StaggerText({
           scrollTrigger: {
             trigger: el,
             start: "top 88%",
-            once: true,
+            onEnter: (self) =>
+              requestAnimationFrame(() => self.kill(false, true)),
           },
         },
       );

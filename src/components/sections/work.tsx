@@ -25,7 +25,12 @@ export function Work() {
 
   useGSAP(
     () => {
-      const rows = gsap.utils.toArray<HTMLElement>("[data-work-row]");
+      const root = rootRef.current;
+      if (!root) return;
+
+      const rows = Array.from(
+        root.querySelectorAll<HTMLElement>("[data-work-row]"),
+      );
       const media = gsap.matchMedia();
 
       media.add(
@@ -53,7 +58,6 @@ export function Work() {
         },
       );
 
-      return () => media.revert();
     },
     { scope: rootRef },
   );

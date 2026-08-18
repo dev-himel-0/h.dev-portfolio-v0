@@ -21,7 +21,15 @@ export function Services() {
         return;
       }
 
-      gsap.from("[data-service-row]", {
+      const root = rootRef.current;
+      const content = contentRef.current;
+      if (!root || !content) return;
+
+      const rows = Array.from(
+        content.querySelectorAll<HTMLElement>("[data-service-row]"),
+      );
+
+      gsap.from(rows, {
         y: 30,
         autoAlpha: 0,
         duration: 0.8,
@@ -30,7 +38,8 @@ export function Services() {
         scrollTrigger: {
           trigger: contentRef.current,
           start: "top 82%",
-          once: true,
+          onEnter: (self) =>
+            requestAnimationFrame(() => self.kill(false, true)),
         },
       });
     },

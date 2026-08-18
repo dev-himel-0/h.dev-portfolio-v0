@@ -27,30 +27,34 @@ export function HowIWork() {
       ).matches;
       const isMobile = !window.matchMedia("(min-width: 810px)").matches;
 
-      const steps = gsap.utils.toArray<HTMLElement>("[data-process-step]");
+      const steps = Array.from(
+        flow.querySelectorAll<HTMLElement>("[data-process-step]"),
+      );
       const cleanups: Array<() => void> = [];
 
       steps.forEach((step, index) => {
         const media = step.querySelector<HTMLElement>("[data-process-media]");
-        const visuals = gsap.utils.toArray<HTMLElement>(
-          media?.querySelectorAll("img, [data-process-visual]") ?? [],
+        const visuals = Array.from(
+          media?.querySelectorAll<HTMLElement>(
+            "img, [data-process-visual]",
+          ) ?? [],
         );
-        const copy = gsap.utils.toArray<HTMLElement>(
-          step.querySelectorAll("[data-process-copy]"),
+        const copy = Array.from(
+          step.querySelectorAll<HTMLElement>("[data-process-copy]"),
         );
         const numberStrip = step.querySelector<HTMLElement>(
           "[data-process-number-strip]",
         );
-        const verticalFills = gsap.utils.toArray<HTMLElement>(
-          step.querySelectorAll(
+        const verticalFills = Array.from(
+          step.querySelectorAll<HTMLElement>(
             "[data-process-vertical-fill], [data-process-mobile-fill]",
           ),
         );
         const horizontalFill = step.querySelector<HTMLElement>(
           "[data-process-horizontal-fill]",
         );
-        const nodes = gsap.utils.toArray<HTMLElement>(
-          step.querySelectorAll("[data-process-node-fill]"),
+        const nodes = Array.from(
+          step.querySelectorAll<HTMLElement>("[data-process-node-fill]"),
         );
 
         if (!media || !numberStrip || !verticalFills.length) {
@@ -92,29 +96,33 @@ export function HowIWork() {
           gsap.set(verticalFills, { scaleY: 1 });
           setNumberPosition(finalNumber);
           gsap.set(nodes, { autoAlpha: 1, scale: 1 });
-          gsap.fromTo(
-            media,
-            { autoAlpha: 0, y: 24 },
-            {
+          const reveal = gsap.timeline({
+            defaults: { ease: "power3.out" },
+            scrollTrigger: {
+              trigger: step,
+              start: "top 84%",
+              onEnter: (self) =>
+                requestAnimationFrame(() => self.kill(false, true)),
+            },
+          });
+
+          reveal
+            .fromTo(media, { autoAlpha: 0, y: 24 }, {
               autoAlpha: 1,
               y: 0,
               duration: 0.65,
-              ease: "power3.out",
-              scrollTrigger: { trigger: step, start: "top 84%", once: true },
-            },
-          );
-          gsap.fromTo(
-            copy,
-            { autoAlpha: 0, y: 16 },
-            {
-              autoAlpha: 1,
-              y: 0,
-              duration: 0.55,
-              ease: "power3.out",
-              stagger: 0.05,
-              scrollTrigger: { trigger: step, start: "top 84%", once: true },
-            },
-          );
+            })
+            .fromTo(
+              copy,
+              { autoAlpha: 0, y: 16 },
+              {
+                autoAlpha: 1,
+                y: 0,
+                duration: 0.55,
+                stagger: 0.05,
+              },
+              0.08,
+            );
           return;
         }
 

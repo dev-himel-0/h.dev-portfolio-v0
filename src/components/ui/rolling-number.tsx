@@ -63,11 +63,13 @@ export function RollingNumber({
       );
       if (!strips.length) return;
 
+      let hasEntered = false;
       const st = ScrollTrigger.create({
         trigger: root,
         start: "top 85%",
-        once: true,
-        onEnter: () => {
+        onEnter: (self) => {
+          if (hasEntered) return;
+          hasEntered = true;
           gsap.set(strips, { yPercent: 0, y: 0, willChange: "transform" });
           gsap.to(strips, {
             yPercent: (index: number) => {
@@ -80,6 +82,7 @@ export function RollingNumber({
             delay,
             onComplete: () => gsap.set(strips, { clearProps: "willChange" }),
           });
+          requestAnimationFrame(() => self.kill(false, true));
         },
       });
 

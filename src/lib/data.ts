@@ -122,11 +122,25 @@ export const profile = {
   name: "Himel",
   brand: "H.dev",
   role: "Frontend Engineer",
-  tagline: "I build fast, precise, and memorable web interfaces.",
+  tagline:
+    "Have a business idea in mind? Let’s turn it into a digital product.",
   availability: "Available for freelance & remote",
   location: "Dhaka, Bangladesh",
   email: "hello@himel.dev",
   experienceYears: 4,
+};
+
+export const contact = {
+  ctaLabel: "Start a project",
+};
+
+export const siteFooter = {
+  locationLabel: "Location",
+  contactLabel: "Contact",
+  linksLabel: "Links",
+  socialsLabel: "Socials",
+  profileLabel: "Profile",
+  copyright: "All rights reserved.",
 };
 
 export const navigation: NavigationItem[] = [

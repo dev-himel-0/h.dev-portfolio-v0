@@ -91,7 +91,15 @@ export function Stack() {
         return;
       }
 
-      gsap.from("[data-bento-cell]", {
+      const root = rootRef.current;
+      const content = contentRef.current;
+      if (!root || !content) return;
+
+      const cells = Array.from(
+        content.querySelectorAll<HTMLElement>("[data-bento-cell]"),
+      );
+
+      gsap.from(cells, {
         y: 34,
         autoAlpha: 0,
         duration: 0.9,
@@ -100,7 +108,8 @@ export function Stack() {
         scrollTrigger: {
           trigger: contentRef.current,
           start: "top 82%",
-          once: true,
+          onEnter: (self) =>
+            requestAnimationFrame(() => self.kill(false, true)),
         },
       });
     },

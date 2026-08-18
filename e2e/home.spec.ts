@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 
 import {
   about,
+  contact as contactContent,
   hero,
   navigation,
   profile,
@@ -164,9 +165,10 @@ test.describe("home", () => {
     await expect(heading).toContainText(hero.filledTitle);
     await expect(heading).toContainText(hero.outlinedTitle);
 
+    const heroSection = page.locator("#home");
     for (const action of hero.actions) {
       await expect(
-        page.getByRole("link", { name: action.label }),
+        heroSection.getByRole("link", { name: action.label }),
       ).toBeVisible();
     }
   });
@@ -1492,7 +1494,7 @@ test.describe("home", () => {
     }
   });
 
-  test("renders the layered contact footer with the H.dev brand reveal", async ({
+  test("renders the layered contact footer with a fully visible H.dev brand", async ({
     page,
   }) => {
     await page.emulateMedia({ reducedMotion: "no-preference" });
@@ -1508,42 +1510,115 @@ test.describe("home", () => {
     await brand.scrollIntoViewIfNeeded();
 
     await expect(contact).toBeAttached();
+    await expect(contact).toContainText(profile.tagline);
     await expect(contact).toContainText(profile.email);
+    await expect(contact).toContainText(profile.availability);
+    await expect(contact).not.toContainText("Based in");
+    await expect(contact).not.toContainText("Elsewhere");
+    await expect(contact).not.toContainText("Navigate");
+    await expect(contact.locator("[data-contact-stage]")).toHaveCSS(
+      "background-color",
+      "rgb(255, 255, 255)",
+    );
+    await expect(contact.locator("[data-contact-stage] canvas")).toHaveCount(0);
+    await expect(contact.locator("[data-contact-cta] a")).toHaveAttribute(
+      "href",
+      `mailto:${profile.email}`,
+    );
+    await expect(contact.locator("[data-contact-cta] a")).toContainText(
+      contactContent.ctaLabel,
+    );
+    await expect(contact.locator("[data-contact-email]")).toHaveAttribute(
+      "href",
+      `mailto:${profile.email}`,
+    );
+    const stageBounds = await contact
+      .locator("[data-contact-stage]")
+      .evaluate((element) => {
+        const rect = element.getBoundingClientRect();
+        return { left: rect.left, right: rect.right };
+      });
+    const viewportWidth = await page.evaluate(() => window.innerWidth);
+    expect(stageBounds.left).toBe(0);
+    expect(stageBounds.right).toBe(viewportWidth);
     const contactPadding = await contact.evaluate((element) => {
       const styles = getComputedStyle(element);
       return { top: styles.paddingTop, bottom: styles.paddingBottom };
     });
-    expect(contactPadding.top).toBe(contactPadding.bottom);
+    expect(contactPadding.top).toBe("0px");
+    expect(Number.parseFloat(contactPadding.bottom)).toBeGreaterThan(0);
+    const contactGridPadding = await contact
+      .locator("[data-contact-stage] > div")
+      .evaluate((element) => {
+        const styles = getComputedStyle(element);
+        return {
+          top: styles.paddingTop,
+          right: styles.paddingRight,
+          bottom: styles.paddingBottom,
+          left: styles.paddingLeft,
+        };
+      });
+    if ((page.viewportSize()?.width ?? 0) >= 1024) {
+      expect(contactGridPadding).toEqual({
+        top: "0px",
+        right: "0px",
+        bottom: "0px",
+        left: "0px",
+      });
+    } else {
+      expect(Number.parseFloat(contactGridPadding.left)).toBeGreaterThan(0);
+      expect(Number.parseFloat(contactGridPadding.right)).toBeGreaterThan(0);
+    }
     await expect(brand).toHaveText(profile.brand);
-    await expect(contact.locator("[data-footer-nav] a")).toHaveCount(
-      navigation.length,
-    );
-    const socialItems = contact.locator("[data-footer-socials] > li");
-    await expect(socialItems).toHaveCount(socials.length);
+    const contactColumns = await contact
+      .locator("[data-contact-reveal]")
+      .evaluateAll((elements) =>
+        elements.map((element) => element.getBoundingClientRect().left),
+      );
     await expect
-      .poll(() =>
-        socialItems.evaluateAll((elements) =>
-          elements.every(
-            (element) => getComputedStyle(element).whiteSpace === "nowrap",
-          ),
-        ),
+      .poll(
+        () =>
+          contact.locator("[data-contact-stage]").evaluate((stage) => {
+            const stageRect = stage.getBoundingClientRect();
+            const stageCenter = stageRect.top + stageRect.height / 2;
+            const rects = [
+              ...stage.querySelectorAll<HTMLElement>("[data-contact-reveal]"),
+            ].map((element) => element.getBoundingClientRect());
+            if ((window.innerWidth ?? 0) >= 1024) {
+              return rects.every(
+                (rect) =>
+                  Math.abs(rect.top + rect.height / 2 - stageCenter) <= 2,
+              );
+            }
+
+            const contentTop = Math.min(...rects.map((rect) => rect.top));
+            const contentBottom = Math.max(...rects.map((rect) => rect.bottom));
+            return (
+              Math.abs((contentTop + contentBottom) / 2 - stageCenter) <= 2
+            );
+          }),
+        "contact content is vertically centered in the stage",
       )
       .toBe(true);
-    await expect
-      .poll(() =>
-        socialItems.evaluateAll((elements) => {
-          const tops = elements.map((element) =>
-            Math.round(element.getBoundingClientRect().top),
-          );
-          return new Set(tops).size;
-        }),
-      )
-      .toBe(1);
+    if ((page.viewportSize()?.width ?? 0) >= 1024) {
+      expect(contactColumns[1]).toBeGreaterThan(contactColumns[0]);
+    } else {
+      expect(contactColumns[1]).toBe(contactColumns[0]);
+    }
 
     await expect(contact.locator("[data-rail]")).toHaveCount(0);
-    await expect(
-      contact.locator(":scope > div:first-child > div:first-child"),
-    ).toHaveCSS("border-top-width", "0px");
+    await expect(contact.locator("[data-contact-stage]")).toHaveCSS(
+      "border-top-width",
+      "0px",
+    );
+    await expect(contact.locator("[data-contact-stage]")).toHaveCSS(
+      "border-bottom-width",
+      "0px",
+    );
+    await expect(contact.locator("[data-contact-stage]")).toHaveCSS(
+      "border-left-width",
+      "1px",
+    );
     await expect(footer.locator("[data-footer-stage]")).toHaveCSS(
       "border-top-width",
       "0px",
@@ -1551,6 +1626,18 @@ test.describe("home", () => {
     await expect(footer.locator("[data-footer-stage]")).toHaveCSS(
       "border-bottom-width",
       "0px",
+    );
+    await expect(footer.locator("[data-footer-stage]")).toHaveCSS(
+      "padding-top",
+      "0px",
+    );
+    await expect(footer.locator("[data-footer-stage]")).toHaveCSS(
+      "padding-bottom",
+      "0px",
+    );
+    await expect(footer.locator("[data-footer-stage]")).toHaveCSS(
+      "overflow",
+      "visible",
     );
 
     await expect
@@ -1560,13 +1647,90 @@ test.describe("home", () => {
           return styles.maskImage || styles.webkitMaskImage;
         }),
       )
-      .toContain("linear-gradient");
+      .toBe("none");
+    const brandWash = footer.locator("[data-footer-brand-wash]");
+    await expect(brandWash).toHaveAttribute("aria-hidden", "true");
+    await expect(brandWash).toHaveCSS("background-color", "rgb(255, 255, 255)");
+    await expect
+      .poll(() =>
+        brandWash.evaluate((element) => getComputedStyle(element).filter),
+      )
+      .toMatch(/^blur\(.+\)$/);
 
     await expect
       .poll(() =>
         brand.evaluate((element) => getComputedStyle(element).opacity),
       )
       .toBe("1");
+
+    await page.evaluate(() =>
+      window.scrollTo({
+        top: document.documentElement.scrollHeight,
+        behavior: "instant",
+      }),
+    );
+
+    await expect
+      .poll(
+        () =>
+          footer.evaluate((element) => {
+            const stage = element.querySelector<HTMLElement>(
+              "[data-footer-stage]",
+            );
+            const brand = element.querySelector<HTMLElement>(
+              "[data-footer-brand]",
+            );
+            const reveal = element.querySelector<HTMLElement>(
+              "[data-footer-brand-reveal]",
+            );
+            const contact = document.querySelector<HTMLElement>("#contact");
+            if (!stage || !brand || !reveal || !contact) return false;
+
+            const stageRect = stage.getBoundingClientRect();
+            const brandRect = brand.getBoundingClientRect();
+            const contactRect = contact.getBoundingClientRect();
+            const styles = getComputedStyle(brand);
+            const revealStyles = getComputedStyle(reveal);
+            const transform = revealStyles.transform;
+            const translateY =
+              transform === "none" ? 0 : new DOMMatrixReadOnly(transform).m42;
+            const fontSize = Number.parseFloat(styles.fontSize);
+            const lineHeight = Number.parseFloat(styles.lineHeight);
+            const bottomOffset = Number.parseFloat(revealStyles.bottom);
+            const canvas = document.createElement("canvas");
+            const context = canvas.getContext("2d");
+            if (!context) return false;
+            context.font = `${styles.fontWeight} ${styles.fontSize} ${styles.fontFamily}`;
+            const metrics = context.measureText(brand.textContent ?? "");
+            const fontMetricsHeight =
+              metrics.fontBoundingBoxAscent + metrics.fontBoundingBoxDescent;
+            const baseline =
+              brandRect.top +
+              (lineHeight - fontMetricsHeight) / 2 +
+              metrics.fontBoundingBoxAscent;
+            const inkTop = baseline - metrics.actualBoundingBoxAscent;
+            const inkBottom = baseline + metrics.actualBoundingBoxDescent;
+            const topClearance = inkTop - contactRect.bottom;
+            const expectedTopSpace = Math.min(
+              48,
+              Math.max(24, window.innerWidth * 0.035),
+            );
+            const stageTopSpace = stageRect.height - fontSize * 0.75;
+
+            return (
+              Math.abs(translateY) <= 1 &&
+              Math.abs(lineHeight - fontSize) <= 1 &&
+              Math.abs(stageTopSpace - expectedTopSpace) <= 1 &&
+              Math.abs(bottomOffset + fontSize * 0.1) <= 1 &&
+              inkTop >= stageRect.top - 1 &&
+              topClearance >= expectedTopSpace &&
+              topClearance <= expectedTopSpace + 8 &&
+              Math.abs(inkBottom - stageRect.bottom) <= 2
+            );
+          }),
+        "footer ink clears the contact seam and meets the document bottom",
+      )
+      .toBe(true);
 
     const hasOverflow = await page.evaluate(
       () => document.documentElement.scrollWidth > window.innerWidth,
@@ -1600,7 +1764,7 @@ test.describe("home", () => {
     }
   });
 
-  test("slides the contact panel and footer brand up into view", async ({
+  test("slides the complete footer brand from beneath the stationary contact", async ({
     page,
   }) => {
     await page.emulateMedia({ reducedMotion: "no-preference" });
@@ -1610,74 +1774,101 @@ test.describe("home", () => {
     });
 
     const contact = page.locator("#contact");
-    const brand = page.locator("[data-site-footer] [data-footer-brand]");
-    const initialContactTransform = () =>
+    const stage = page.locator("[data-site-footer] [data-footer-stage]");
+    const brandReveal = page.locator(
+      "[data-site-footer] [data-footer-brand-reveal]",
+    );
+    const contactTransform = () =>
       contact.evaluate((element) => getComputedStyle(element).transform);
-    const brandState = () =>
-      brand.evaluate((element) => ({
-        opacity: getComputedStyle(element).opacity,
-        transform: getComputedStyle(element).transform,
-      }));
+    const brandY = () => translateY(brandReveal);
+    const contactFooterGap = () =>
+      page.evaluate(() => {
+        const contact = document.querySelector("#contact");
+        const footer = document.querySelector("[data-site-footer]");
+        if (!contact || !footer) return Number.POSITIVE_INFINITY;
+        return (
+          footer.getBoundingClientRect().top -
+          contact.getBoundingClientRect().bottom
+        );
+      });
+    const canAnimate = await page.evaluate(
+      () =>
+        window.matchMedia(
+          "(min-width: 810px) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)",
+        ).matches,
+    );
 
     await expect
-      .poll(() => brandState().then((state) => state.opacity))
-      .toBe("0");
-
-    await brand.scrollIntoViewIfNeeded();
-
-    await expect
-      .poll(() => brandState().then((state) => state.opacity), {
-        timeout: 5_000,
-      })
-      .toBe("1");
-    await expect
-      .poll(() => brandState().then((state) => state.transform), {
-        timeout: 5_000,
-      })
+      .poll(contactTransform)
       .toMatch(/^(none|matrix\(1, 0, 0, 1, 0, 0\))$/);
 
-    if ((page.viewportSize()?.width ?? 0) < 810) {
-      // Touch layouts keep the contact panel in normal flow rather than
-      // running a continuous scrub while the user scrolls.
-      await expect
-        .poll(initialContactTransform, { timeout: 5_000 })
-        .toMatch(/^(none|matrix\(1, 0, 0, 1, 0, 0\))$/);
-      await page.locator("#home").scrollIntoViewIfNeeded();
-      await expect
-        .poll(() => brandState().then((state) => state.opacity), {
-          timeout: 5_000,
-        })
-        .toBe("0");
-      await brand.scrollIntoViewIfNeeded();
-      await expect
-        .poll(() => brandState().then((state) => state.opacity), {
-          timeout: 5_000,
-        })
-        .toBe("1");
-      return;
+    const hiddenBrandY = await stage.evaluate((element) => {
+      const contact = document.querySelector<HTMLElement>("#contact");
+      if (!contact) return 0;
+
+      const stageRect = element.getBoundingClientRect();
+      const overlap = Math.min(
+        stageRect.height,
+        Math.max(0, contact.getBoundingClientRect().bottom - stageRect.top),
+      );
+      return -(stageRect.height - overlap);
+    });
+    const initialBrandY = await brandY();
+    if (canAnimate) {
+      expect(Math.abs(hiddenBrandY)).toBeGreaterThan(
+        (await stage.evaluate((element) => element.offsetHeight)) * 0.65,
+      );
+      expect(initialBrandY).toBeCloseTo(hiddenBrandY, 0);
+    } else {
+      expect(initialBrandY).toBeCloseTo(0, 0);
     }
 
+    const scrollRange = await stage.evaluate((element) => {
+      const rect = element.getBoundingClientRect();
+      const top = rect.top + window.scrollY - window.innerHeight;
+      return { start: top, distance: rect.height };
+    });
+    await page.evaluate(
+      ({ start, distance }) =>
+        window.scrollTo({
+          top: start + distance * 0.55,
+          behavior: "instant",
+        }),
+      scrollRange,
+    );
+
+    if (canAnimate) {
+      await expect
+        .poll(brandY, { timeout: 5_000 })
+        .toBeGreaterThan(initialBrandY);
+      await expect
+        .poll(brandY, { timeout: 5_000 })
+        .toBeCloseTo(hiddenBrandY * 0.45, 0);
+    } else {
+      await expect.poll(brandY, { timeout: 5_000 }).toBeCloseTo(0, 0);
+    }
     await expect
-      .poll(initialContactTransform, {
-        timeout: 5_000,
-      })
-      .toMatch(/matrix\(1, 0, 0, 1, 0, -/);
+      .poll(contactTransform)
+      .toMatch(/^(none|matrix\(1, 0, 0, 1, 0, 0\))$/);
+
+    await page.evaluate(() =>
+      window.scrollTo({
+        top: document.documentElement.scrollHeight,
+        behavior: "instant",
+      }),
+    );
+    await expect.poll(brandY, { timeout: 5_000 }).toBeCloseTo(0, 0);
+    await expect.poll(contactFooterGap).toBeCloseTo(0, 0);
 
     await page.locator("#home").scrollIntoViewIfNeeded();
 
-    await expect
-      .poll(() => brandState().then((state) => state.opacity), {
-        timeout: 5_000,
-      })
-      .toBe("0");
-
-    await brand.scrollIntoViewIfNeeded();
-
-    await expect
-      .poll(() => brandState().then((state) => state.opacity), {
-        timeout: 5_000,
-      })
-      .toBe("1");
+    if (canAnimate) {
+      await expect
+        .poll(brandY, { timeout: 5_000 })
+        .toBeCloseTo(hiddenBrandY, 0);
+    } else {
+      await expect.poll(brandY, { timeout: 5_000 }).toBeCloseTo(0, 0);
+    }
   });
 });
 

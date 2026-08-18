@@ -1,74 +1,104 @@
 "use client";
 
-import { useRef } from "react";
-import { ArrowUpRight } from "@phosphor-icons/react";
+import { FlipLink } from "@/components/ui/flip-link";
+import { SectionReveal } from "@/components/ui/section-reveal";
+import {
+  contact,
+  navigation,
+  profile,
+  siteFooter,
+  socials,
+} from "@/lib/data";
+import { useGSAP } from "@gsap/react";
+import {
+  ArrowUpRight,
+  EnvelopeSimple,
+  GithubLogo,
+  LinkedinLogo,
+  MapPin,
+  XLogo,
+} from "@phosphor-icons/react";
+import type { Icon } from "@phosphor-icons/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
-import { SectionReveal } from "@/components/ui/section-reveal";
-import { navigation, profile, socials } from "@/lib/data";
+import { useRef } from "react";
+import type { SocialIcon } from "@/lib/data";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
+const FOOTER_SOCIAL_ICONS: Record<SocialIcon, Icon> = {
+  github: GithubLogo,
+  linkedin: LinkedinLogo,
+  x: XLogo,
+  email: EnvelopeSimple,
+};
+
 /**
- * The closing frame of the portfolio: the contact panel slides upward over a
- * footer layer, while the oversized brand keeps its own masked reveal.
+ * The closing frame of the portfolio: the footer information panel masks the
+ * oversized brand while it drifts down into its final frame.
  */
 export function SiteFooter() {
   const rootRef = useRef<HTMLDivElement>(null);
-  const contactRef = useRef<HTMLElement>(null);
   const brandStageRef = useRef<HTMLDivElement>(null);
-  const brandRef = useRef<HTMLSpanElement>(null);
+  const brandRevealRef = useRef<HTMLDivElement>(null);
 
   useGSAP(
     () => {
-      const contact = contactRef.current;
-      const brand = brandRef.current;
+      const footerInfo = rootRef.current?.querySelector<HTMLElement>(
+        "[data-footer-info]",
+      );
       const stage = brandStageRef.current;
-      if (!contact || !brand || !stage) return;
+      const brand = brandRevealRef.current;
+      if (!footerInfo || !stage || !brand) return;
 
-      const reducedMotion = window.matchMedia(
-        "(prefers-reduced-motion: reduce)",
-      ).matches;
-      if (reducedMotion) return;
+      const media = gsap.matchMedia();
 
-      const canUseParallax = window.matchMedia("(min-width: 810px)").matches;
+      media.add(
+        "(min-width: 810px) and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)",
+        () => {
+          const hiddenY = () => {
+            const footerInfoBottom = footerInfo.getBoundingClientRect().bottom;
+            const stageTop = stage.getBoundingClientRect().top;
+            const overlap = Math.min(
+              stage.offsetHeight,
+              Math.max(0, footerInfoBottom - stageTop),
+            );
 
-      if (canUseParallax) {
-        gsap.to(contact, {
-          y: () => -(stage.offsetHeight * 0.25),
-          ease: "none",
-          scrollTrigger: {
-            trigger: contact,
-            start: "bottom bottom",
-            end: "bottom top",
-            scrub: 0.8,
-            onToggle: (self) =>
-              gsap.set(contact, {
-                willChange: self.isActive ? "transform" : "auto",
-              }),
-          },
-        });
-      }
+            // Park the complete word behind the footer information panel until
+            // the stage scrolls into its reveal range.
+            return -(stage.offsetHeight - overlap);
+          };
 
-      gsap.set(brand, {
-        yPercent: 112,
-        autoAlpha: 0,
-        willChange: "transform, opacity",
-      });
-
-      gsap.to(brand, {
-        yPercent: 0,
-        autoAlpha: 1,
-        duration: 1.25,
-        ease: "expo.out",
-        scrollTrigger: {
-          trigger: stage,
-          start: "top 92%",
-          toggleActions: "restart none restart reset",
+          gsap.fromTo(
+            brand,
+            { y: hiddenY },
+            {
+              y: 0,
+              ease: "none",
+              scrollTrigger: {
+                trigger: stage,
+                start: "top bottom",
+                end: "bottom bottom",
+                scrub: 1.1,
+                invalidateOnRefresh: true,
+                onToggle: (self) =>
+                  gsap.set(brand, {
+                    willChange: self.isActive ? "transform" : "auto",
+                  }),
+              },
+            },
+          );
         },
-        onComplete: () => gsap.set(brand, { clearProps: "willChange" }),
+      );
+
+      media.add("(prefers-reduced-motion: reduce)", () => {
+        gsap.set(brand, {
+          y: 0,
+          clearProps: "transform,will-change",
+        });
       });
+
+      return () => media.revert();
     },
     { scope: rootRef },
   );
@@ -80,107 +110,73 @@ export function SiteFooter() {
       className="relative isolate overflow-clip bg-white text-black"
     >
       <section
-        ref={contactRef}
         id="contact"
         aria-labelledby="contact-heading"
         data-footer-contact
-        className="relative z-10 overflow-clip bg-white py-24 sm:py-28 lg:py-36"
+        className="relative z-10 overflow-clip bg-white pb-8 sm:pb-10 lg:pb-12"
       >
-        <div className="mx-auto w-full max-w-[100rem] px-5 sm:px-8 lg:px-10">
-          <SectionReveal
-            variant="fade"
-            distance={100}
-            stagger={0.12}
-            className="mx-auto grid gap-12 lg:max-w-[76rem] lg:grid-cols-[minmax(0,1.1fr)_minmax(22rem,0.9fr)] lg:gap-20"
+        <div className="w-full items-center justify-center">
+          <div
+            data-contact-stage
+            className="relative overflow-hidden border-x border-black/10 bg-white text-black"
           >
-            <div
-              data-reveal
-              data-contact-reveal
+            <SectionReveal
+              variant="fade"
+              distance={100}
+              stagger={0.16}
+              className="relative z-10 mx-auto grid min-h-[clamp(28rem,52svh,34rem)] max-w-[76rem] content-center gap-14 px-6 py-10 sm:px-10 sm:py-14 lg:grid-cols-[minmax(0,1.22fr)_minmax(18rem,0.78fr)] lg:items-center lg:gap-20 lg:px-0 lg:py-0"
             >
-              <p className="font-sans text-[0.625rem] font-medium tracking-[0.24em] text-black/45 uppercase">
-                Contact
-              </p>
-              <h2
-                id="contact-heading"
-                className="mt-6 max-w-[38rem] font-heading text-[clamp(2rem,4.6vw,4.5rem)] leading-[0.95] font-semibold tracking-[-0.055em]"
+              <div
+                data-reveal
+                data-contact-reveal
+                className="max-w-[48rem]"
               >
-                {profile.tagline}
-              </h2>
-              <a
-                href={`mailto:${profile.email}`}
-                className="group mt-10 inline-flex items-center gap-3 border-b border-black/20 pb-2 font-heading text-[clamp(1.1rem,2vw,1.5rem)] font-medium tracking-[-0.02em] transition-colors duration-300 hover:border-black focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-4 focus-visible:outline-none"
-              >
-                {profile.email}
-                <ArrowUpRight
-                  aria-hidden="true"
-                  className="size-5 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-1 group-hover:-translate-y-1"
-                />
-              </a>
-            </div>
-
-            <div
-              data-reveal
-              data-contact-reveal
-              className="grid grid-cols-2 gap-y-10 self-end lg:justify-items-end lg:text-right"
-            >
-              <FooterColumn label="Based in">
-                <p>{profile.location}</p>
-                <p className="mt-1 text-black/45">{profile.availability}</p>
-              </FooterColumn>
-
-              <FooterColumn label="Navigate">
-                <nav
-                  aria-label="Footer navigation"
-                  data-footer-nav
+                <h2
+                  id="contact-heading"
+                  className="max-w-[48rem] font-heading text-[clamp(2rem,4.6vw,4.5rem)] leading-[0.95] font-semibold tracking-[-0.055em] text-balance text-black"
                 >
-                  <ul className="space-y-2">
-                    {navigation.map((item) => (
-                      <li key={item.href}>
-                        <a
-                          href={item.href}
-                          className="group inline-flex min-h-11 items-center gap-2 text-black/60 transition-colors duration-300 hover:text-black focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:outline-none"
-                        >
-                          {item.label}
-                          <ArrowUpRight
-                            aria-hidden="true"
-                            className="size-3 -translate-x-1 translate-y-1 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:translate-y-0 group-hover:opacity-100"
-                          />
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                </nav>
-              </FooterColumn>
+                  {profile.tagline}
+                </h2>
+              </div>
 
-              <FooterColumn
-                label="Elsewhere"
-                className="col-span-2 sm:col-span-1"
+              <div
+                data-reveal
+                data-contact-reveal
+                data-contact-actions
+                className="flex flex-col items-start gap-5 lg:items-end lg:text-right"
               >
-                <ul
-                  data-footer-socials
-                  className="flex flex-wrap justify-start gap-x-4 gap-y-1 sm:flex-nowrap sm:justify-end"
+                <div
+                  data-contact-cta
+                  className="w-full sm:w-auto"
                 >
-                  {socials.map((social) => (
-                    <li
-                      key={social.label}
-                      className="whitespace-nowrap"
-                    >
-                      {social.href ? (
-                        <a
-                          href={social.href}
-                          className="inline-flex min-h-11 items-center text-black/60 transition-colors duration-300 hover:text-black focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 focus-visible:outline-none"
-                        >
-                          {social.label}
-                        </a>
-                      ) : (
-                        <span className="text-black/60">{social.label}</span>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              </FooterColumn>
-            </div>
-          </SectionReveal>
+                  <FlipLink
+                    href={`mailto:${profile.email}`}
+                    label={contact.ctaLabel}
+                    icon={ArrowUpRight}
+                    variant="solid"
+                    className="focus-visible:ring-black focus-visible:ring-offset-white lg:min-w-[16rem]"
+                  />
+                </div>
+                <a
+                  href={`mailto:${profile.email}`}
+                  data-contact-email
+                  className="group inline-flex min-h-11 items-center gap-3 border-b border-black/25 pb-2 font-heading text-[clamp(1.1rem,2vw,1.5rem)] font-medium tracking-[-0.02em] text-black transition-colors duration-300 hover:border-black focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-4 focus-visible:ring-offset-white focus-visible:outline-none"
+                >
+                  {profile.email}
+                  <ArrowUpRight
+                    aria-hidden="true"
+                    className="size-5 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:translate-x-1 group-hover:-translate-y-1"
+                  />
+                </a>
+                <p
+                  data-contact-availability
+                  className="max-w-[18rem] font-sans text-xs leading-[1.5] text-black/55 lg:text-right"
+                >
+                  {profile.availability}
+                </p>
+              </div>
+            </SectionReveal>
+          </div>
         </div>
       </section>
 
@@ -190,38 +186,200 @@ export function SiteFooter() {
         className="relative z-0 bg-white text-black"
       >
         <div
+          data-footer-info
+          className="relative z-10 bg-white"
+        >
+          <SectionReveal
+            variant="fade"
+            distance={40}
+            stagger={0.12}
+            start="top 82%"
+            className="mx-auto grid max-w-[76rem] justify-items-start gap-10 px-6 py-[clamp(2.5rem,5vw,4rem)] text-left sm:grid-cols-2 sm:px-10 lg:grid-cols-4 lg:gap-12 lg:px-0"
+          >
+            <div
+              data-reveal
+              data-footer-contact-info
+              className="grid justify-items-start gap-7 sm:col-span-2 sm:grid-cols-2 lg:col-span-1 lg:grid-cols-1 lg:gap-6"
+            >
+              <div>
+                <p className="font-sans text-[0.625rem] font-medium tracking-[0.22em] text-black/45 uppercase">
+                  {siteFooter.locationLabel}
+                </p>
+                <div className="mt-3 flex items-center justify-start gap-2 font-heading text-[clamp(1rem,1.8vw,1.25rem)] leading-[1.2] font-medium tracking-[-0.025em] text-black/90">
+                  <MapPin
+                    aria-hidden="true"
+                    weight="regular"
+                    className="size-4 shrink-0 text-black/55"
+                  />
+                  <span>{profile.location}</span>
+                </div>
+              </div>
+
+              <div className="lg:mt-1">
+                <p className="font-sans text-[0.625rem] font-medium tracking-[0.22em] text-black/45 uppercase">
+                  {siteFooter.contactLabel}
+                </p>
+                <a
+                  href={`mailto:${profile.email}`}
+                  className="group mt-3 inline-flex min-h-11 items-center justify-start gap-2 font-heading text-[clamp(1rem,1.8vw,1.25rem)] leading-[1.2] font-medium tracking-[-0.025em] text-black/90 transition-colors duration-300 hover:text-black focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-4 focus-visible:ring-offset-white focus-visible:outline-none"
+                >
+                  <EnvelopeSimple
+                    aria-hidden="true"
+                    weight="regular"
+                    className="size-4 shrink-0 text-black/55"
+                  />
+                  {profile.email}
+                  <ArrowUpRight
+                    aria-hidden="true"
+                    className="size-4 transition-transform duration-300 ease-out group-hover:translate-x-1 group-hover:-translate-y-1"
+                  />
+                </a>
+                <p className="mt-2 max-w-[16rem] font-sans text-xs leading-[1.5] text-black/50">
+                  {profile.availability}
+                </p>
+              </div>
+            </div>
+
+            <nav
+              data-reveal
+              data-footer-nav
+              aria-label="Footer navigation"
+            >
+              <p className="font-sans text-[0.625rem] font-medium tracking-[0.22em] text-black/45 uppercase">
+                {siteFooter.linksLabel}
+              </p>
+              <ul className="mt-3 space-y-0">
+                {navigation.map((item) => (
+                  <li key={item.href}>
+                    <a
+                      href={item.href}
+                      className="group inline-flex min-h-11 items-center justify-start gap-2 font-heading text-[clamp(1.125rem,2.3vw,1.5rem)] leading-none font-medium tracking-[-0.035em] text-black/90 transition-colors duration-300 hover:text-black focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-4 focus-visible:ring-offset-white focus-visible:outline-none"
+                    >
+                      {item.label}
+                      <ArrowUpRight
+                        aria-hidden="true"
+                        className="size-4 -translate-x-1 translate-y-1 opacity-0 transition-all duration-300 ease-out group-hover:translate-x-0 group-hover:translate-y-0 group-hover:opacity-100"
+                      />
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+
+            <div
+              data-reveal
+              data-footer-socials
+            >
+              <p className="font-sans text-[0.625rem] font-medium tracking-[0.22em] text-black/45 uppercase">
+                {siteFooter.socialsLabel}
+              </p>
+              <ul className="mt-3 space-y-0">
+                {socials.map((social) => (
+                  <li key={social.label}>
+                    <FooterSocialItem social={social} />
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div
+              data-reveal
+              data-footer-profile
+            >
+              <p className="font-sans text-[0.625rem] font-medium tracking-[0.22em] text-black/45 uppercase">
+                {siteFooter.profileLabel}
+              </p>
+              <p className="mt-3 font-heading text-[clamp(1rem,1.8vw,1.25rem)] leading-[1.2] font-medium tracking-[-0.025em] text-black/90">
+                {profile.role}
+              </p>
+              <p className="mt-2 font-sans text-xs leading-[1.5] text-black/50">
+                {profile.experienceYears}+ years experience
+              </p>
+            </div>
+          </SectionReveal>
+        </div>
+
+        <div
           ref={brandStageRef}
           data-footer-stage
-          className="relative overflow-hidden px-2 pt-[clamp(1rem,2vw,2rem)] sm:px-4"
+          className="relative z-0 overflow-visible"
         >
-          <span
-            ref={brandRef}
-            data-footer-brand
-            className="footer-brand-fade block origin-bottom text-center font-heading text-[clamp(6.5rem,27vw,27rem)] leading-[0.76] font-semibold tracking-[-0.095em] whitespace-nowrap"
+          <div
+            ref={brandRevealRef}
+            data-footer-brand-reveal
+            className="absolute inset-x-0 bottom-[-0.1em] h-[1em] font-heading leading-none font-semibold tracking-[-0.095em] whitespace-nowrap"
           >
-            {profile.brand}
-          </span>
+            <span
+              data-footer-brand
+              className="absolute inset-0 z-10 block text-center text-black"
+            >
+              {profile.brand}
+            </span>
+            <span
+              aria-hidden="true"
+              data-footer-brand-wash
+              className="footer-brand-wash pointer-events-none"
+            />
+          </div>
+        </div>
+
+        <div
+          data-footer-meta
+          className="relative z-30 mx-auto flex max-w-[76rem] flex-wrap items-center justify-between gap-x-6 gap-y-2 bg-white px-6 py-4 text-left sm:px-10 lg:px-0"
+        >
+          <p className="font-sans text-[0.625rem] tracking-[0.12em] text-black/45 uppercase">
+            © {profile.name}. {siteFooter.copyright}
+          </p>
+          <a
+            href={`mailto:${profile.email}`}
+            className="group inline-flex min-h-11 items-center justify-center gap-2 font-sans text-[0.625rem] font-medium tracking-[0.12em] text-black/45 uppercase transition-colors duration-300 hover:text-black focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-4 focus-visible:ring-offset-white focus-visible:outline-none"
+          >
+            <EnvelopeSimple
+              aria-hidden="true"
+              weight="regular"
+              className="size-3.5 transition-transform duration-300 ease-out group-hover:-translate-y-0.5"
+            />
+            {contact.ctaLabel}
+            <ArrowUpRight
+              aria-hidden="true"
+              className="size-3.5 transition-transform duration-300 ease-out group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+            />
+          </a>
         </div>
       </footer>
     </div>
   );
 }
 
-function FooterColumn({
-  label,
-  children,
-  className = "",
+function FooterSocialItem({
+  social,
 }: {
-  label: string;
-  children: React.ReactNode;
-  className?: string;
+  social: (typeof socials)[number];
 }) {
-  return (
-    <div className={className}>
-      <p className="mb-4 font-sans text-[0.625rem] font-medium tracking-[0.2em] text-black/45 uppercase">
-        {label}
-      </p>
-      <div className="font-sans text-sm leading-[1.55]">{children}</div>
-    </div>
+  const SocialIcon = FOOTER_SOCIAL_ICONS[social.icon];
+  const icon = (
+    <SocialIcon
+      aria-hidden="true"
+      weight="regular"
+      className="size-4 shrink-0 text-black/55"
+    />
+  );
+  const className =
+    "inline-flex min-h-11 items-center justify-start gap-2 font-heading text-[clamp(1.125rem,2.3vw,1.5rem)] leading-none font-medium tracking-[-0.035em] text-black/90";
+
+  return social.href ? (
+    <a
+      href={social.href}
+      aria-label={social.label}
+      className={`${className} transition-colors duration-300 hover:text-black focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-4 focus-visible:ring-offset-white focus-visible:outline-none`}
+    >
+      {icon}
+      {social.label}
+    </a>
+  ) : (
+    <span className={className}>
+      {icon}
+      {social.label}
+    </span>
   );
 }

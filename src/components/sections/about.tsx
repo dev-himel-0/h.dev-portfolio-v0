@@ -56,12 +56,20 @@ export function About() {
       const statCells =
         band?.querySelectorAll<HTMLElement>("[data-about-stat]");
       if (band && statCells?.length) {
+        const statDividers = Array.from(
+          band.querySelectorAll<HTMLElement>("[data-stat-divider]"),
+        );
+        const statLabels = Array.from(
+          band.querySelectorAll<HTMLElement>("[data-stat-label]"),
+        );
+        let hasEnteredStats = false;
         ScrollTrigger.create({
           trigger: band,
           start: "top 85%",
-          once: true,
-          onEnter: () => {
-            gsap.from("[data-stat-divider]", {
+          onEnter: (self) => {
+            if (hasEnteredStats) return;
+            hasEnteredStats = true;
+            gsap.from(statDividers, {
               scaleY: 0,
               transformOrigin: "top center",
               duration: 0.9,
@@ -70,7 +78,7 @@ export function About() {
               delay: 0.2,
             });
 
-            gsap.from("[data-stat-label]", {
+            gsap.from(statLabels, {
               y: 12,
               autoAlpha: 0,
               duration: 0.6,
@@ -78,13 +86,17 @@ export function About() {
               stagger: 0.08,
               delay: 0.6,
             });
+            requestAnimationFrame(() => self.kill());
           },
         });
       }
 
       const socialsEl = socialsRef.current;
       if (socialsEl) {
-        gsap.from("[data-social-row-inner]", {
+        const socialRows = Array.from(
+          socialsEl.querySelectorAll<HTMLElement>("[data-social-row-inner]"),
+        );
+        gsap.from(socialRows, {
           yPercent: 110,
           duration: 1.1,
           ease: "power4.out",
@@ -92,7 +104,8 @@ export function About() {
           scrollTrigger: {
             trigger: socialsEl,
             start: "top 85%",
-            once: true,
+            onEnter: (self) =>
+              requestAnimationFrame(() => self.kill(false, true)),
           },
         });
       }
