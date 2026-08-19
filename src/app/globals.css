@@ -293,6 +293,11 @@
   text-stroke-width: clamp(1px, 0.12vw, 2px);
 }
 
+.hero-outline-final-letter {
+  display: inline-block;
+  margin-inline-start: 0.032em;
+}
+
 .hero-meta-stage {
   width: 100%;
   margin: clamp(0.45rem, 1vh, 0.75rem) auto 0;

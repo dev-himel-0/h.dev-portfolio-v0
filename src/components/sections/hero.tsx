@@ -282,7 +282,10 @@ export function Hero({
                         data-hero-line="outlined"
                         className="hero-outline-text block whitespace-nowrap"
                       >
-                        {hero.outlinedTitle}
+                        {hero.outlinedTitle.slice(0, -1)}
+                        <span className="hero-outline-final-letter">
+                          {hero.outlinedTitle.slice(-1)}
+                        </span>
                       </span>
                     </span>
                   </span>
