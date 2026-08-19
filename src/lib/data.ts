@@ -34,11 +34,10 @@ export type ServiceIcon =
   | "landing-page"
   | "web-design"
   | "web-development"
-  | "ai-automation"
-  | "product-design"
-  | "framer-development"
-  | "ui-ux-design"
-  | "creative-direction";
+  | "app-development"
+  | "ai-automation";
+
+export type ProcessIcon = "idea" | "design" | "build" | "ship";
 
 export const serviceIconSources: Record<
   ServiceIcon,
@@ -56,25 +55,13 @@ export const serviceIconSources: Record<
     alt: "Web development service icon",
     src: "/img/services/icons/web-dev.png",
   },
+  "app-development": {
+    alt: "App development service icon",
+    src: "/img/services/icons/app-dev.png",
+  },
   "ai-automation": {
     alt: "AI automation service icon",
     src: "/img/services/icons/ai-automation.png",
-  },
-  "product-design": {
-    alt: "Product design icon",
-    src: "https://framerusercontent.com/images/rA85Y0EWOdi7zZR56JJDPw4A.png?width=512&height=512",
-  },
-  "framer-development": {
-    alt: "Framer development icon",
-    src: "https://framerusercontent.com/images/Or7wABqMyvcDnGzNVDaUoWHodS4.png?width=512&height=512",
-  },
-  "ui-ux-design": {
-    alt: "UI/UX design icon",
-    src: "https://framerusercontent.com/images/dyqoaLEefg6sDhPk1JjxTFRigI.png?width=512&height=512",
-  },
-  "creative-direction": {
-    alt: "Creative direction icon",
-    src: "https://framerusercontent.com/images/ktaqYAtXQMTeq7J0vNxH0Mkhoc.png?width=512&height=512",
   },
 };
 
@@ -88,13 +75,14 @@ export interface StackCapability {
   title: string;
   description: string;
   tools: string[];
+  icon: ServiceIcon;
 }
 
 export interface ProcessStep {
   title: string;
   description: string;
   eyebrow: string;
-  icon: ServiceIcon;
+  icon: ProcessIcon;
   image: string;
   imageAlt: string;
   video: string;
@@ -121,7 +109,7 @@ export interface HeroAction extends NavigationItem {
 export const profile = {
   name: "Himel",
   brand: "H.dev",
-  role: "Frontend Engineer",
+  role: "Design Engineer",
   tagline:
     "Have a business idea in mind? Let’s turn it into a digital product.",
   availability: "Available for freelance & remote",
@@ -197,7 +185,7 @@ export const projects: Project[] = [
   {
     title: "Project One",
     year: "2025",
-    role: "Frontend Engineer",
+    role: "Design Engineer",
     description:
       "Placeholder description. What the product was, the problem it solved, and the impact you delivered.",
     impact: [
@@ -210,7 +198,7 @@ export const projects: Project[] = [
   {
     title: "Project Two",
     year: "2024",
-    role: "Frontend Engineer",
+    role: "Design Engineer",
     description:
       "Placeholder description. What the product was, the problem it solved, and the impact you delivered.",
     impact: [
@@ -223,7 +211,7 @@ export const projects: Project[] = [
   {
     title: "Project Three",
     year: "2023",
-    role: "Frontend Engineer",
+    role: "Design Engineer",
     description:
       "Placeholder description. What the product was, the problem it solved, and the impact you delivered.",
     impact: [
@@ -250,23 +238,23 @@ export const projects: Project[] = [
 
 export const services: Service[] = [
   {
-    title: "Landing Page",
+    title: "Landing Page Design",
     description:
-      "Crafting focused landing pages that communicate value clearly and guide users towards desired action.",
+      "Designing focused landing pages that make the value clear, build trust quickly, and guide visitors toward action.",
     tags: ["React", "Next.js", "GSAP", "Motion"],
     icon: "landing-page",
     image: "/img/projects/project01.webp",
   },
   {
-    title: "Website Design",
+    title: "Website Design / Redesign",
     description:
-      "Designing clear, intuitive websites that balance visual appeal with usability and strong structure.",
-    tags: ["Tailwind", "Design Systems"],
+      "Designing and refining structured websites with clear navigation, strong visual hierarchy, and a system that stays consistent.",
+    tags: ["Figma", "Tailwind", "Design Systems"],
     icon: "web-design",
     image: "/img/projects/project02.webp",
   },
   {
-    title: "Web Development",
+    title: "Web / App Development",
     description:
       "Building responsive, maintainable web experiences with clear architecture, fast interactions, and a strong technical foundation.",
     tags: ["React", "Next.js", "TypeScript", "Node.js"],
@@ -290,13 +278,36 @@ export const servicesSection = {
   label: "CAPABILITIES",
 };
 
-export const stackCapabilities: StackCapability[] = services.map(
-  ({ title, description, tags }) => ({
-    title,
-    description,
-    tools: tags,
-  }),
-);
+export const stackCapabilities: StackCapability[] = [
+  {
+    title: "Landing Page Design",
+    description:
+      "Designing focused landing pages that make the value clear, build trust quickly, and guide visitors toward action.",
+    tools: ["React", "Next.js", "GSAP", "Motion"],
+    icon: "landing-page",
+  },
+  {
+    title: "Website Design / Redesign",
+    description:
+      "Designing and refining structured websites with clear navigation, strong visual hierarchy, and a system that stays consistent.",
+    tools: ["Figma", "Tailwind", "Design Systems"],
+    icon: "web-design",
+  },
+  {
+    title: "Web / App Development",
+    description:
+      "Building web and app experiences with responsive interfaces, clear architecture, and dependable performance.",
+    tools: ["React", "Next.js", "TypeScript", "Node.js", "APIs"],
+    icon: "app-development",
+  },
+  {
+    title: "AI Automation",
+    description:
+      "Connecting practical AI workflows that reduce repetitive work, link useful tools, and keep people in control.",
+    tools: ["AI Workflows", "APIs", "Automation", "Integrations"],
+    icon: "ai-automation",
+  },
+];
 
 export const stackSection = {
   index: "03",
@@ -310,7 +321,7 @@ export const processSteps: ProcessStep[] = [
     eyebrow: "01 / CLARITY",
     description:
       "We start by clarifying the problem, the audience, and the feeling the experience should leave behind. We align on direction before design begins.",
-    icon: "product-design",
+    icon: "idea",
     image: "/videos/idea.jpg",
     imageAlt: "Hands writing notes beside a laptop",
     video: "/videos/idea.mp4",
@@ -320,7 +331,7 @@ export const processSteps: ProcessStep[] = [
     eyebrow: "02 / DIRECTION",
     description:
       "The direction takes shape through structure, typography, and interaction decisions that make the product feel intentional. We keep it clear and consistent.",
-    icon: "ui-ux-design",
+    icon: "design",
     image: "/videos/design.jpg",
     imageAlt: "Code and interface work on a computer screen",
     video: "/videos/design.mp4",
@@ -330,7 +341,7 @@ export const processSteps: ProcessStep[] = [
     eyebrow: "03 / PRECISION",
     description:
       "I translate the design into responsive, maintainable code while protecting the details that make the interface feel alive. The foundation stays flexible and fast.",
-    icon: "framer-development",
+    icon: "build",
     image: "/videos/build.jpg",
     imageAlt: "Software developer working at a computer",
     video: "/videos/build.mp4",
@@ -340,7 +351,7 @@ export const processSteps: ProcessStep[] = [
     eyebrow: "04 / MOMENTUM",
     description:
       "Before launch, I refine the final details, test the experience, and make sure it is fast, clear, and ready to perform. The release is ready for real users.",
-    icon: "creative-direction",
+    icon: "ship",
     image: "/videos/ship.jpg",
     imageAlt: "Developer working on a laptop at a desk",
     video: "/videos/ship.mp4",

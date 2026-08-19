@@ -3,15 +3,27 @@
 import { SectionRail } from "@/components/ui/section-rail";
 import { SectionReveal } from "@/components/ui/section-reveal";
 import { VideoReveal } from "@/components/ui/video-reveal";
-import { processSection, processSteps, serviceIconSources } from "@/lib/data";
+import { LightbulbIcon, RocketLaunchIcon } from "@phosphor-icons/react";
+import type { Icon } from "@phosphor-icons/react";
+import { processSection, processSteps, type ProcessIcon } from "@/lib/data";
 import { cn } from "@/lib/utils";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import Image from "next/image";
 import { useRef } from "react";
+import type { IconType } from "react-icons";
+import { SiFigma, SiReact } from "react-icons/si";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
+
+type ProcessIconComponent = Icon | IconType;
+
+const processIcons: Record<ProcessIcon, ProcessIconComponent> = {
+  idea: LightbulbIcon,
+  design: SiFigma,
+  build: SiReact,
+  ship: RocketLaunchIcon,
+};
 
 export function HowIWork() {
   const rootRef = useRef<HTMLElement>(null);
@@ -286,7 +298,7 @@ function ProcessStep({
 }) {
   const railOnLeft = index % 2 === 0;
   const number = String(index + 1).padStart(2, "0");
-  const icon = serviceIconSources[step.icon];
+  const ProcessIcon = processIcons[step.icon];
 
   return (
     <li
@@ -416,17 +428,15 @@ function ProcessStep({
           data-process-copy
           className="mt-9 flex items-center gap-4"
         >
-          <Image
+          <span
             data-process-icon
-            src={icon.src}
-            data-image-source={icon.src}
-            alt=""
-            aria-hidden="true"
-            width={44}
-            height={44}
-            draggable={false}
-            className="size-10 object-contain grayscale sm:size-11"
-          />
+            className="flex size-10 shrink-0 items-center justify-center sm:size-11"
+          >
+            <ProcessIcon
+              aria-hidden="true"
+              className="size-full"
+            />
+          </span>
           <h3 className="min-w-0 flex-1 font-heading text-[2.5rem] leading-none font-semibold tracking-[-0.03em] [text-wrap:balance] sm:text-[2.75rem]">
             {step.title}
           </h3>

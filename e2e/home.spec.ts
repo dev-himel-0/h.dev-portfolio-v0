@@ -1954,8 +1954,19 @@ test.describe("services", () => {
         "data-image-source",
         serviceIconSources[service.icon].src,
       );
+      const iconFrame = row.locator("[data-service-icon-frame]");
       const iconBox = await icon.boundingBox();
-      expect(iconBox?.width ?? 0).toBeGreaterThan(28);
+      const iconFrameBox = await iconFrame.boundingBox();
+      const titleFontSize = await row
+        .locator("[data-service-title]")
+        .evaluate((element) =>
+          Number.parseFloat(getComputedStyle(element).fontSize),
+        );
+      expect(iconBox?.width ?? 0).toBeGreaterThan(0);
+      expect(
+        Math.abs((iconFrameBox?.width ?? 0) - titleFontSize),
+      ).toBeLessThanOrEqual(1);
+      expect(iconBox?.width ?? 0).toBeGreaterThan(titleFontSize * 1.15);
     }
 
     if ((page.viewportSize()?.width ?? 0) >= 1024) {
@@ -2076,9 +2087,6 @@ test.describe("stack", () => {
     );
     await expect(section).not.toContainText("TOOLS & SYSTEMS");
     await expect(section.locator("[data-magic-bento]")).toBeVisible();
-    expect(stackCapabilities.map(({ title }) => title)).toEqual(
-      services.map(({ title }) => title),
-    );
     await expect(section.locator("[data-bento-cell]")).toHaveCount(
       stackCapabilities.length,
     );
@@ -2228,8 +2236,7 @@ test.describe("stack", () => {
       expect(firstTitleBox!.y - firstCellBox!.y).toBeLessThan(80);
       expect(secondTitleBox!.y - secondCellBox!.y).toBeLessThan(80);
       expect(titleSizes[0]).toBeGreaterThan(titleSizes[1]);
-      expect(titleLineCounts[1]).toBe(1);
-      expect(titleLineCounts[2]).toBe(1);
+      expect(titleLineCounts.every((count) => count === 1)).toBe(true);
       expect(
         Math.max(...descriptionHeights) - Math.min(...descriptionHeights),
       ).toBeLessThan(1);
@@ -2391,10 +2398,7 @@ test.describe("how I work", () => {
         "border-radius",
         "0px",
       );
-      await expect(row.locator("[data-process-icon]")).toHaveAttribute(
-        "data-image-source",
-        serviceIconSources[step.icon].src,
-      );
+      await expect(row.locator("[data-process-icon] svg")).toHaveCount(1);
       await expect(row.locator("[data-process-number]")).toHaveAttribute(
         "aria-label",
         `Step ${String(index + 1).padStart(2, "0")}`,

@@ -36,7 +36,6 @@ import {
   TbBolt,
   TbComponents,
   TbGauge,
-  TbLayout,
   TbPlugConnected,
   TbRobot,
   TbWaveSine,
@@ -68,10 +67,10 @@ const toolIcons: Record<string, IconType> = {
 };
 
 const ghostIconByCapability: Record<string, IconType> = {
-  "Landing Page": TbLayout,
-  "Website Design": SiFigma,
-  "Web Development": SiReact,
-  "AI Automation": TbRobot,
+  "Landing Page Design": SiReact,
+  "Website Design / Redesign": SiTailwindcss,
+  "Web / App Development": SiNodedotjs,
+  "AI Automation": TbBolt,
 };
 
 const iconPositionStyle = {
@@ -217,10 +216,10 @@ function CapabilityCell({
           <h3
             data-stack-title
             className={cn(
-              "min-w-0 font-heading font-medium tracking-[-0.035em] [text-wrap:balance]",
+              "min-w-0 font-heading font-medium tracking-[-0.035em] [text-wrap:nowrap] whitespace-nowrap",
               isWide
-                ? "max-w-[19rem] text-[clamp(1.55rem,2.8vw,2.5rem)]/[0.98]"
-                : "max-w-none text-[clamp(1.25rem,1.8vw,1.75rem)]/[0.98]",
+                ? "max-w-[19rem] text-[clamp(1.15rem,2.4vw,2.1rem)]/[0.98]"
+                : "max-w-none text-[clamp(1.1rem,1.8vw,1.75rem)]/[0.98]",
             )}
           >
             {capability.title}

@@ -132,7 +132,7 @@ export function HoverServiceList({ services }: HoverServiceListProps) {
                   onFocus={() => selectService(index)}
                   onPointerEnter={() => selectService(index)}
                   className={cn(
-                    "group grid h-20 w-full grid-cols-[2.125rem_minmax(0,1fr)_auto] items-center gap-4 border-0 bg-transparent p-0 text-left outline-none max-[319px]:gap-3 lg:h-24",
+                    "group grid h-20 w-full grid-cols-[2.125rem_minmax(0,1fr)_auto] items-center gap-4 border-0 bg-transparent p-0 text-left text-[clamp(1.2rem,2.75vw,2.125rem)] leading-[1.1] outline-none max-[319px]:gap-4 max-[319px]:text-[clamp(1.05rem,6.2vw,1.25rem)] lg:h-24",
                     "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-black",
                   )}
                 >
@@ -162,16 +162,17 @@ export function HoverServiceList({ services }: HoverServiceListProps) {
                   <span
                     data-service-title
                     className={cn(
-                      "block min-w-0 font-heading text-[clamp(1.45rem,3.25vw,2.5rem)] leading-[1.1] font-medium tracking-[-0.03em] text-black transition-colors duration-300 max-[319px]:text-[clamp(1.2rem,7vw,1.45rem)]",
+                      "block min-w-0 font-heading font-medium tracking-[-0.03em] text-black transition-colors duration-300",
                       !active && "text-black/85",
                     )}
                   >
                     {service.title}
                   </span>
                   <span
+                    data-service-icon-frame
                     aria-hidden="true"
                     className={cn(
-                      "flex size-10 shrink-0 items-center justify-end text-black/40 transition-colors duration-300",
+                      "flex size-[1em] shrink-0 items-center justify-end text-black/40 transition-colors duration-300",
                       active && "text-black",
                     )}
                   >
@@ -183,7 +184,7 @@ export function HoverServiceList({ services }: HoverServiceListProps) {
                       width={40}
                       height={40}
                       draggable={false}
-                      className="size-8 object-contain sm:size-9 lg:size-10"
+                      className="size-full origin-right -translate-x-[0.125em] scale-[1.3] object-contain"
                     />
                   </span>
                 </button>

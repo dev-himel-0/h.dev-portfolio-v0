@@ -100,6 +100,44 @@ test.describe("responsive layout", () => {
     expect(rows.every(Boolean)).toBe(true);
   });
 
+  test("keeps enlarged service icons fully inside their rows", async ({
+    page,
+  }) => {
+    for (const viewport of [
+      { width: 280, height: 640 },
+      { width: 1440, height: 900 },
+    ]) {
+      await page.setViewportSize(viewport);
+      await page.goto("/");
+
+      const rows = await page
+        .locator("#services [data-service-row]")
+        .evaluateAll((elements) =>
+          elements.map((element) => {
+            const trail = element.closest("[data-service-row-trail]");
+            const icon = element.querySelector("[data-service-icon]");
+            if (!trail || !icon) return false;
+
+            const trailRect = trail.getBoundingClientRect();
+            const iconRect = icon.getBoundingClientRect();
+            return (
+              iconRect.left >= trailRect.left - 0.5 &&
+              iconRect.right <= trailRect.right - 1 &&
+              iconRect.top >= trailRect.top - 0.5 &&
+              iconRect.bottom <= trailRect.bottom + 0.5
+            );
+          }),
+        );
+
+      expect(rows.every(Boolean)).toBe(true);
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= window.innerWidth,
+        ),
+      ).toBe(true);
+    }
+  });
+
   test("keeps mobile interactive links at a comfortable hit size", async ({
     page,
   }) => {
@@ -116,7 +154,9 @@ test.describe("responsive layout", () => {
     expect(heights.every((height) => height >= 44)).toBe(true);
   });
 
-  test("wraps stack titles inside narrow bento cells", async ({ page }) => {
+  test("keeps stack titles on one line inside narrow bento cells", async ({
+    page,
+  }) => {
     await page.setViewportSize({ width: 280, height: 640 });
     await page.goto("/");
 
@@ -125,16 +165,19 @@ test.describe("responsive layout", () => {
       .evaluateAll((elements) =>
         elements.map((element) => {
           const rect = element.getBoundingClientRect();
+          const style = getComputedStyle(element);
           return {
             fitsViewport: rect.left >= 0 && rect.right <= window.innerWidth,
             fitsContent: element.scrollWidth <= element.clientWidth + 1,
+            lineCount: Math.round(rect.height / parseFloat(style.lineHeight)),
           };
         }),
       );
 
     expect(
       result.every(
-        ({ fitsViewport, fitsContent }) => fitsViewport && fitsContent,
+        ({ fitsViewport, fitsContent, lineCount }) =>
+          fitsViewport && fitsContent && lineCount === 1,
       ),
     ).toBe(true);
   });

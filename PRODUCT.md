@@ -10,11 +10,11 @@ web
 
 Primary: freelance clients — startup founders, agency leads, and product managers deciding whether to hire Himel for a frontend build or redesign. They evaluate quickly, often in one short visit, and shortlist candidates who feel technically premium and reliable.
 
-Secondary: remote hiring managers and recruiters screening Himel for frontend engineer roles.
+Secondary: remote hiring managers and recruiters screening Himel for design engineer roles.
 
 ## Product Purpose
 
-Himel's portfolio exists to win freelance projects and remote roles by presenting his frontend engineering craft credibly and memorably. Success is measured in inbound inquiries — client messages and interview requests.
+Himel's portfolio exists to win freelance projects and remote roles by presenting his design engineering craft credibly and memorably. Success is measured in inbound inquiries — client messages and interview requests.
 
 ## Positioning
 
@@ -26,7 +26,7 @@ Clients arrive from links or socials and evaluate within seconds; first viewport
 
 ## Capabilities and Constraints
 
-- Frontend engineer, 4+ years, based in Dhaka, Bangladesh; available for freelance and remote work.
+- Design engineer, 4+ years, based in Dhaka, Bangladesh; available for freelance and remote work.
 - Technical baseline: Next.js (App Router), React, Tailwind, GSAP + Lenis animation stack.
 - Binding visual constraints (user-volunteered): pure black & white — white background, black text, neutral grays only; no gradients, accent colors, or decorative noise. Fonts: Outfit (display), Montserrat (body), Geist Mono (labels/numbers).
 - One section at a time; each section verified with lint, production build, and visual check before the next.
@@ -34,7 +34,7 @@ Clients arrive from links or socials and evaluate within seconds; first viewport
 
 ## Brand Commitments
 
-- Name: Himel. Role line: Frontend Engineer.
+- Name: Himel. Role line: Design Engineer.
 - Contact: hello@himel.dev; availability: "Available for freelance & remote".
 - Voice: clean, concise, confident; no hype, no filler copy.
 - Pure black & white identity and the three-font system above are binding.

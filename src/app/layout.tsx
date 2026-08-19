@@ -24,9 +24,9 @@ const generalSans = localFont({
 const montserrat = Montserrat({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
-  title: "Himel — Frontend Engineer",
+  title: "Himel — Design Engineer",
   description:
-    "Himel is a frontend engineer with 4+ years of experience, open for freelance projects and remote roles.",
+    "Himel is a design engineer with 4+ years of experience, open for freelance projects and remote roles.",
   icons: {
     icon: "/img/h.png",
   },
