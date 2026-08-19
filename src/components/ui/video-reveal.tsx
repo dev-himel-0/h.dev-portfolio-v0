@@ -38,6 +38,8 @@ export function VideoReveal({
 
     if (!canHover.matches) return;
 
+    video.src = src;
+
     const reset = () => {
       video.pause();
       video.currentTime = 0;
@@ -72,8 +74,10 @@ export function VideoReveal({
       root.removeEventListener("pointerleave", reset);
       document.removeEventListener("visibilitychange", onVisibilityChange);
       reset();
+      video.removeAttribute("src");
+      video.load();
     };
-  }, []);
+  }, [src]);
 
   return (
     <div
@@ -94,8 +98,6 @@ export function VideoReveal({
         ref={videoRef}
         data-process-visual
         data-video-layer
-        src={src}
-        poster={poster}
         muted
         loop
         playsInline

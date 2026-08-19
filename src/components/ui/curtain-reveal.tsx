@@ -180,7 +180,7 @@ export function CurtainReveal({
         <div
           key={i}
           data-curtain-panel
-          className="h-full flex-1 bg-black will-change-transform"
+          className="-ml-px h-full min-w-0 flex-1 bg-black first:ml-0 will-change-transform"
         />
       ))}
       {(children || progress !== undefined) && (

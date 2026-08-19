@@ -22,6 +22,7 @@ export function ScrollToTop() {
   const scrollFrameRef = useRef<number | null>(null);
   const progressRingRef = useRef<SVGCircleElement>(null);
   const shouldShowRef = useRef(false);
+  const maxScrollRef = useRef(0);
   const lenis = useSmoothScroll();
 
   // Coalesce Lenis' frequent scroll events into one DOM update per frame. The
@@ -29,8 +30,7 @@ export function ScrollToTop() {
   useEffect(() => {
     const update = () => {
       scrollFrameRef.current = null;
-      const maxScroll =
-        document.documentElement.scrollHeight - window.innerHeight;
+      const maxScroll = maxScrollRef.current;
       let nextProgress = 0;
       if (maxScroll <= 0) {
         nextProgress = 0;
@@ -44,6 +44,13 @@ export function ScrollToTop() {
       );
     };
 
+    const measure = () => {
+      maxScrollRef.current = Math.max(
+        document.documentElement.scrollHeight - window.innerHeight,
+        0,
+      );
+    };
+
     const onScroll = () => {
       // This threshold controls interactivity, so update it synchronously even
       // when reduced-motion browsers defer animation frames.
@@ -53,9 +60,14 @@ export function ScrollToTop() {
         shouldShowRef.current = nextShouldShow;
         setShouldShow(nextShouldShow);
       }
-      if (scrollFrameRef.current === null) {
+      if (nextShouldShow && scrollFrameRef.current === null) {
         scrollFrameRef.current = window.requestAnimationFrame(update);
       }
+    };
+
+    const onResize = () => {
+      measure();
+      onScroll();
     };
 
     if (lenis) {
@@ -63,7 +75,8 @@ export function ScrollToTop() {
     } else {
       window.addEventListener("scroll", onScroll, { passive: true });
     }
-    window.addEventListener("resize", onScroll);
+    window.addEventListener("resize", onResize);
+    measure();
     onScroll();
     return () => {
       if (lenis) {
@@ -71,7 +84,7 @@ export function ScrollToTop() {
       } else {
         window.removeEventListener("scroll", onScroll);
       }
-      window.removeEventListener("resize", onScroll);
+      window.removeEventListener("resize", onResize);
       if (scrollFrameRef.current !== null) {
         window.cancelAnimationFrame(scrollFrameRef.current);
       }

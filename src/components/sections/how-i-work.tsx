@@ -47,7 +47,7 @@ export function HowIWork() {
         );
         const verticalFills = Array.from(
           step.querySelectorAll<HTMLElement>(
-            "[data-process-vertical-fill], [data-process-mobile-fill]",
+            "[data-process-vertical-fill]",
           ),
         );
         const horizontalFill = step.querySelector<HTMLElement>(
@@ -258,14 +258,8 @@ export function HowIWork() {
         <ol
           ref={flowRef}
           data-process-flow
-          className="relative max-[809px]:pr-0 max-[809px]:pl-5"
+          className="relative"
         >
-          <span
-            aria-hidden="true"
-            data-process-mobile-track
-            className="pointer-events-none absolute top-0 bottom-0 left-[-0.5rem] w-1 bg-black/10 min-[810px]:hidden"
-          />
-
           {processSteps.map((step, index) => (
             <ProcessStep
               key={step.title}
@@ -362,12 +356,6 @@ function ProcessStep({
           className="absolute inset-1 rounded-full bg-black opacity-0"
         />
       </span>
-      <span
-        aria-hidden="true"
-        data-process-mobile-fill
-        className="pointer-events-none absolute top-6 bottom-6 left-[-0.5rem] w-1 origin-top scale-y-0 bg-black min-[810px]:hidden"
-      />
-
       <div
         data-process-media
         className={cn(

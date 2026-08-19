@@ -23,11 +23,9 @@ interface ImageRevealProps extends Omit<ComponentProps<typeof Image>, "fill"> {
 }
 
 /**
- * Clip-path image reveal: the frame wipes open top-to-bottom while the
- * photo scales 1.15 -> 1. Optional scrub parallax makes the photo drift
- * vertically as it scrolls through the viewport (applied to an oversized
- * wrapper so the `fill` image keeps its intrinsic sizing). Skipped under
- * `prefers-reduced-motion`.
+ * Fine-pointer devices get a clip-path wipe, image scale, and optional scrub
+ * parallax. Touch devices use a compositor-only fade-up to avoid repeatedly
+ * rasterizing large filtered images. Skipped under `prefers-reduced-motion`.
  */
 export function ImageReveal({
   src,
@@ -51,65 +49,95 @@ export function ImageReveal({
         return;
       }
 
-      const reducedMotion = window.matchMedia(
-        "(prefers-reduced-motion: reduce)",
-      ).matches;
-      const canUseParallax =
-        parallax > 0 && window.matchMedia("(min-width: 810px)").matches;
+      const media = gsap.matchMedia();
 
-      if (reducedMotion) {
-        gsap.set(scope, { clearProps: "clipPath" });
-        gsap.set(img, { clearProps: "transform" });
-        if (wrapRef.current) {
-          gsap.set(wrapRef.current, { clearProps: "transform" });
-        }
-        return;
-      }
+      media.add(
+        {
+          reduceMotion: "(prefers-reduced-motion: reduce)",
+          fullMotion:
+            "(min-width: 810px) and (hover: hover) and (pointer: fine)",
+          touch: "(max-width: 809px), (hover: none), (pointer: coarse)",
+        },
+        (context) => {
+          const { reduceMotion, fullMotion } = context.conditions ?? {};
+          const wrap = wrapRef.current;
 
-      gsap
-        .timeline({
-          scrollTrigger: {
-            trigger: scope,
-            start,
-            onEnter: (self) =>
-              requestAnimationFrame(() => self.kill(false, true)),
-          },
-        })
-        .fromTo(
-          scope,
-          { clipPath: "inset(100% 0% 0% 0%)" },
-          {
-            clipPath: "inset(0% 0% 0% 0%)",
-            duration: 1.1,
-            ease: "power4.inOut",
-          },
-        )
-        .fromTo(
-          img,
-          { scale: 1.15 },
-          { scale: 1, duration: 1.4, ease: "power3.out" },
-          0,
-        );
+          if (reduceMotion) {
+            gsap.set(scope, { clearProps: "all" });
+            gsap.set(img, { clearProps: "transform" });
+            if (wrap) gsap.set(wrap, { clearProps: "transform" });
+            return;
+          }
 
-      if (canUseParallax) {
-        const wrap = wrapRef.current;
-        if (wrap) {
-          gsap.fromTo(
-            wrap,
-            { yPercent: -24 },
-            {
-              yPercent: -2,
-              ease: "none",
+          if (!fullMotion) {
+            gsap.fromTo(
+              scope,
+              { autoAlpha: 0, y: 20 },
+              {
+                autoAlpha: 1,
+                y: 0,
+                duration: 0.65,
+                ease: "power3.out",
+                onStart: () =>
+                  gsap.set(scope, { willChange: "transform,opacity" }),
+                onComplete: () =>
+                  gsap.set(scope, { clearProps: "willChange" }),
+                scrollTrigger: {
+                  trigger: scope,
+                  start,
+                  onEnter: (self) =>
+                    requestAnimationFrame(() => self.kill(false, true)),
+                },
+              },
+            );
+            return;
+          }
+
+          gsap
+            .timeline({
               scrollTrigger: {
                 trigger: scope,
-                start: "top bottom",
-                end: "bottom top",
-                scrub: true,
+                start,
+                onEnter: (self) =>
+                  requestAnimationFrame(() => self.kill(false, true)),
               },
-            },
-          );
-        }
-      }
+            })
+            .fromTo(
+              scope,
+              { clipPath: "inset(100% 0% 0% 0%)" },
+              {
+                clipPath: "inset(0% 0% 0% 0%)",
+                duration: 1.1,
+                ease: "power4.inOut",
+              },
+            )
+            .fromTo(
+              img,
+              { scale: 1.15 },
+              { scale: 1, duration: 1.4, ease: "power3.out" },
+              0,
+            );
+
+          if (parallax > 0 && wrap) {
+            gsap.fromTo(
+              wrap,
+              { yPercent: -24 },
+              {
+                yPercent: -2,
+                ease: "none",
+                scrollTrigger: {
+                  trigger: scope,
+                  start: "top bottom",
+                  end: "bottom top",
+                  scrub: true,
+                },
+              },
+            );
+          }
+        },
+      );
+
+      return () => media.revert();
     },
     { scope: ref },
   );

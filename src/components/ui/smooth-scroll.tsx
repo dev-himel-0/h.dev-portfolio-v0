@@ -12,6 +12,7 @@ import {
 } from "react";
 
 gsap.registerPlugin(ScrollTrigger);
+ScrollTrigger.config({ ignoreMobileResize: true });
 
 const LENIS_OPTIONS = {
   duration: 1.3,
