@@ -35,9 +35,8 @@ export function HowIWork() {
       steps.forEach((step, index) => {
         const media = step.querySelector<HTMLElement>("[data-process-media]");
         const visuals = Array.from(
-          media?.querySelectorAll<HTMLElement>(
-            "img, [data-process-visual]",
-          ) ?? [],
+          media?.querySelectorAll<HTMLElement>("img, [data-process-visual]") ??
+            [],
         );
         const copy = Array.from(
           step.querySelectorAll<HTMLElement>("[data-process-copy]"),
@@ -46,9 +45,7 @@ export function HowIWork() {
           "[data-process-number-strip]",
         );
         const verticalFills = Array.from(
-          step.querySelectorAll<HTMLElement>(
-            "[data-process-vertical-fill]",
-          ),
+          step.querySelectorAll<HTMLElement>("[data-process-vertical-fill]"),
         );
         const horizontalFill = step.querySelector<HTMLElement>(
           "[data-process-horizontal-fill]",
@@ -107,11 +104,15 @@ export function HowIWork() {
           });
 
           reveal
-            .fromTo(media, { autoAlpha: 0, y: 24 }, {
-              autoAlpha: 1,
-              y: 0,
-              duration: 0.65,
-            })
+            .fromTo(
+              media,
+              { autoAlpha: 0, y: 24 },
+              {
+                autoAlpha: 1,
+                y: 0,
+                duration: 0.65,
+              },
+            )
             .fromTo(
               copy,
               { autoAlpha: 0, y: 16 },

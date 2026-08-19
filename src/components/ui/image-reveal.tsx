@@ -80,8 +80,7 @@ export function ImageReveal({
                 ease: "power3.out",
                 onStart: () =>
                   gsap.set(scope, { willChange: "transform,opacity" }),
-                onComplete: () =>
-                  gsap.set(scope, { clearProps: "willChange" }),
+                onComplete: () => gsap.set(scope, { clearProps: "willChange" }),
                 scrollTrigger: {
                   trigger: scope,
                   start,

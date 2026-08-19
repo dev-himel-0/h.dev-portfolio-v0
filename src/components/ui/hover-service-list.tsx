@@ -112,7 +112,9 @@ export function HoverServiceList({ services }: HoverServiceListProps) {
             <div key={service.title}>
               <ImageTrail
                 data-service-row-trail
-                images={[{ src: service.image, alt: `${service.title} preview` }]}
+                images={[
+                  { src: service.image, alt: `${service.title} preview` },
+                ]}
                 threshold={48}
                 minDelay={55}
                 duration={900}
