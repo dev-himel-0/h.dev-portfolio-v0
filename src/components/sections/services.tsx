@@ -68,7 +68,7 @@ export function Services() {
         >
           <h2
             id="services-heading"
-            className="max-w-full text-right font-heading text-[clamp(1.75rem,6.5vw,5.5rem)] leading-[0.82] font-semibold tracking-[-0.03em]"
+            className="section-heading max-w-full text-right font-heading font-semibold tracking-[-0.03em]"
           >
             <span className="inline-block pb-[0.03em]">
               {servicesSection.filledTitle}

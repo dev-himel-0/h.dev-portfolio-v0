@@ -137,7 +137,7 @@ export function Stack() {
         >
           <h2
             id="stack-heading"
-            className="font-heading text-[clamp(1.75rem,6.5vw,5.5rem)] leading-[0.82] font-semibold tracking-[-0.03em]"
+            className="section-heading font-heading font-semibold tracking-[-0.03em]"
           >
             <span className="inline-block pb-[0.03em]">
               {stackSection.filledTitle}
@@ -226,7 +226,7 @@ function CapabilityCell({
           </h3>
           <p
             data-stack-description
-            className="mt-5 line-clamp-3 min-h-[4.1rem] max-w-none text-sm leading-[1.55] tracking-[-0.005em] text-black/55"
+            className="mt-5 line-clamp-3 min-h-[4.1rem] max-w-none text-[0.9375rem] leading-[1.55] tracking-[-0.005em] text-black/55"
           >
             {capability.description}
           </p>

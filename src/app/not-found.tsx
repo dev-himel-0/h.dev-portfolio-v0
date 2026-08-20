@@ -132,13 +132,13 @@ export default function NotFound() {
       <header className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2 px-[clamp(1.5rem,6vw,4.5rem)] pt-[clamp(1.5rem,4vh,2.75rem)]">
         <p
           data-nf-top
-          className="text-[0.625rem] leading-none font-semibold tracking-[0.22em] text-black/45 uppercase"
+          className="text-[0.6875rem] leading-[1.2] font-semibold tracking-[0.22em] text-black/60 uppercase"
         >
           {profile.name} — {profile.role}
         </p>
         <p
           data-nf-top
-          className="text-[0.625rem] leading-none font-semibold tracking-[0.22em] text-black/45 uppercase"
+          className="text-[0.6875rem] leading-[1.2] font-semibold tracking-[0.22em] text-black/60 uppercase"
         >
           Error {notFound.status}
         </p>
@@ -239,13 +239,13 @@ export default function NotFound() {
       <footer className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2 px-[clamp(1.5rem,6vw,4.5rem)] pb-[clamp(1.5rem,4vh,2.75rem)]">
         <p
           data-nf-bottom
-          className="text-[0.625rem] leading-none font-semibold tracking-[0.22em] text-black/45 uppercase"
+          className="text-[0.6875rem] leading-[1.2] font-semibold tracking-[0.22em] text-black/60 uppercase"
         >
           {profile.location}
         </p>
         <p
           data-nf-bottom
-          className="max-w-full truncate text-right text-[0.625rem] leading-none font-semibold tracking-[0.22em] text-black/45 uppercase"
+          className="max-w-full truncate text-right text-[0.6875rem] leading-[1.2] font-semibold tracking-[0.22em] text-black/60 uppercase"
         >
           {pathname || notFound.label}
         </p>

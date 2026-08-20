@@ -144,7 +144,7 @@ export function SectionRail({
             <span className="h-14 w-px origin-top bg-black/50" />
             <span
               data-rail-label
-              className="text-[0.625rem] font-medium tracking-[0.22em] text-black/60 uppercase [writing-mode:vertical-rl]"
+              className="text-[0.6875rem] font-medium tracking-[0.22em] text-black/60 uppercase [writing-mode:vertical-rl]"
             >
               {index}
             </span>

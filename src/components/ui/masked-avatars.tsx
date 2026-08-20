@@ -110,7 +110,7 @@ export function MaskedAvatars({
                 data-tech-label
                 aria-hidden="true"
                 className={cn(
-                  "pointer-events-none absolute bottom-full left-1/2 mb-1 -translate-x-1/2 font-sans text-[0.625rem] tracking-[0.08em] whitespace-nowrap text-black uppercase",
+                  "pointer-events-none absolute bottom-full left-1/2 mb-1 -translate-x-1/2 font-sans text-[0.6875rem] tracking-[0.08em] whitespace-nowrap text-black uppercase",
                   "transition-[opacity,transform,filter] duration-200",
                   isActive
                     ? "blur-0 translate-y-0 opacity-100"

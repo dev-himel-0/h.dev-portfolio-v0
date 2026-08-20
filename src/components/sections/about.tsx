@@ -175,14 +175,14 @@ export function About() {
         </div>
 
         <div className="mt-[clamp(1.25rem,3.5vh,2rem)] flex flex-col items-center justify-center gap-2 sm:flex-row sm:gap-3">
-          <span className="font-sans text-[0.625rem] tracking-[0.22em] text-black/40 uppercase">
+          <span className="font-sans text-[0.6875rem] tracking-[0.22em] text-black/60 uppercase">
             {profile.location}
           </span>
           <span
             aria-hidden="true"
             className="hidden size-1 rounded-full bg-black/40 sm:block"
           />
-          <span className="flex items-center gap-2 font-sans text-[0.625rem] tracking-[0.22em] text-black/40 uppercase">
+          <span className="flex items-center gap-2 font-sans text-[0.6875rem] tracking-[0.22em] text-black/60 uppercase">
             <span
               aria-hidden="true"
               className="size-1 rounded-full bg-black"
@@ -223,7 +223,7 @@ function StatCell({
       </div>
       <span
         data-stat-label
-        className="text-center font-sans text-[0.625rem] leading-snug tracking-[0.22em] text-black/50 uppercase"
+        className="text-center font-sans text-[0.6875rem] leading-snug tracking-[0.22em] text-black/60 uppercase"
       >
         {stat.label}
       </span>
@@ -249,7 +249,7 @@ function SocialItem({ link, index }: { link: SocialLink; index: number }) {
       />
       <span
         aria-hidden="true"
-        className="relative font-sans text-[0.625rem] tracking-[0.22em] text-black/40 transition-colors duration-300 group-hover:text-white/60"
+        className="relative font-sans text-[0.6875rem] tracking-[0.22em] text-black/60 transition-colors duration-300 group-hover:text-white/60"
       >
         {String(index + 1).padStart(2, "0")}
       </span>

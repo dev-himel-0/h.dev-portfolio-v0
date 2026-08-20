@@ -28,7 +28,7 @@ Clients arrive from links or socials and evaluate within seconds; first viewport
 
 - Design engineer, 4+ years, based in Dhaka, Bangladesh; available for freelance and remote work.
 - Technical baseline: Next.js (App Router), React, Tailwind, GSAP + Lenis animation stack.
-- Binding visual constraints (user-volunteered): pure black & white — white background, black text, neutral grays only; no gradients, accent colors, or decorative noise. Fonts: Outfit (display), Montserrat (body), Geist Mono (labels/numbers).
+- Binding visual constraints (user-volunteered): pure black & white — white background, black text, neutral grays only; no gradients, accent colors, or decorative noise. Fonts: General Sans (display headings), Montserrat (body, labels, and numbers).
 - One section at a time; each section verified with lint, production build, and visual check before the next.
 - Content is placeholder-only today (name, role, availability, email are real; projects, services, stack details are not). Never invent projects, clients, experience, or metrics.
 
@@ -37,7 +37,7 @@ Clients arrive from links or socials and evaluate within seconds; first viewport
 - Name: Himel. Role line: Design Engineer.
 - Contact: hello@himel.dev; availability: "Available for freelance & remote".
 - Voice: clean, concise, confident; no hype, no filler copy.
-- Pure black & white identity and the three-font system above are binding.
+- Pure black & white identity and the two-font system above are binding.
 
 ## Evidence on Hand
 

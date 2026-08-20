@@ -202,7 +202,7 @@ export function SiteFooter() {
               className="grid justify-items-start gap-5 sm:col-span-2 sm:grid-cols-2 lg:col-span-1 lg:grid-cols-1 lg:gap-4"
             >
               <div>
-                <p className="font-sans text-[0.625rem] font-medium tracking-[0.22em] text-black/45 uppercase">
+                <p className="font-sans text-[0.6875rem] font-medium tracking-[0.22em] text-black/60 uppercase">
                   {siteFooter.locationLabel}
                 </p>
                 <div className="mt-2 flex items-center justify-start gap-2 font-heading text-[clamp(1rem,1.8vw,1.25rem)] leading-[1.2] font-medium tracking-[-0.025em] text-black/90">
@@ -216,7 +216,7 @@ export function SiteFooter() {
               </div>
 
               <div className="lg:mt-1">
-                <p className="font-sans text-[0.625rem] font-medium tracking-[0.22em] text-black/45 uppercase">
+                <p className="font-sans text-[0.6875rem] font-medium tracking-[0.22em] text-black/60 uppercase">
                   {siteFooter.contactLabel}
                 </p>
                 <a
@@ -234,7 +234,7 @@ export function SiteFooter() {
                     className="size-4 transition-transform duration-300 ease-out group-hover:translate-x-1 group-hover:-translate-y-1"
                   />
                 </a>
-                <p className="mt-1 max-w-[16rem] font-sans text-xs leading-[1.5] text-black/50">
+                <p className="mt-1 max-w-[16rem] font-sans text-xs leading-[1.5] text-black/60">
                   {profile.availability}
                 </p>
               </div>
@@ -245,7 +245,7 @@ export function SiteFooter() {
               data-footer-nav
               aria-label="Footer navigation"
             >
-              <p className="font-sans text-[0.625rem] font-medium tracking-[0.22em] text-black/45 uppercase">
+              <p className="font-sans text-[0.6875rem] font-medium tracking-[0.22em] text-black/60 uppercase">
                 {siteFooter.linksLabel}
               </p>
               <ul className="mt-2 space-y-0">
@@ -270,7 +270,7 @@ export function SiteFooter() {
               data-reveal
               data-footer-socials
             >
-              <p className="font-sans text-[0.625rem] font-medium tracking-[0.22em] text-black/45 uppercase">
+              <p className="font-sans text-[0.6875rem] font-medium tracking-[0.22em] text-black/60 uppercase">
                 {siteFooter.socialsLabel}
               </p>
               <ul className="mt-2 space-y-0">
@@ -286,7 +286,7 @@ export function SiteFooter() {
               data-reveal
               data-footer-profile
             >
-              <p className="font-sans text-[0.625rem] font-medium tracking-[0.22em] text-black/45 uppercase">
+              <p className="font-sans text-[0.6875rem] font-medium tracking-[0.22em] text-black/60 uppercase">
                 {siteFooter.profileLabel}
               </p>
               <p className="mt-2 font-heading text-[clamp(1rem,1.8vw,1.25rem)] leading-[1.2] font-medium tracking-[-0.025em] text-black/90">
@@ -311,7 +311,7 @@ export function SiteFooter() {
                     </p>
                     <p
                       data-footer-profile-label
-                      className="mt-1 font-sans text-[0.5625rem] leading-snug font-medium tracking-[0.14em] text-black/50 uppercase"
+                      className="mt-1 font-sans text-[0.6875rem] leading-snug font-medium tracking-[0.14em] text-black/60 uppercase"
                     >
                       {stat.label}
                     </p>
@@ -350,12 +350,12 @@ export function SiteFooter() {
           data-footer-meta
           className="relative z-30 mx-auto flex max-w-[76rem] flex-wrap items-center justify-between gap-x-6 gap-y-2 bg-white px-6 py-4 text-left sm:px-10 lg:px-0"
         >
-          <p className="font-sans text-[0.625rem] tracking-[0.12em] text-black/45 uppercase">
+          <p className="font-sans text-[0.6875rem] tracking-[0.12em] text-black/60 uppercase">
             © {profile.name}. {siteFooter.copyright}
           </p>
           <a
             href={`mailto:${profile.email}`}
-            className="group inline-flex min-h-11 items-center justify-center gap-2 font-sans text-[0.625rem] font-medium tracking-[0.12em] text-black/45 uppercase transition-colors duration-300 hover:text-black focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-4 focus-visible:ring-offset-white focus-visible:outline-none"
+            className="group inline-flex min-h-11 items-center justify-center gap-2 font-sans text-[0.6875rem] font-medium tracking-[0.12em] text-black/60 uppercase transition-colors duration-300 hover:text-black focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-4 focus-visible:ring-offset-white focus-visible:outline-none"
           >
             <EnvelopeSimple
               aria-hidden="true"

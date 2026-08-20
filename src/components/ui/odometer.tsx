@@ -103,7 +103,7 @@ export function Odometer({ ref, digits = 3, className }: OdometerProps) {
       data-odometer
       aria-hidden="true"
       className={cn(
-        "flex items-center bg-black px-3 py-1 font-mono text-sm leading-none font-light text-white/80 tabular-nums",
+        "flex items-center bg-black px-3 py-1 font-sans text-sm leading-none font-light text-white/80 tabular-nums",
         className,
       )}
     >

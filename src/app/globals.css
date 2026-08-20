@@ -172,6 +172,11 @@
   paint-order: stroke fill;
 }
 
+.section-heading {
+  font-size: clamp(1.75rem, 8vw, 5.5rem);
+  line-height: 0.9;
+}
+
 /* The stage starts at the contact seam and crops away the font's empty line-box
    space. The glyph can slide from the seam without sitting beneath the panel. */
 [data-site-footer] {
@@ -671,7 +676,7 @@ header[data-open="true"] ~ .smg .smg-prelayer {
   gap: 0.625rem;
   margin: 0;
   font-family: var(--font-sans);
-  font-size: clamp(0.625rem, 1vw, 0.6875rem);
+  font-size: clamp(0.6875rem, 1vw, 0.75rem);
   letter-spacing: 0.02em;
   color: oklch(0.985 0 0 / 0.6);
 }
@@ -747,7 +752,7 @@ header[data-open="true"] ~ .smg .smg-prelayer {
 .smg-footer-note {
   margin: 0;
   font-family: var(--font-sans);
-  font-size: clamp(0.625rem, 1vw, 0.6875rem);
+  font-size: clamp(0.6875rem, 1vw, 0.75rem);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: oklch(0.985 0 0 / 0.45);
@@ -880,7 +885,7 @@ header[data-open="true"] .navbar-bg {
   color: inherit;
   font-family: var(--font-heading);
   font-size: 0.8125rem;
-  font-weight: 300;
+  font-weight: 400;
   letter-spacing: 0.06em;
   line-height: 1;
   text-transform: uppercase;

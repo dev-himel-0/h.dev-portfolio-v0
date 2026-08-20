@@ -43,6 +43,56 @@ export function HowIWork() {
         flow.querySelectorAll<HTMLElement>("[data-process-step]"),
       );
       const cleanups: Array<() => void> = [];
+      let snappingActive = true;
+      let snapFrame = 0;
+
+      // Grid dimensions can end on fractional pixels. Snap each rail on its
+      // thickness axis so horizontal and vertical strokes rasterize evenly.
+      const snapTimelineTracks = () => {
+        const dpr = window.devicePixelRatio || 1;
+        const snapTrack = (track: HTMLElement, axis: "x" | "y") => {
+          const setAxis = (value: number) =>
+            gsap.set(
+              track,
+              axis === "x"
+                ? { x: value, autoRound: false }
+                : { y: value, autoRound: false },
+            );
+
+          setAxis(0);
+          const rect = track.getBoundingClientRect();
+          const coordinate = axis === "x" ? rect.left : rect.top;
+          const snappedCoordinate = Math.round(coordinate * dpr) / dpr;
+          setAxis(snappedCoordinate - coordinate);
+        };
+
+        flow
+          .querySelectorAll<HTMLElement>("[data-process-desktop-track]")
+          .forEach((track) => snapTrack(track, "x"));
+        flow
+          .querySelectorAll<HTMLElement>("[data-process-horizontal-track]")
+          .forEach((track) => snapTrack(track, "y"));
+      };
+      const scheduleTrackSnap = () => {
+        if (isMobile || !snappingActive) return;
+        cancelAnimationFrame(snapFrame);
+        snapFrame = requestAnimationFrame(() => {
+          if (snappingActive) snapTimelineTracks();
+        });
+      };
+
+      if (!isMobile) {
+        scheduleTrackSnap();
+        window.addEventListener("resize", scheduleTrackSnap);
+        ScrollTrigger.addEventListener("refresh", scheduleTrackSnap);
+        void document.fonts?.ready?.then(scheduleTrackSnap);
+        cleanups.push(() => {
+          snappingActive = false;
+          cancelAnimationFrame(snapFrame);
+          window.removeEventListener("resize", scheduleTrackSnap);
+          ScrollTrigger.removeEventListener("refresh", scheduleTrackSnap);
+        });
+      }
 
       steps.forEach((step, index) => {
         const media = step.querySelector<HTMLElement>("[data-process-media]");
@@ -229,7 +279,7 @@ export function HowIWork() {
       ref={rootRef}
       id="how-i-work"
       aria-labelledby="how-i-work-heading"
-      className="relative overflow-clip bg-white py-[6.25rem] text-black sm:py-[7.5rem] lg:py-[8.75rem]"
+      className="relative overflow-clip bg-white py-20 text-black sm:py-24 lg:py-28"
     >
       <SectionRail
         sectionRef={rootRef}
@@ -246,7 +296,7 @@ export function HowIWork() {
           <header
             data-reveal
             data-process-heading
-            className="mb-[3.75rem] flex w-full flex-col items-end gap-7 text-right sm:mb-[5rem] lg:mb-[6.25rem]"
+            className="mb-10 flex w-full flex-col items-end gap-7 text-right sm:mb-12 lg:mb-16"
           >
             <span
               data-process-label
@@ -256,7 +306,7 @@ export function HowIWork() {
             </span>
             <h2
               id="how-i-work-heading"
-              className="font-heading text-[clamp(2.5rem,7vw,5.5rem)] leading-[0.88] font-semibold tracking-[-0.045em] whitespace-nowrap"
+              className="section-heading font-heading font-semibold tracking-[-0.045em] whitespace-nowrap"
             >
               <span className="inline-block pb-[0.03em]">
                 {processSection.filledTitle}
@@ -304,15 +354,15 @@ function ProcessStep({
     <li
       data-process-step
       className={cn(
-        "group relative max-[809px]:py-6 min-[810px]:grid min-[810px]:grid-cols-2 min-[810px]:items-center min-[810px]:gap-x-20 min-[810px]:py-[3.125rem] min-[810px]:pb-[3.75rem]",
-        last && "min-[810px]:pb-[3.125rem]",
+        "group relative max-[809px]:py-5 min-[810px]:grid min-[810px]:grid-cols-2 min-[810px]:items-center min-[810px]:gap-x-12 min-[810px]:py-8 min-[810px]:pb-10",
+        last && "min-[810px]:pb-8",
       )}
     >
       <div
         aria-hidden="true"
         data-process-desktop-track
         className={cn(
-          "pointer-events-none absolute top-0 bottom-0 hidden w-1.5 bg-black/10 min-[810px]:block",
+          "pointer-events-none absolute top-0 bottom-0 hidden w-[2px] bg-black/10 min-[810px]:block",
           railOnLeft ? "left-0" : "left-1/2 -translate-x-1/2",
           index === 0 && "top-[0.9375rem]",
         )}
@@ -328,7 +378,7 @@ function ProcessStep({
           aria-hidden="true"
           data-process-horizontal-track
           className={cn(
-            "pointer-events-none absolute bottom-0 hidden h-1.5 w-1/2 bg-black/10 min-[810px]:block",
+            "pointer-events-none absolute bottom-0 hidden h-[2px] w-1/2 bg-black/10 min-[810px]:block",
             railOnLeft ? "left-0" : "right-1/2",
           )}
         >
@@ -346,8 +396,8 @@ function ProcessStep({
         aria-hidden="true"
         data-process-node
         className={cn(
-          "pointer-events-none absolute z-[2] hidden size-8 rounded-full border-[0.3125rem] border-black/10 bg-white min-[810px]:block",
-          railOnLeft ? "left-[-0.6875rem]" : "left-1/2 -translate-x-1/2",
+          "pointer-events-none absolute z-[2] hidden size-5 rounded-full border-2 border-black/10 bg-white min-[810px]:block",
+          railOnLeft ? "left-[-0.625rem]" : "left-1/2 -translate-x-1/2",
           index === 0 ? "top-[-0.0625rem]" : "top-[-0.625rem]",
         )}
       >
@@ -360,8 +410,8 @@ function ProcessStep({
         aria-hidden="true"
         data-process-node
         className={cn(
-          "pointer-events-none absolute bottom-[-0.6875rem] z-[2] hidden size-8 rounded-full border-[0.3125rem] border-black/10 bg-white min-[810px]:block",
-          railOnLeft ? "left-[-0.6875rem]" : "left-1/2 -translate-x-1/2",
+          "pointer-events-none absolute bottom-[-0.625rem] z-[2] hidden size-5 rounded-full border-2 border-black/10 bg-white min-[810px]:block",
+          railOnLeft ? "left-[-0.625rem]" : "left-1/2 -translate-x-1/2",
         )}
       >
         <span
@@ -372,7 +422,7 @@ function ProcessStep({
       <div
         data-process-media
         className={cn(
-          "relative z-[1] order-1 aspect-[1619/971] w-full overflow-hidden bg-black/[0.04] max-[809px]:mb-5 min-[810px]:row-start-1",
+          "relative z-[1] order-1 aspect-[16/9] w-full overflow-hidden bg-black/[0.04] max-[809px]:mb-4 min-[810px]:row-start-1 min-[810px]:aspect-[1.85]",
           railOnLeft ? "min-[810px]:col-start-2" : "min-[810px]:col-start-1",
         )}
       >
@@ -391,14 +441,14 @@ function ProcessStep({
         className={cn(
           "relative z-[1] order-2 max-[809px]:pl-0 min-[810px]:row-start-1",
           railOnLeft
-            ? "min-[810px]:col-start-1 min-[810px]:pl-[3.125rem]"
-            : "min-[810px]:col-start-2 min-[810px]:pr-[3.125rem]",
+            ? "min-[810px]:col-start-1 min-[810px]:pl-8"
+            : "min-[810px]:col-start-2 min-[810px]:pr-8",
         )}
       >
         <div
           data-process-number
           aria-label={`Step ${number}`}
-          className="hero-outline-text relative flex h-[clamp(4rem,7vw,5.5625rem)] max-w-full items-start overflow-hidden font-heading text-[clamp(4rem,7vw,6rem)] leading-[0.93] font-semibold tracking-[-0.08em] opacity-20"
+          className="hero-outline-text relative flex h-[clamp(3.25rem,5.5vw,4.75rem)] max-w-full items-start overflow-hidden font-heading text-[clamp(3.25rem,5.5vw,5rem)] leading-[0.93] font-semibold tracking-[-0.08em] opacity-20"
         >
           <span className="sr-only">Step {number}</span>
           <span
@@ -426,24 +476,24 @@ function ProcessStep({
 
         <div
           data-process-copy
-          className="mt-9 flex items-center gap-4"
+          className="mt-5 flex items-center gap-4"
         >
           <span
             data-process-icon
-            className="flex size-10 shrink-0 items-center justify-center sm:size-11"
+            className="flex size-9 shrink-0 items-center justify-center sm:size-10"
           >
             <ProcessIcon
               aria-hidden="true"
               className="size-full"
             />
           </span>
-          <h3 className="min-w-0 flex-1 font-heading text-[2.5rem] leading-none font-semibold tracking-[-0.03em] [text-wrap:balance] sm:text-[2.75rem]">
+          <h3 className="min-w-0 flex-1 font-heading text-[2.25rem] leading-none font-semibold tracking-[-0.03em] [text-wrap:balance] sm:text-[2.5rem]">
             {step.title}
           </h3>
         </div>
         <p
           data-process-copy
-          className="mt-5 max-w-[30rem] font-sans text-sm leading-[1.65] tracking-[-0.005em] text-black/60"
+          className="mt-3 max-w-[30rem] font-sans text-[0.9375rem] leading-[1.6] tracking-[-0.005em] text-black/60"
         >
           {step.description}
         </p>

@@ -83,7 +83,7 @@ export function Work() {
         >
           <h2
             id="work-heading"
-            className="font-heading text-[clamp(1.75rem,6.5vw,5.5rem)] leading-[0.82] font-semibold tracking-[-0.03em] whitespace-nowrap"
+            className="section-heading font-heading font-semibold tracking-[-0.03em] whitespace-nowrap"
           >
             <span className="inline-block pb-[0.03em]">{work.filledTitle}</span>{" "}
             <span className="hero-outline-text inline-block pb-[0.21em] tracking-[-0.025em]">
@@ -138,13 +138,13 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
         >
           <p
             data-work-meta
-            className="font-sans text-[0.625rem] tracking-[0.22em] text-black/50 uppercase"
+            className="font-sans text-[0.6875rem] tracking-[0.22em] text-black/60 uppercase"
           >
             {project.year} — {project.role}
           </p>
           <h3
             data-work-title
-            className="mt-4 text-2xl font-semibold tracking-[-0.02em] sm:text-3xl lg:mt-6 lg:text-4xl"
+            className="mt-4 font-heading text-2xl font-semibold tracking-[-0.02em] sm:text-3xl lg:mt-6 lg:text-4xl"
           >
             {project.title}
             {project.href && (
@@ -156,7 +156,7 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
           </h3>
           <p
             data-work-description
-            className="mt-3 max-w-[34rem] text-sm leading-relaxed text-black/55"
+            className="mt-3 max-w-[34rem] text-[0.9375rem] leading-[1.6] text-black/55"
           >
             {project.description}
           </p>
@@ -177,7 +177,7 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
                 />
                 <p
                   data-impact-label
-                  className="mt-1.5 font-sans text-[0.625rem] tracking-[0.22em] text-black/50 uppercase"
+                  className="mt-1.5 font-sans text-[0.6875rem] tracking-[0.22em] text-black/60 uppercase"
                 >
                   {stat.label}
                 </p>
@@ -293,7 +293,7 @@ function ProjectFigure({
           loading={eager ? "eager" : undefined}
         />
       ) : (
-        <span className="flex h-full w-full items-center justify-center font-sans text-xs tracking-[0.32em] text-black/40 uppercase">
+        <span className="flex h-full w-full items-center justify-center font-sans text-xs tracking-[0.32em] text-black/60 uppercase">
           {project.year}
         </span>
       )}

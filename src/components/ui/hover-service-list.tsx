@@ -86,10 +86,10 @@ export function HoverServiceList({ services }: HoverServiceListProps) {
     >
       <div className="col-span-full pt-3">
         <div className="flex items-baseline justify-between gap-4 pb-3">
-          <span className="font-sans text-[0.625rem] font-medium tracking-[0.2em] text-black/45 uppercase">
+          <span className="font-sans text-[0.6875rem] font-medium tracking-[0.2em] text-black/60 uppercase">
             {servicesSection.label}
           </span>
-          <span className="font-sans text-[0.625rem] font-medium tracking-[0.2em] text-black/45 uppercase">
+          <span className="font-sans text-[0.6875rem] font-medium tracking-[0.2em] text-black/60 uppercase">
             {String(services.length).padStart(2, "0")}
           </span>
         </div>
@@ -140,7 +140,7 @@ export function HoverServiceList({ services }: HoverServiceListProps) {
                     data-service-index
                     aria-hidden="true"
                     className={cn(
-                      "relative inline-flex h-4 items-center font-sans text-[0.6875rem] tracking-[0.06em] text-black/40 transition-colors duration-300",
+                      "relative inline-flex h-4 items-center font-sans text-[0.6875rem] tracking-[0.06em] text-black/60 transition-colors duration-300",
                       active && "text-black",
                     )}
                   >
@@ -218,7 +218,7 @@ export function HoverServiceList({ services }: HoverServiceListProps) {
           <p className="font-heading text-base font-medium tracking-[-0.01em] text-black">
             {activeService.title}
           </p>
-          <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 font-sans text-[0.625rem] tracking-[0.14em] text-black/45 uppercase">
+          <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 font-sans text-[0.6875rem] tracking-[0.14em] text-black/60 uppercase">
             {activeService.tags.map((tag) => (
               <span key={tag}>{tag}</span>
             ))}
