@@ -25,6 +25,8 @@ interface RollingNumberProps {
   delay?: number;
   /** Roll duration per strip. Defaults to 1.8. */
   duration?: number;
+  /** Animate the digit strips when the numeric value changes. */
+  animateOnChange?: boolean;
   /** Decorative mode: no accessible copy, root marked aria-hidden. */
   ariaHidden?: boolean;
 }
@@ -33,7 +35,8 @@ interface RollingNumberProps {
  * Mechanical rolling number: each digit of the numeric core is a vertical
  * 0-9 tape clipped to one digit column; static prefix/suffix characters sit
  * beside the wheels. The markup renders the final digits (SSR-safe), then
- * GSAP rewinds and rolls them once the element crosses mid-viewport.
+ * GSAP rewinds and rolls them once the element crosses mid-viewport or when
+ * `animateOnChange` is enabled and the value changes.
  * Skipped under `prefers-reduced-motion` — final state is already in markup.
  */
 export function RollingNumber({
@@ -44,6 +47,7 @@ export function RollingNumber({
   className,
   delay = 0,
   duration = 1.8,
+  animateOnChange = false,
   ariaHidden = false,
 }: RollingNumberProps) {
   const ref = useRef<HTMLSpanElement>(null);
@@ -52,11 +56,12 @@ export function RollingNumber({
   const prefix = parts?.[1] ?? "";
   const core = parts?.[2] ?? "";
   const tail = parts?.[3] ?? "";
+  const previousCoreRef = useRef(core);
 
   useGSAP(
     () => {
       const root = ref.current;
-      if (!root || prefersReducedMotion()) return;
+      if (!root || animateOnChange || prefersReducedMotion()) return;
 
       const strips = root.querySelectorAll<HTMLElement>(
         "[data-odometer-strip]",
@@ -91,6 +96,46 @@ export function RollingNumber({
     { scope: ref },
   );
 
+  useGSAP(
+    () => {
+      const root = ref.current;
+      if (!root || !animateOnChange) return;
+
+      const strips = root.querySelectorAll<HTMLElement>(
+        "[data-odometer-strip]",
+      );
+      if (!strips.length) return;
+
+      const previousCore = previousCoreRef.current;
+      previousCoreRef.current = core;
+
+      if (previousCore === core || prefersReducedMotion()) return;
+
+      gsap.killTweensOf(strips);
+      gsap.set(strips, {
+        y: 0,
+        yPercent: (index: number) =>
+          -(Number(previousCore[index] ?? 0) * 10),
+        willChange: "transform",
+      });
+      gsap.to(strips, {
+        y: 0,
+        yPercent: (index: number) =>
+          -(Number(strips[index].dataset.digit ?? 0) * 10),
+        duration,
+        ease: "expo.out",
+        stagger: 0.03,
+        overwrite: "auto",
+        onComplete: () => gsap.set(strips, { clearProps: "willChange" }),
+      });
+    },
+    {
+      dependencies: [animateOnChange, core],
+      scope: ref,
+      revertOnUpdate: false,
+    },
+  );
+
   return (
     <span
       ref={ref}
@@ -114,7 +159,7 @@ export function RollingNumber({
         {core.split("").map((char, index) =>
           char === "." ? (
             <span
-              key={`${char}-${index}`}
+              key={index}
               className="mr-[0.04em]"
             >
               {char}

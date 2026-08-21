@@ -4,9 +4,10 @@ import { useRef, useState } from "react";
 import Image from "next/image";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
-import { serviceIconSources, servicesSection, type Service } from "@/lib/data";
+import { serviceIconSources, type Service } from "@/lib/data";
 import { cn } from "@/lib/utils";
 import { ImageTrail } from "@/components/ui/image-trail";
+import { RollingNumber } from "@/components/ui/rolling-number";
 
 interface HoverServiceListProps {
   services: Service[];
@@ -19,7 +20,12 @@ interface HoverServiceListProps {
 export function HoverServiceList({ services }: HoverServiceListProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
   const activeService = services[activeIndex] ?? services[0];
+  const displayedIndex = hoveredIndex ?? focusedIndex;
+  const displayedCount =
+    displayedIndex === null ? services.length : displayedIndex + 1;
 
   useGSAP(
     () => {
@@ -85,13 +91,13 @@ export function HoverServiceList({ services }: HoverServiceListProps) {
       className="grid gap-y-0 lg:grid-cols-[1.45fr_1fr] lg:gap-x-11"
     >
       <div className="col-span-full pt-3">
-        <div className="flex items-baseline justify-between gap-4 pb-3">
-          <span className="font-sans text-[0.6875rem] font-medium tracking-[0.2em] text-black/60 uppercase">
-            {servicesSection.label}
-          </span>
-          <span className="font-sans text-[0.6875rem] font-medium tracking-[0.2em] text-black/60 uppercase">
-            {String(services.length).padStart(2, "0")}
-          </span>
+        <div className="flex items-baseline justify-end gap-4 pb-3">
+          <RollingNumber
+            value={String(displayedCount).padStart(2, "0")}
+            animateOnChange
+            duration={0.45}
+            className="font-sans text-[0.6875rem] font-medium tracking-[0.2em] text-black/60 uppercase"
+          />
         </div>
         <div
           aria-hidden="true"
@@ -129,8 +135,16 @@ export function HoverServiceList({ services }: HoverServiceListProps) {
                   aria-controls="services-detail"
                   aria-pressed={active}
                   onClick={() => selectService(index)}
-                  onFocus={() => selectService(index)}
-                  onPointerEnter={() => selectService(index)}
+                  onFocus={() => {
+                    setFocusedIndex(index);
+                    selectService(index);
+                  }}
+                  onBlur={() => setFocusedIndex(null)}
+                  onPointerEnter={() => {
+                    setHoveredIndex(index);
+                    selectService(index);
+                  }}
+                  onPointerLeave={() => setHoveredIndex(null)}
                   className={cn(
                     "group grid h-20 w-full grid-cols-[2.125rem_minmax(0,1fr)_auto] items-center gap-4 border-0 bg-transparent p-0 text-left text-[clamp(1.2rem,2.75vw,2.125rem)] leading-[1.1] outline-none max-[319px]:gap-4 max-[319px]:text-[clamp(1.05rem,6.2vw,1.25rem)] lg:h-24",
                     "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-black",

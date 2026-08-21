@@ -275,7 +275,6 @@ export const servicesSection = {
   index: "02",
   filledTitle: "What I",
   outlinedTitle: "Offer",
-  label: "CAPABILITIES",
 };
 
 export const stackCapabilities: StackCapability[] = [
