@@ -202,7 +202,7 @@ export function HoverServiceList({ services }: HoverServiceListProps) {
         id="services-detail"
         data-service-detail-panel
         aria-live="polite"
-        className="border-l border-black/10 py-6 pl-7 lg:min-h-[25rem] lg:py-8 lg:pl-11"
+        className="border-t border-l-0 border-black/10 px-0 py-6 lg:min-h-[25rem] lg:border-t-0 lg:border-l lg:py-8 lg:pl-11"
       >
         <div
           key={activeService.title}

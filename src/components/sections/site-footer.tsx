@@ -122,9 +122,9 @@ export function SiteFooter() {
           >
             <SectionReveal
               variant="fade"
-              distance={100}
+              distance={48}
               stagger={0.16}
-              className="relative z-10 mx-auto grid min-h-[clamp(28rem,52svh,34rem)] max-w-[76rem] content-center gap-14 px-6 py-10 sm:px-10 sm:py-14 lg:grid-cols-[minmax(0,1.22fr)_minmax(18rem,0.78fr)] lg:items-center lg:gap-20 lg:px-0 lg:py-0"
+              className="wide-container relative z-10 grid min-h-[clamp(28rem,52svh,34rem)] content-center gap-14 py-10 sm:py-14 lg:grid-cols-[minmax(0,1.22fr)_minmax(18rem,0.78fr)] lg:items-center lg:gap-20 lg:py-0"
             >
               <div
                 data-reveal
@@ -194,7 +194,7 @@ export function SiteFooter() {
             distance={40}
             stagger={0.12}
             start="top 82%"
-            className="mx-auto grid max-w-[76rem] justify-items-start gap-7 px-6 py-[clamp(2rem,3.5vw,3rem)] text-left sm:grid-cols-2 sm:px-10 lg:grid-cols-4 lg:gap-8 lg:px-0"
+            className="wide-container grid justify-items-start gap-7 py-[clamp(2rem,3.5vw,3rem)] text-left sm:grid-cols-2 lg:grid-cols-4 lg:gap-8"
           >
             <div
               data-reveal
@@ -348,7 +348,7 @@ export function SiteFooter() {
 
         <div
           data-footer-meta
-          className="relative z-30 mx-auto flex max-w-[76rem] flex-wrap items-center justify-between gap-x-6 gap-y-2 bg-white px-6 py-4 text-left sm:px-10 lg:px-0"
+          className="wide-container relative z-30 flex flex-wrap items-center justify-between gap-x-6 gap-y-2 bg-white py-4 text-left"
         >
           <p className="font-sans text-[0.6875rem] tracking-[0.12em] text-black/60 uppercase">
             © {profile.name}. {siteFooter.copyright}

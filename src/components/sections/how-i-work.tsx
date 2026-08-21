@@ -288,10 +288,10 @@ export function HowIWork() {
         side="left"
       />
 
-      <div className="mx-auto w-full max-w-[75rem] px-[1.875rem]">
+      <div className="process-container">
         <SectionReveal
           variant="fade"
-          distance={100}
+          distance={32}
         >
           <header
             data-reveal

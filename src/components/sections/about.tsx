@@ -122,7 +122,7 @@ export function About() {
     >
       <div
         data-about-content
-        className="mx-auto w-full max-w-[58rem] px-5 text-center sm:px-8"
+        className="page-container page-container--narrow text-center"
       >
         <div data-about-manifesto>
           <StaggerText

@@ -4,7 +4,10 @@ import { useEffect, useRef, type RefObject } from "react";
 import gsap from "gsap";
 import { useSmoothScroll } from "@/components/ui/smooth-scroll";
 
-const RAIL_CLAMP = "clamp(2.25rem,2.65vw,2.75rem)";
+/* Keep the rail outside the process container at laptop widths, then let it
+   move toward the page edge as the max-width containers gain outer margin. */
+const RAIL_CLAMP =
+  "min(clamp(2.25rem, 2.65vw, 2.75rem), max(0.75rem, calc((100vw - 75rem) / 2 + 0.75rem)))";
 
 /**
  * Default section rail: a dot + thin line + vertical index pinned at

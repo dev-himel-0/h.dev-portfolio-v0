@@ -129,10 +129,10 @@ export function Stack() {
         side="right"
       />
 
-      <div className="mx-auto w-full max-w-[72rem] px-5 sm:px-8">
+      <div className="page-container">
         <SectionReveal
           variant="fade"
-          distance={100}
+          distance={48}
           className="mb-14 lg:mb-20"
         >
           <h2

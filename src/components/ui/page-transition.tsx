@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
+import { useSmoothScroll } from "@/components/ui/smooth-scroll";
 import { markSoftNavigation } from "@/lib/navigation";
 import {
   completeWipe,
@@ -36,6 +37,7 @@ import {
  */
 export function PageTransition({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const lenis = useSmoothScroll();
   const [previousPathname, setPreviousPathname] = useState(pathname);
   const lastPathnameRef = useRef(pathname);
   const mountPathRef = useRef(pathname);
@@ -68,8 +70,15 @@ export function PageTransition({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (pathname === lastPathnameRef.current) return;
     lastPathnameRef.current = pathname;
+
+    // The 404 page has no scrollable content. Re-measure before revealing the
+    // incoming page so Lenis does not keep a zero scroll limit from that route.
+    lenis?.resize();
     completeWipe();
-  }, [pathname]);
+    const refreshFrame = window.requestAnimationFrame(() => lenis?.resize());
+
+    return () => window.cancelAnimationFrame(refreshFrame);
+  }, [lenis, pathname]);
 
   /**
    * Entrance wipe for directly-loaded pages: any hard load on a route other

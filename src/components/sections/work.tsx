@@ -34,7 +34,7 @@ export function Work() {
       const media = gsap.matchMedia();
 
       media.add(
-        "(min-width: 810px) and (prefers-reduced-motion: no-preference)",
+        "(min-width: 1024px) and (prefers-reduced-motion: no-preference)",
         () => {
           rows.slice(0, -1).forEach((row, index) => {
             const nextRow = rows[index + 1];
@@ -75,10 +75,10 @@ export function Work() {
         side="right"
       />
 
-      <div className="mx-auto w-full max-w-[72rem] px-5 sm:px-8">
+      <div className="page-container">
         <SectionReveal
           variant="fade"
-          distance={100}
+          distance={48}
           className="mb-14 lg:mb-20"
         >
           <h2
@@ -190,7 +190,7 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
   );
 
   const cardClass = cn(
-    "work-card group relative flex w-full flex-col gap-10 bg-white pt-10 sm:pt-12 min-[810px]:sticky min-[810px]:top-20 min-[810px]:z-[1] lg:flex-row lg:gap-14 lg:pt-14",
+    "work-card group relative flex w-full flex-col gap-10 bg-white pt-10 sm:pt-12 lg:sticky lg:top-20 lg:z-[1] lg:flex-row lg:gap-14 lg:pt-14",
     flipped && "lg:flex-row-reverse",
   );
 

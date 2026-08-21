@@ -133,6 +133,7 @@ export function scrollToInstant(target: number | HTMLElement) {
 function resetWipe() {
   if (overlayEl) gsap.set(overlayEl, { display: "none" });
   lenis?.start();
+  pendingReveal = noop;
   busy = false;
 }
 
